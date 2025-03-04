@@ -1,0 +1,385 @@
+/* About Hero Section */
+.vr-about-hero {
+    position: relative;
+    padding: calc(var(--vr-spacing-xl) * 3) 0;
+    background: linear-gradient(135deg, var(--vr-primary) 0%, var(--vr-secondary) 100%);
+    color: var(--vr-light);
+    overflow: hidden;
+}
+
+.vr-about-hero::before,
+.vr-about-hero::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: pulse 15s infinite alternate;
+}
+
+.vr-about-hero::before {
+    width: 600px;
+    height: 600px;
+    top: -200px;
+    right: -200px;
+    animation-delay: -7s;
+}
+
+.vr-about-hero::after {
+    width: 500px;
+    height: 500px;
+    bottom: -200px;
+    left: -200px;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.1; }
+    50% { transform: scale(1.2); opacity: 0.15; }
+    100% { transform: scale(1); opacity: 0.1; }
+}
+
+.vr-about-hero__content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeInUp 1s ease forwards;
+}
+
+.vr-about-hero__title {
+    font-size: var(--vr-text-4xl);
+    font-weight: var(--vr-font-bold);
+    margin-bottom: var(--vr-spacing-lg);
+    line-height: 1.2;
+    background: linear-gradient(135deg, var(--vr-light) 0%, rgba(255,255,255,0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.vr-about-hero__description {
+    font-size: var(--vr-text-xl);
+    opacity: 0.9;
+    line-height: var(--vr-leading-relaxed);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+/* Mission Section */
+.vr-mission {
+    padding: calc(var(--vr-spacing-xl) * 2) 0;
+    background: var(--vr-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.vr-mission__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--vr-spacing-xl);
+}
+
+.vr-mission__item {
+    text-align: center;
+    padding: var(--vr-spacing-xl);
+    background: var(--vr-light);
+    border-radius: var(--vr-radius-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.vr-mission__item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--vr-primary-bg) 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.vr-mission__item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.vr-mission__item:hover::before {
+    opacity: 1;
+}
+
+.vr-mission__icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto var(--vr-spacing-lg);
+    background: var(--vr-primary-bg);
+    border-radius: var(--vr-radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vr-primary);
+    font-size: var(--vr-text-2xl);
+    transition: all 0.5s ease;
+    position: relative;
+    z-index: 1;
+}
+
+.vr-mission__item:hover .vr-mission__icon {
+    transform: rotateY(360deg);
+    background: var(--vr-primary);
+    color: var(--vr-light);
+}
+
+.vr-mission__title {
+    font-size: var(--vr-text-xl);
+    font-weight: var(--vr-font-semibold);
+    margin-bottom: var(--vr-spacing-md);
+    color: var(--vr-gray-900);
+    position: relative;
+    z-index: 1;
+}
+
+.vr-mission__text {
+    color: var(--vr-gray-600);
+    line-height: var(--vr-leading-relaxed);
+    position: relative;
+    z-index: 1;
+}
+
+/* Stats Section */
+.vr-stats {
+    padding: calc(var(--vr-spacing-xl) * 2) 0;
+    background: linear-gradient(135deg, var(--vr-primary) 0%, var(--vr-secondary) 100%);
+    color: var(--vr-light);
+    position: relative;
+    overflow: hidden;
+}
+
+.vr-stats__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--vr-spacing-xl);
+    text-align: center;
+}
+
+.vr-stats__item {
+    padding: var(--vr-spacing-lg);
+    border-radius: var(--vr-radius-lg);
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.vr-stats__item:hover {
+    transform: translateY(-5px);
+    background: rgba(255,255,255,0.15);
+}
+
+.vr-stats__number {
+    font-size: var(--vr-text-4xl);
+    font-weight: var(--vr-font-bold);
+    margin-bottom: var(--vr-spacing-sm);
+    line-height: 1;
+    background: linear-gradient(135deg, var(--vr-light) 0%, rgba(255,255,255,0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.vr-stats__label {
+    font-size: var(--vr-text-lg);
+    opacity: 0.9;
+    font-weight: var(--vr-font-medium);
+}
+
+/* Team Section */
+.vr-team {
+    padding: calc(var(--vr-spacing-xl) * 2) 0;
+    background: var(--vr-light);
+}
+
+.vr-team__header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto var(--vr-spacing-xl);
+}
+
+.vr-team__title {
+    font-size: var(--vr-text-3xl);
+    font-weight: var(--vr-font-bold);
+    color: var(--vr-gray-900);
+    margin-bottom: var(--vr-spacing-md);
+    position: relative;
+    display: inline-block;
+}
+
+.vr-team__title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background: var(--vr-primary);
+    border-radius: var(--vr-radius-full);
+}
+
+.vr-team__description {
+    color: var(--vr-gray-600);
+    line-height: var(--vr-leading-relaxed);
+}
+
+.vr-team__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--vr-spacing-xl);
+}
+
+.vr-team__member {
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.vr-team__member:hover {
+    transform: translateY(-10px);
+}
+
+.vr-team__member-image {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    margin: 0 auto var(--vr-spacing-md);
+    overflow: hidden;
+    border: 4px solid var(--vr-primary-bg);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.vr-team__member:hover .vr-team__member-image {
+    border-color: var(--vr-primary);
+    transform: scale(1.05);
+}
+
+.vr-team__member-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.3s ease;
+}
+
+.vr-team__member:hover .vr-team__member-image img {
+    transform: scale(1.1);
+}
+
+.vr-team__member-name {
+    font-size: var(--vr-text-lg);
+    font-weight: var(--vr-font-semibold);
+    color: var(--vr-gray-900);
+    margin-bottom: var(--vr-spacing-xs);
+}
+
+.vr-team__member-role {
+    color: var(--vr-primary);
+    font-size: var(--vr-text-sm);
+    margin-bottom: var(--vr-spacing-sm);
+    font-weight: var(--vr-font-medium);
+}
+
+.vr-team__member-social {
+    display: flex;
+    justify-content: center;
+    gap: var(--vr-spacing-sm);
+}
+
+.vr-team__member-social a {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--vr-gray-100);
+    color: var(--vr-gray-600);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.vr-team__member-social a:hover {
+    background: var(--vr-primary);
+    color: var(--vr-light);
+    transform: translateY(-3px) rotate(360deg);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+[data-scroll-reveal] {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-scroll-reveal].active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .vr-mission__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .vr-team__grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .vr-stats__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--vr-spacing-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .vr-about-hero {
+        padding: var(--vr-spacing-xl) 0;
+    }
+
+    .vr-about-hero__title {
+        font-size: var(--vr-text-3xl);
+    }
+
+    .vr-about-hero__description {
+        font-size: var(--vr-text-lg);
+    }
+
+    .vr-mission__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vr-team__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .vr-team__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vr-stats__grid {
+        grid-template-columns: 1fr;
+    }
+} 

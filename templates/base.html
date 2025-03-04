@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{pageDescription}}">
+    <title>Vyrlo - {{pageTitle}}</title>
+    
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/fonts/main-font.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/images/logo/logo.png" as="image">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    
+    <!-- Critical CSS -->
+    <style>
+        /* Inject critical CSS here */
+        :root { --vr-header-height: 80px; }
+        .vr-main { padding-top: var(--vr-header-height); }
+    </style>
+    
+    <!-- Font Awesome - Load asynchronously -->
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" 
+          media="print" onload="this.media='all'">
+    
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/main/style.css">
+    
+    <!-- Page Specific CSS -->
+    {{pageStyles}}
+</head>
+<body>
+    <!-- Header Placeholder -->
+    <div id="headerContainer"></div>
+
+    <!-- Main Content -->
+    <main class="vr-main">
+        {{content}}
+    </main>
+
+    <!-- Footer Placeholder -->
+    <div id="footerContainer"></div>
+
+    <!-- Toast Container -->
+    <div class="vr-toast-container" id="toastContainer"></div>
+
+    <!-- Core JS -->
+    <script type="module" src="/js/core/utils.js"></script>
+    <script type="module" src="/js/services/api.service.js"></script>
+    <script type="module" src="/js/services/toast.service.js"></script>
+    <script type="module" src="/js/services/listing.service.js"></script>
+    <script type="module" src="/js/core/componentLoader.js"></script>
+    
+    <!-- Page Specific JS -->
+    {{pageScripts}}
+</body>
+</html>

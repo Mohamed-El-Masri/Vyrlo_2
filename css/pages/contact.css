@@ -1,0 +1,276 @@
+/* Contact Hero Section */
+.vr-contact-hero {
+    position: relative;
+    padding: calc(var(--vr-spacing-xl) * 2) 0;
+    background: linear-gradient(135deg, var(--vr-primary) 0%, var(--vr-secondary) 100%);
+    color: var(--vr-light);
+    overflow: hidden;
+}
+
+.vr-contact-hero::before,
+.vr-contact-hero::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,0.1) 0%, transparent 20%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,0.1) 0%, transparent 20%);
+    opacity: 0.5;
+    animation: pulse 20s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); opacity: 0.5; }
+    50% { transform: scale(1.2); opacity: 0.3; }
+    100% { transform: scale(1); opacity: 0.5; }
+}
+
+.vr-contact-hero__content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.vr-contact-hero__title {
+    font-size: var(--vr-text-4xl);
+    font-weight: var(--vr-font-bold);
+    margin-bottom: var(--vr-spacing-md);
+    line-height: 1.2;
+    background: linear-gradient(135deg, var(--vr-light) 0%, rgba(255,255,255,0.8) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.vr-contact-hero__description {
+    font-size: var(--vr-text-xl);
+    opacity: 0.9;
+    line-height: var(--vr-leading-relaxed);
+}
+
+/* Contact Section */
+.vr-contact {
+    padding: calc(var(--vr-spacing-xl) * 2) 0;
+    background: var(--vr-light);
+}
+
+.vr-contact__grid {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: var(--vr-spacing-xl);
+    align-items: start;
+}
+
+/* Contact Info */
+.vr-contact-info {
+    background: var(--vr-gray-50);
+    padding: var(--vr-spacing-xl);
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-sm);
+}
+
+.vr-contact-info__item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--vr-spacing-md);
+    padding: var(--vr-spacing-lg);
+    background: var(--vr-light);
+    border-radius: var(--vr-radius-md);
+    margin-bottom: var(--vr-spacing-md);
+    transition: all 0.3s ease;
+}
+
+.vr-contact-info__item:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--vr-shadow-md);
+}
+
+.vr-contact-info__icon {
+    width: 48px;
+    height: 48px;
+    background: var(--vr-primary-bg);
+    border-radius: var(--vr-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--vr-primary);
+    font-size: var(--vr-text-xl);
+    flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.vr-contact-info__item:hover .vr-contact-info__icon {
+    background: var(--vr-primary);
+    color: var(--vr-light);
+    transform: rotate(360deg);
+}
+
+.vr-contact-info__content h3 {
+    font-size: var(--vr-text-lg);
+    font-weight: var(--vr-font-semibold);
+    color: var(--vr-gray-900);
+    margin-bottom: var(--vr-spacing-xs);
+}
+
+.vr-contact-info__content p {
+    color: var(--vr-gray-600);
+    line-height: var(--vr-leading-relaxed);
+}
+
+.vr-contact-info__content a {
+    color: var(--vr-primary);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.vr-contact-info__content a:hover {
+    color: var(--vr-primary-dark);
+}
+
+/* Contact Form */
+.vr-contact-form {
+    background: var(--vr-light);
+    padding: var(--vr-spacing-xl);
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-lg);
+}
+
+.vr-contact-form__title {
+    font-size: var(--vr-text-2xl);
+    font-weight: var(--vr-font-bold);
+    color: var(--vr-gray-900);
+    margin-bottom: var(--vr-spacing-lg);
+    text-align: center;
+}
+
+.vr-contact-form__grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--vr-spacing-md);
+}
+
+.vr-contact-form__full {
+    grid-column: span 2;
+}
+
+.vr-form-group {
+    margin-bottom: var(--vr-spacing-md);
+}
+
+.vr-form-group label {
+    display: block;
+    margin-bottom: var(--vr-spacing-xs);
+    color: var(--vr-gray-700);
+    font-weight: var(--vr-font-medium);
+}
+
+.vr-form-group input,
+.vr-form-group textarea {
+    width: 100%;
+    padding: var(--vr-spacing-md);
+    border: 2px solid var(--vr-gray-200);
+    border-radius: var(--vr-radius-md);
+    transition: all 0.3s ease;
+    font-size: var(--vr-text-base);
+}
+
+.vr-form-group input:focus,
+.vr-form-group textarea:focus {
+    border-color: var(--vr-primary);
+    box-shadow: 0 0 0 4px var(--vr-primary-bg);
+    outline: none;
+}
+
+.vr-form-group textarea {
+    height: 150px;
+    resize: vertical;
+}
+
+.vr-contact-form__submit {
+    width: 100%;
+    padding: var(--vr-spacing-md) var(--vr-spacing-xl);
+    background: var(--vr-primary);
+    color: var(--vr-light);
+    border: none;
+    border-radius: var(--vr-radius-md);
+    font-size: var(--vr-text-lg);
+    font-weight: var(--vr-font-semibold);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--vr-spacing-sm);
+}
+
+.vr-contact-form__submit:hover {
+    background: var(--vr-primary-dark);
+    transform: translateY(-2px);
+}
+
+.vr-contact-form__submit:active {
+    transform: translateY(0);
+}
+
+/* Map Section */
+.vr-map {
+    height: 400px;
+    margin-top: var(--vr-spacing-xl);
+    border-radius: var(--vr-radius-lg);
+    overflow: hidden;
+    box-shadow: var(--vr-shadow-lg);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .vr-contact__grid {
+        grid-template-columns: 1fr;
+        gap: var(--vr-spacing-xl);
+    }
+}
+
+@media (max-width: 768px) {
+    .vr-contact-hero {
+        padding: var(--vr-spacing-xl) 0;
+    }
+
+    .vr-contact-hero__title {
+        font-size: var(--vr-text-3xl);
+    }
+
+    .vr-contact-hero__description {
+        font-size: var(--vr-text-lg);
+    }
+
+    .vr-contact-form__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vr-contact-form__full {
+        grid-column: span 1;
+    }
+}
+
+/* Loading States */
+.vr-contact-form__submit.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.vr-contact-form__submit.loading .vr-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--vr-light);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+} 

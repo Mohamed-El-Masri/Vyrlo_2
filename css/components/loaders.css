@@ -1,0 +1,94 @@
+/* Spinner Loader */
+.vr-spinner {
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--vr-gray-200);
+  border-top-color: var(--vr-primary);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+/* Sizes */
+.vr-spinner--sm { 
+  width: 16px; 
+  height: 16px; 
+  border-width: 1px;
+}
+
+.vr-spinner--lg { 
+  width: 32px; 
+  height: 32px; 
+  border-width: 3px;
+}
+
+/* Pulse Loader */
+.vr-pulse {
+  display: inline-block;
+  position: relative;
+  width: 80px;
+  height: 16px;
+}
+
+.vr-pulse div {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--vr-primary);
+  animation: pulse 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+
+.vr-pulse div:nth-child(1) {
+  left: 0;
+  animation-delay: -0.24s;
+}
+
+.vr-pulse div:nth-child(2) {
+  left: 32px;
+  animation-delay: -0.12s;
+}
+
+.vr-pulse div:nth-child(3) {
+  left: 64px;
+  animation-delay: 0;
+}
+
+/* Skeleton Loader */
+.vr-skeleton {
+  background: var(--vr-gray-200);
+  border-radius: var(--vr-radius-sm);
+  animation: pulse-bg 1.5s ease-in-out infinite;
+}
+
+.vr-skeleton--text {
+  height: 1em;
+  margin-bottom: 0.5em;
+}
+
+.vr-skeleton--circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.vr-skeleton--rectangle {
+  width: 100%;
+  height: 200px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(0); }
+  50% { transform: scale(1); }
+  100% { transform: scale(0); }
+}
+
+@keyframes pulse-bg {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}

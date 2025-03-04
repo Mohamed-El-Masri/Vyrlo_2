@@ -1,0 +1,46 @@
+/* Reset CSS */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--vr-font-main);
+    font-size: var(--vr-text-base);
+    line-height: 1.5;
+    color: var(--vr-gray-900);
+    background-color: var(--vr-gray-50);
+}
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+}
+
+input, button {
+    outline: none;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+ul, ol {
+    list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+}

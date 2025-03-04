@@ -1,0 +1,19 @@
+/images/
+├── defaults/
+│   ├── default-category.png     # صورة افتراضية للفئات (200x200px)
+│   ├── default-listing.jpg      # صورة افتراضية للقوائم (800x600px)
+│   └── default-avatar.png       # صورة افتراضية للمستخدم (100x100px)
+│
+├── background/
+│   └── hero-bg.jpg             # خلفية قسم Hero (1920x1080px)
+│
+├── logo/
+│   ├── logo.png                # شعار الموقع (200x60px)
+│   ├── logo-white.png          # شعار أبيض للفوتر (200x60px)
+│   └── favicon.png             # أيقونة الموقع (32x32px)
+│
+└── icons/
+    └── categories/             # أيقونات الفئات
+        ├── restaurant.png
+        ├── dentist.png
+        └── home-services.png

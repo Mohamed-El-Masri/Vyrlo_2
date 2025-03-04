@@ -1,0 +1,82 @@
+<header class="vr-header">
+  <div class="vr-header__container">
+    <!-- Logo Section -->
+    <a href="/pages/home.html" class="vr-header__logo-link">
+      <img src="/images/logo/logo.png" alt="Vyrlo" class="vr-header__logo">
+    </a>
+
+    <!-- Mobile Menu Trigger -->
+    <button class="vr-header__menu-trigger" id="menuTrigger" aria-label="Toggle menu">
+      <span class="vr-header__menu-icon"></span>
+    </button>
+
+    <!-- Main Navigation -->
+    <nav class="vr-header__nav" id="mainNav">
+      <a href="/pages/home.html" class="vr-header__link">Home</a>
+      <a href="/pages/listings.html" class="vr-header__link">Listings</a>
+      <a href="/pages/about.html" class="vr-header__link">About</a>
+      <a href="/pages/contact.html" class="vr-header__link">Contact</a>
+    </nav>
+
+    <!-- Auth Section -->
+    <div class="vr-header__auth">
+      <!-- Guest View -->
+      <div class="vr-header__guest" id="guestView">
+        <a href="/pages/login.html" class="vr-btn vr-btn--outline">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Login</span>
+        </a>
+        <a href="/pages/register.html" class="vr-btn vr-btn--primary">
+          <i class="fas fa-user-plus"></i>
+          <span>Register</span>
+        </a>
+      </div>
+
+      <!-- Authenticated View -->
+      <div class="vr-header__user" id="userView" style="display: none;">
+        <div class="vr-header__user-menu">
+          <button class="vr-header__user-trigger" id="profileTrigger">
+            <div class="vr-avatar vr-avatar--md vr-avatar--bordered">
+              <img src="/images/defaults/default-avatar.png" 
+                   alt="Profile" 
+                   class="vr-avatar__image"
+                   id="headerAvatar"
+                   onerror="this.src='/images/defaults/default-avatar.png'">
+            </div>
+            <span class="vr-header__user-name" id="profileName">Hello, User</span>
+            <i class="fas fa-chevron-down vr-header__profile-arrow"></i>
+          </button>
+
+          <div class="vr-header__dropdown" id="profileDropdown">
+            <div class="vr-dropdown__content">
+              <a href="/pages/profile.html" class="vr-dropdown__item">
+                <i class="fas fa-user"></i>
+                <span>My Profile</span>
+              </a>
+              <a href="/pages/my-listings.html" class="vr-dropdown__item">
+                <i class="fas fa-list"></i>
+                <span>My Listings</span>
+              </a>
+              <a href="/pages/add-listing.html" class="vr-dropdown__item">
+                <i class="fas fa-plus"></i>
+                <span>Add Listing</span>
+              </a>
+              <a href="/pages/settings.html" class="vr-dropdown__item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+              </a>
+              <hr class="vr-dropdown__divider">
+              <button class="vr-dropdown__item vr-dropdown__item--danger" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Notification Toast Container -->
+<div class="vr-toast-container" id="toastContainer"></div>

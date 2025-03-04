@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listings - Vyrlo</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/main/style.css">
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="/css/pages/listings.css">
+</head>
+<body>
+    <!-- Header Container -->
+    <div id="headerContainer"></div>
+
+    <!-- Main Content -->
+    <main class="vr-main">
+        <!-- Search Section -->
+        <section class="vr-listings-search">
+            <div class="vr-container">
+                <form id="searchForm" class="vr-listings-search__form">
+                    <div class="vr-listings-search__group">
+                        <div class="vr-form-group">
+                            <label class="vr-label" for="searchInput">What are you looking for?</label>
+                            <div class="vr-input-group">
+                                <i class="fas fa-search vr-input-group__icon"></i>
+                                <input type="text" id="searchInput" class="vr-input" placeholder="Search listings...">
+                            </div>
+                        </div>
+                        <div class="vr-form-group">
+                            <label class="vr-label" for="locationInput">Location</label>
+                            <div class="vr-input-group">
+                                <i class="fas fa-map-marker-alt vr-input-group__icon"></i>
+                                <input type="text" id="locationInput" class="vr-input" placeholder="Enter location">
+                            </div>
+                        </div>
+                        <div class="vr-form-group">
+                            <label class="vr-label" for="categorySelect">Category</label>
+                            <div class="vr-select">
+                                <select id="categorySelect" class="vr-input">
+                                    <option value="">All Categories</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="vr-listings-results">
+            <div class="vr-container">
+                <!-- Results Header -->
+                <div class="vr-listings-header">
+                    <div class="vr-listings-header__info">
+                        <h2>All Listings</h2>
+                        <p>Found <span id="resultsCount">0</span> listings</p>
+                    </div>
+                    <!-- Active Filters -->
+                    <div id="activeFilters" class="vr-active-filters"></div>
+                </div>
+
+                <!-- Results Content -->
+                <div class="vr-listings-content">
+                    <!-- Results Grid -->
+                    <div id="listingsGrid" class="vr-listings-grid"></div>
+                    
+                    <!-- Load More -->
+                    <div class="vr-listings-footer">
+                        <button id="loadMore" class="vr-btn vr-btn--primary">
+                            <span>Load More</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="footerContainer"></div>
+
+    <!-- Toast Container -->
+    <div class="vr-toast-container" id="toastContainer"></div>
+
+    <!-- Core JS -->
+    <script type="module" src="/js/core/utils.js"></script>
+    <script type="module" src="/js/services/api.service.js"></script>
+    <script type="module" src="/js/services/toast.service.js"></script>
+    <script type="module" src="/js/services/listing.service.js"></script>
+    <script type="module" src="/js/core/componentLoader.js"></script>
+    
+    <!-- Page JS -->
+    <script type="module" src="/js/pages/listings.js"></script>
+</body>
+</html> 

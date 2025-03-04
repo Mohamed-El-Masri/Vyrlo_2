@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listing Details - Vyrlo</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/main/style.css">
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="/css/pages/listing-details.css">
+</head>
+<body>
+    <!-- Header Container -->
+    <div id="headerContainer"></div>
+
+    <!-- Main Content -->
+    <main class="vr-main">
+        <!-- Gallery Section -->
+        <section class="vr-listing-gallery">
+            <div class="swiper">
+                <div class="swiper-wrapper" id="galleryWrapper">
+                    <!-- Gallery images will be loaded here -->
+                </div>
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div>
+        </section>
+
+        <!-- Listing Info -->
+        <section class="vr-listing-info">
+            <div class="vr-container">
+                <div class="vr-listing-info__grid">
+                    <!-- Main Content -->
+                    <div class="vr-listing-info__main">
+                        <!-- Header -->
+                        <div class="vr-listing-header">
+                            <div class="vr-listing-header__content">
+                                <h1 id="listingName">Loading...</h1>
+                                <div class="vr-listing-header__meta">
+                                    <span class="vr-listing-header__location">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <span id="listingLocation">Loading...</span>
+                                    </span>
+                                    <span class="vr-listing-header__category">
+                                        <i class="fas fa-tag"></i>
+                                        <span id="listingCategory">Loading...</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="vr-listing-header__actions">
+                                <button class="vr-btn vr-btn--icon" id="shareListing" title="Share">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                                <button class="vr-btn vr-btn--icon" id="saveListing" title="Save">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="vr-listing-section">
+                            <h2 class="vr-listing-section__title">About</h2>
+                            <div class="vr-listing-section__content" id="listingDescription">
+                                Loading...
+                            </div>
+                        </div>
+
+                        <!-- Amenities -->
+                        <div class="vr-listing-section">
+                            <h2 class="vr-listing-section__title">Features & Amenities</h2>
+                            <div class="vr-listing-amenities" id="listingAmenities">
+                                <!-- Amenities will be loaded here -->
+                            </div>
+                        </div>
+
+                        <!-- Reviews -->
+                        <div class="vr-listing-section">
+                            <div class="vr-listing-section__header">
+                                <h2 class="vr-listing-section__title">Reviews</h2>
+                                <button class="vr-btn vr-btn--primary" id="writeReview">
+                                    Write a Review
+                                </button>
+                            </div>
+                            <div class="vr-listing-reviews">
+                                <div class="vr-listing-reviews__summary">
+                                    <div class="vr-listing-reviews__stats">
+                                        <div class="vr-listing-reviews__rating">
+                                            <span class="vr-rating-large">4.5</span>
+                                            <div class="vr-rating-stars">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star-half-alt"></i>
+                                            </div>
+                                            <span class="vr-rating-count">Based on 128 reviews</span>
+                                        </div>
+                                        <div class="vr-rating-bars">
+                                            <!-- Rating distribution will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="vr-listing-reviews__list" id="reviewsList">
+                                    <!-- Reviews will be loaded here -->
+                                </div>
+                                <button class="vr-btn vr-btn--outline vr-btn--full" id="loadMoreReviews">
+                                    Load More Reviews
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sidebar -->
+                    <aside class="vr-listing-info__sidebar">
+                        <!-- Contact Card -->
+                        <div class="vr-listing-card">
+                            <div class="vr-listing-card__header">
+                                <h3>Contact Information</h3>
+                            </div>
+                            <div class="vr-listing-card__content">
+                                <div class="vr-listing-contact">
+                                    <div class="vr-listing-contact__item">
+                                        <i class="fas fa-phone"></i>
+                                        <a href="tel:" id="listingPhone">Loading...</a>
+                                    </div>
+                                    <div class="vr-listing-contact__item">
+                                        <i class="fas fa-envelope"></i>
+                                        <a href="mailto:" id="listingEmail">Loading...</a>
+                                    </div>
+                                    <div class="vr-listing-contact__item">
+                                        <i class="fas fa-globe"></i>
+                                        <a href="#" target="_blank" id="listingWebsite">Loading...</a>
+                                    </div>
+                                </div>
+                                <div class="vr-listing-social">
+                                    <!-- Social links will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Location Card -->
+                        <div class="vr-listing-card">
+                            <div class="vr-listing-card__header">
+                                <h3>Location</h3>
+                            </div>
+                            <div class="vr-listing-map" id="listingMap"></div>
+                            <div class="vr-listing-card__footer">
+                                <button class="vr-btn vr-btn--outline vr-btn--full" id="getDirections">
+                                    <i class="fas fa-directions"></i>
+                                    Get Directions
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Business Hours Card -->
+                        <div class="vr-listing-card">
+                            <div class="vr-listing-card__header">
+                                <h3>Business Hours</h3>
+                                <span class="vr-listing-status vr-listing-status--open" id="currentStatus">
+                                    Open Now
+                                </span>
+                            </div>
+                            <div class="vr-listing-hours vr-listing-hours--compact" id="sidebarHours">
+                                <!-- Hours will be loaded here -->
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <!-- Similar Listings -->
+        <section class="vr-similar-listings">
+            <div class="vr-container">
+                <div class="vr-section-header">
+                    <h2 class="vr-section-title">Similar Listings</h2>
+                    <div class="vr-slider-navigation">
+                        <button class="vr-slider-button vr-slider-button--prev similar-prev">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="vr-slider-button vr-slider-button--next similar-next">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="swiper similar-listings-slider">
+                    <div class="swiper-wrapper" id="similarListings">
+                        <!-- Similar listings will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="footerContainer"></div>
+
+    <!-- Review Modal -->
+    <div class="vr-modal" id="reviewModal">
+        <!-- Review form will be loaded here -->
+    </div>
+
+    <!-- Share Modal -->
+    <div class="vr-modal" id="shareModal">
+        <!-- Share options will be loaded here -->
+    </div>
+
+    <!-- Toast Container -->
+    <div class="vr-toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Core JS -->
+    <script type="module" src="/js/core/utils.js"></script>
+    <script type="module" src="/js/services/api.service.js"></script>
+    <script type="module" src="/js/services/toast.service.js"></script>
+    <script type="module" src="/js/services/listing.service.js"></script>
+    <script type="module" src="/js/core/componentLoader.js"></script>
+    
+    <!-- Page JS -->
+    <script type="module" src="/js/pages/listing-details.js"></script>
+</body>
+</html> 

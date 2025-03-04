@@ -1,0 +1,213 @@
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-10deg) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes button-loading {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes float {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+}
+
+@keyframes scale {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes shimmer {
+    0% { background-position: -1000px 0; }
+    100% { background-position: 1000px 0; }
+}
+
+@keyframes reveal {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vr-animate-fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+.vr-animate-slide-up {
+    animation: slideUp 0.5s ease forwards;
+}
+
+.vr-animate-slide-down {
+    animation: slideDown 0.5s ease forwards;
+}
+
+.vr-animate-scale-in {
+    animation: scaleIn 0.5s ease forwards;
+}
+
+.vr-animate-rotate-in {
+    animation: rotateIn 0.5s ease forwards;
+}
+
+.vr-animate-float {
+    animation: float 3s ease-in-out infinite;
+}
+
+.vr-animate-scale {
+    animation: scale 3s ease-in-out infinite;
+}
+
+.vr-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.vr-reveal.active {
+    animation: reveal 0.6s ease forwards;
+}
+
+[data-scroll-reveal] {
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-scroll-reveal].active {
+    opacity: 1;
+    transform: translateY(0) !important;
+}
+
+[data-scroll-reveal="fade-up"] {
+    transform: translateY(30px);
+}
+
+[data-scroll-reveal="fade-down"] {
+    transform: translateY(-30px);
+}
+
+[data-scroll-reveal="fade-left"] {
+    transform: translateX(-30px);
+}
+
+[data-scroll-reveal="fade-right"] {
+    transform: translateX(30px);
+}
+
+[data-scroll-reveal="scale"] {
+    transform: scale(0.9);
+}
+
+.vr-delay-1 { animation-delay: 0.1s; }
+.vr-delay-2 { animation-delay: 0.2s; }
+.vr-delay-3 { animation-delay: 0.3s; }
+.vr-delay-4 { animation-delay: 0.4s; }
+.vr-delay-5 { animation-delay: 0.5s; }
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.vr-animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+.vr-animate-pulse {
+    animation: pulse 2s ease infinite;
+}
+
+.vr-hover-scale {
+    transition: transform 0.3s ease;
+}
+
+.vr-hover-scale:hover {
+    transform: scale(1.05);
+}
+
+.vr-hover-lift {
+    transition: transform 0.3s ease;
+}
+
+.vr-hover-lift:hover {
+    transform: translateY(-5px);
+}
+
+.vr-how-it-works__item {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+.vr-how-it-works__item.active {
+    animation: slideUpFade 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vr-how-it-works__item:nth-child(1) { animation-delay: 0.1s; }
+.vr-how-it-works__item:nth-child(2) { animation-delay: 0.3s; }
+.vr-how-it-works__item:nth-child(3) { animation-delay: 0.5s; }

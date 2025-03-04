@@ -1,0 +1,72 @@
+.vr-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--vr-radius-md);
+  font-weight: var(--vr-font-medium);
+  transition: all var(--vr-transition-fast);
+  gap: var(--vr-spacing-sm);
+}
+
+.vr-btn--primary {
+  background-color: var(--vr-primary);
+  color: var(--vr-light);
+}
+
+.vr-btn--primary:hover {
+  background-color: var(--vr-primary-dark);
+}
+
+.vr-btn--outline {
+  border: 2px solid var(--vr-primary);
+  color: var(--vr-primary);
+}
+
+.vr-btn--outline:hover {
+  background-color: var(--vr-primary);
+  color: var(--vr-light);
+}
+
+.vr-btn--text {
+  color: var(--vr-primary);
+  padding: 0;
+}
+
+.vr-btn--text:hover {
+  color: var(--vr-primary-dark);
+  text-decoration: underline;
+}
+
+/* Button Sizes */
+.vr-btn--sm {
+  font-size: var(--vr-text-sm);
+  padding: 0.375rem 1rem;
+}
+
+.vr-btn--lg {
+  font-size: var(--vr-text-lg);
+  padding: 0.75rem 1.5rem;
+}
+
+/* Button States */
+.vr-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.vr-btn--loading {
+  position: relative;
+  pointer-events: none;
+}
+
+.vr-btn--loading::after {
+  content: '';
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: button-loading 0.6s linear infinite;
+}

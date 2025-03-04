@@ -1,0 +1,61 @@
+/* Base Flex */
+.vr-flex {
+  display: flex;
+}
+
+/* Flex Direction */
+.vr-flex--row { flex-direction: row; }
+.vr-flex--row-reverse { flex-direction: row-reverse; }
+.vr-flex--col { flex-direction: column; }
+.vr-flex--col-reverse { flex-direction: column-reverse; }
+
+/* Flex Wrap */
+.vr-flex--wrap { flex-wrap: wrap; }
+.vr-flex--nowrap { flex-wrap: nowrap; }
+.vr-flex--wrap-reverse { flex-wrap: wrap-reverse; }
+
+/* Justify Content */
+.vr-flex--justify-start { justify-content: flex-start; }
+.vr-flex--justify-end { justify-content: flex-end; }
+.vr-flex--justify-center { justify-content: center; }
+.vr-flex--justify-between { justify-content: space-between; }
+.vr-flex--justify-around { justify-content: space-around; }
+.vr-flex--justify-evenly { justify-content: space-evenly; }
+
+/* Align Items */
+.vr-flex--items-start { align-items: flex-start; }
+.vr-flex--items-end { align-items: flex-end; }
+.vr-flex--items-center { align-items: center; }
+.vr-flex--items-baseline { align-items: baseline; }
+.vr-flex--items-stretch { align-items: stretch; }
+
+/* Align Content */
+.vr-flex--content-start { align-content: flex-start; }
+.vr-flex--content-end { align-content: flex-end; }
+.vr-flex--content-center { align-content: center; }
+.vr-flex--content-between { align-content: space-between; }
+.vr-flex--content-around { align-content: space-around; }
+.vr-flex--content-stretch { align-content: stretch; }
+
+/* Flex Grow & Shrink */
+.vr-flex--grow-0 { flex-grow: 0; }
+.vr-flex--grow-1 { flex-grow: 1; }
+.vr-flex--shrink-0 { flex-shrink: 0; }
+.vr-flex--shrink-1 { flex-shrink: 1; }
+
+/* Gaps */
+.vr-flex--gap-sm { gap: var(--vr-spacing-sm); }
+.vr-flex--gap-md { gap: var(--vr-spacing-md); }
+.vr-flex--gap-lg { gap: var(--vr-spacing-lg); }
+.vr-flex--gap-xl { gap: var(--vr-spacing-xl); }
+
+/* Responsive Flex */
+@media (max-width: 768px) {
+  .vr-flex--md-col { flex-direction: column; }
+  .vr-flex--md-row { flex-direction: row; }
+}
+
+@media (max-width: 480px) {
+  .vr-flex--sm-col { flex-direction: column; }
+  .vr-flex--sm-row { flex-direction: row; }
+}

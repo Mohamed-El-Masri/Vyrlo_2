@@ -1,0 +1,273 @@
+.vr-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--vr-spacing-xs);
+  margin-bottom: var(--vr-spacing-md);
+}
+
+.vr-label {
+  font-size: var(--vr-text-sm);
+  font-weight: var(--vr-font-medium);
+  color: var(--vr-gray-700);
+}
+
+.vr-input {
+  padding: 0.625rem var(--vr-spacing-md);
+  border: 1px solid var(--vr-gray-300);
+  border-radius: var(--vr-radius-md);
+  font-size: var(--vr-text-base);
+  transition: border-color var(--vr-transition-fast);
+}
+
+.vr-input:focus {
+  outline: none;
+  border-color: var(--vr-primary);
+  box-shadow: 0 0 0 3px var(--vr-primary-bg);
+}
+
+.vr-input::placeholder {
+  color: var(--vr-gray-400);
+}
+
+.vr-input--error {
+  border-color: var(--vr-error);
+}
+
+.vr-error-text {
+  font-size: var(--vr-text-xs);
+  color: var(--vr-error);
+  margin-top: 0.25rem;
+}
+
+/* Select Input */
+.vr-select {
+  position: relative;
+  width: 100%;
+}
+
+.vr-select select {
+  width: 100%;
+  appearance: none;
+  padding-right: 2.5rem;
+  background-image: url("data:image/svg+xml,...");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1em;
+}
+
+/* Checkbox & Radio */
+.vr-checkbox, .vr-radio {
+  display: flex;
+  align-items: center;
+  gap: var(--vr-spacing-sm);
+  cursor: pointer;
+}
+
+.vr-checkbox input, .vr-radio input {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+/* Input Group */
+.vr-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.vr-input-group .vr-input {
+  flex: 1;
+}
+
+.vr-input-group__addon {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--vr-spacing-md);
+  background: var(--vr-gray-100);
+  border: 1px solid var(--vr-gray-300);
+  color: var(--vr-gray-600);
+}
+
+.vr-input-group__addon:first-child {
+  border-right: 0;
+  border-radius: var(--vr-radius-md) 0 0 var(--vr-radius-md);
+}
+
+.vr-input-group__addon:last-child {
+  border-left: 0;
+  border-radius: 0 var(--vr-radius-md) var(--vr-radius-md) 0;
+}
+
+/* Enhanced Select */
+.vr-select-wrapper {
+  position: relative;
+}
+
+.vr-select-wrapper::after {
+  content: '';
+  position: absolute;
+  right: var(--vr-spacing-md);
+  top: 50%;
+  transform: translateY(-50%);
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 5px solid var(--vr-gray-600);
+  pointer-events: none;
+}
+
+/* Custom Checkbox */
+.vr-checkbox-custom {
+  position: relative;
+  padding-left: 28px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.vr-checkbox-custom input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.vr-checkbox-custom__mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: var(--vr-light);
+  border: 2px solid var(--vr-gray-300);
+  border-radius: var(--vr-radius-sm);
+  transition: all var(--vr-transition-fast);
+}
+
+.vr-checkbox-custom:hover input ~ .vr-checkbox-custom__mark {
+  border-color: var(--vr-primary);
+}
+
+.vr-checkbox-custom input:checked ~ .vr-checkbox-custom__mark {
+  background-color: var(--vr-primary);
+  border-color: var(--vr-primary);
+}
+
+.vr-checkbox-custom__mark:after {
+  content: '';
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--vr-light);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.vr-checkbox-custom input:checked ~ .vr-checkbox-custom__mark:after {
+  display: block;
+}
+
+/* Custom Radio */
+.vr-radio-custom {
+  position: relative;
+  padding-left: 28px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.vr-radio-custom input {
+  position: absolute;
+  opacity: 0;
+}
+
+.vr-radio-custom__mark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 20px;
+  background-color: var(--vr-light);
+  border: 2px solid var(--vr-gray-300);
+  border-radius: 50%;
+  transition: all var(--vr-transition-fast);
+}
+
+.vr-radio-custom:hover input ~ .vr-radio-custom__mark {
+  border-color: var(--vr-primary);
+}
+
+.vr-radio-custom input:checked ~ .vr-radio-custom__mark {
+  border-color: var(--vr-primary);
+}
+
+.vr-radio-custom__mark:after {
+  content: '';
+  position: absolute;
+  display: none;
+  top: 4px;
+  left: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vr-primary);
+}
+
+.vr-radio-custom input:checked ~ .vr-radio-custom__mark:after {
+  display: block;
+}
+
+/* File Input */
+.vr-file-input {
+  position: relative;
+  display: inline-block;
+}
+
+.vr-file-input input[type="file"] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.vr-file-input__trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--vr-spacing-sm);
+  padding: var(--vr-spacing-sm) var(--vr-spacing-md);
+  background: var(--vr-gray-100);
+  border: 1px dashed var(--vr-gray-300);
+  border-radius: var(--vr-radius-md);
+  color: var(--vr-gray-600);
+  transition: all var(--vr-transition-fast);
+}
+
+.vr-file-input:hover .vr-file-input__trigger {
+  border-color: var(--vr-primary);
+  color: var(--vr-primary);
+}
+
+/* Form Grid */
+.vr-form-grid {
+  display: grid;
+  gap: var(--vr-spacing-md);
+  grid-template-columns: repeat(12, 1fr);
+}
+
+.vr-form-grid__col-6 {
+  grid-column: span 6;
+}
+
+.vr-form-grid__col-4 {
+  grid-column: span 4;
+}
+
+/* Responsive Form Grid */
+@media (max-width: 768px) {
+  .vr-form-grid__col-6,
+  .vr-form-grid__col-4 {
+    grid-column: span 12;
+  }
+}

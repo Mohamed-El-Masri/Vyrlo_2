@@ -1,0 +1,428 @@
+.vr-auth {
+    min-height: 100vh;
+    padding: calc(var(--vr-header-height) + 2rem) var(--vr-spacing-md) var(--vr-spacing-xl);
+    background: linear-gradient(135deg, var(--vr-primary) 0%, var(--vr-primary-dark) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.vr-auth::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    max-width: 800px;
+    max-height: 800px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: rotate 20s linear infinite;
+    z-index: 1;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.vr-auth__container {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.vr-auth__content {
+    background: var(--vr-light);
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-lg);
+    padding: var(--vr-spacing-xl);
+    position: relative;
+    z-index: 2;
+}
+
+.vr-auth__header {
+    text-align: center;
+    margin-bottom: var(--vr-spacing-xl);
+}
+
+.vr-auth__title {
+    color: var(--vr-primary);
+    font-size: var(--vr-text-2xl);
+    font-weight: var(--vr-font-bold);
+    margin-bottom: var(--vr-spacing-sm);
+}
+
+.vr-auth__subtitle {
+    color: var(--vr-gray-600);
+    font-size: var(--vr-text-base);
+}
+
+.vr-auth__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vr-spacing-lg);
+}
+
+.vr-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--vr-spacing-xs);
+}
+
+.vr-label {
+    color: var(--vr-gray-700);
+    font-size: var(--vr-text-sm);
+    font-weight: var(--vr-font-medium);
+}
+
+.vr-input-group {
+    position: relative;
+}
+
+.vr-input {
+    width: 100%;
+    padding: var(--vr-spacing-sm) var(--vr-spacing-md);
+    padding-left: calc(var(--vr-spacing-md) + 24px);
+    border: 1px solid var(--vr-gray-200);
+    border-radius: var(--vr-radius-md);
+    background: var(--vr-gray-50);
+    color: var(--vr-gray-900);
+    font-size: var(--vr-text-base);
+    transition: all var(--vr-transition-fast);
+}
+
+.vr-input:hover {
+    border-color: var(--vr-gray-300);
+}
+
+.vr-input:focus {
+    border-color: var(--vr-primary);
+    background: var(--vr-light);
+    box-shadow: 0 0 0 4px var(--vr-primary-light);
+}
+
+.vr-input.error {
+    border-color: var(--vr-error);
+    background: var(--vr-error-light);
+}
+
+.vr-input-group__addon {
+    position: absolute;
+    left: var(--vr-spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--vr-gray-400);
+    pointer-events: none;
+}
+
+.vr-error-text {
+    display: none;
+    color: var(--vr-error);
+    font-size: var(--vr-text-sm);
+    margin-top: var(--vr-spacing-xs);
+}
+
+.vr-input.error + .vr-input-group__addon {
+    color: var(--vr-error);
+}
+
+.vr-input.error ~ .vr-error-text {
+    display: block;
+}
+
+.vr-auth__options {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 var(--vr-spacing-lg);
+}
+
+.vr-auth__link {
+    color: var(--vr-primary);
+    font-weight: var(--vr-font-medium);
+    text-decoration: none;
+    transition: all var(--vr-transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--vr-spacing-xs);
+}
+
+.vr-auth__link:hover {
+    color: var(--vr-primary-dark);
+    transform: translateX(4px);
+}
+
+.vr-auth__link i {
+    font-size: 14px;
+}
+
+.vr-auth__submit {
+    background: linear-gradient(to right, var(--vr-primary), var(--vr-primary-dark));
+    color: var(--vr-light);
+    border: none;
+    border-radius: var(--vr-radius-md);
+    padding: var(--vr-spacing-md);
+    font-size: var(--vr-text-base);
+    font-weight: var(--vr-font-medium);
+    cursor: pointer;
+    transition: all var(--vr-transition-fast);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--vr-spacing-sm);
+}
+
+.vr-auth__submit:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--vr-shadow-md);
+}
+
+.vr-auth__submit:active {
+    transform: translateY(0);
+}
+
+.vr-auth__submit .vr-spinner {
+    position: absolute;
+    display: none;
+}
+
+.vr-auth__submit.loading {
+    pointer-events: none;
+    opacity: 0.8;
+}
+
+.vr-auth__submit.loading .vr-spinner {
+    display: block;
+}
+
+.vr-auth__submit.loading span {
+    opacity: 0;
+}
+
+.vr-auth__footer {
+    margin-top: var(--vr-spacing-xl);
+    text-align: center;
+    color: var(--vr-gray-600);
+    font-size: var(--vr-text-sm);
+}
+
+.vr-password-toggle {
+    position: absolute;
+    right: var(--vr-spacing-md);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--vr-gray-400);
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: color var(--vr-transition-fast);
+}
+
+.vr-password-toggle:hover {
+    color: var(--vr-gray-600);
+}
+
+/* User Navigation Styles */
+.vr-user-nav {
+    position: relative;
+}
+
+/* Error States */
+.vr-error-text {
+    color: var(--vr-error);
+    font-size: 13px;
+    margin-top: 8px;
+    display: none;
+    padding-left: 24px;
+    position: relative;
+    font-weight: 500;
+}
+
+.vr-error-text::before {
+    content: '!';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    background: var(--vr-error-light);
+    color: var(--vr-error);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.vr-input.error {
+    border-color: var(--vr-error);
+    background: var(--vr-error-light);
+}
+
+.vr-input.error + .vr-input-group__addon {
+    color: var(--vr-error);
+}
+
+.vr-input.error ~ .vr-error-text {
+    display: block;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+    .vr-auth {
+        padding: calc(var(--vr-header-height) + 1rem) var(--vr-spacing-sm) var(--vr-spacing-lg);
+        min-height: 100vh;
+    }
+
+    .vr-auth::before {
+        max-width: 400px;
+        max-height: 400px;
+    }
+
+    .vr-auth__content {
+        padding: var(--vr-spacing-lg);
+        margin: var(--vr-spacing-sm);
+    }
+
+    .vr-auth__title {
+        font-size: var(--vr-text-xl);
+    }
+
+    .vr-auth__subtitle {
+        font-size: var(--vr-text-sm);
+    }
+
+    .vr-auth__form {
+        gap: var(--vr-spacing-md);
+    }
+}
+
+/* User Navigation Styles */
+.vr-user-nav {
+    position: relative;
+    display: inline-block;
+}
+
+.vr-avatar-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 50px;
+    transition: background-color 0.3s ease;
+}
+
+.vr-avatar-button:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.vr-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.vr-user-name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.vr-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 200px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.vr-dropdown--active {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.vr-dropdown-menu {
+    list-style: none;
+    padding: 8px 0;
+    margin: 0;
+}
+
+.vr-dropdown-menu li {
+    padding: 0;
+    margin: 0;
+}
+
+.vr-dropdown-menu a {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.vr-dropdown-menu a:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.vr-dropdown-menu i {
+    width: 16px;
+    text-align: center;
+    color: var(--primary-color);
+}
+
+.vr-dropdown-divider {
+    height: 1px;
+    background-color: rgba(0, 0, 0, 0.1);
+    margin: 8px 0;
+}
+
+.vr-logout {
+    color: var(--danger-color) !important;
+}
+
+.vr-logout i {
+    color: var(--danger-color) !important;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .vr-auth__content {
+        padding: 24px;
+    }
+
+    .vr-auth__title {
+        font-size: 20px;
+    }
+
+    .vr-user-name {
+        display: none;
+    }
+
+    .vr-dropdown {
+        width: 180px;
+    }
+} 

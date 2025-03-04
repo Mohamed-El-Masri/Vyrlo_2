@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account - Vyrlo</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Styles -->
+    <link rel="stylesheet" href="/css/main/variables.css">
+    <link rel="stylesheet" href="/css/main/reset.css">
+    <link rel="stylesheet" href="/css/main/utilities.css">
+    <link rel="stylesheet" href="/css/main/animations.css">
+    <link rel="stylesheet" href="/css/main/style.css">
+    <!-- Component Styles -->
+    <link rel="stylesheet" href="/css/components/header.css">
+    <link rel="stylesheet" href="/css/components/footer.css">
+    <!-- Page Styles -->
+    <link rel="stylesheet" href="/css/pages/auth.css">
+</head>
+<body>
+    <!-- Header Container -->
+    <div id="headerContainer"></div>
+
+    <main class="vr-main">
+        <div class="vr-auth">
+            <div class="vr-auth__container">
+                <div class="vr-auth__content">
+                    <div class="vr-auth__header">
+                        <h1 class="vr-auth__title">Create Account</h1>
+                        <p class="vr-auth__subtitle">Enter your details to create a new account</p>
+                    </div>
+
+                    <form id="registerForm" class="vr-auth__form">
+                        <div class="vr-form-group">
+                            <label for="name" class="vr-label">Username</label>
+                            <div class="vr-input-group">
+                                <span class="vr-input-group__addon">
+                                    <i class="fas fa-user"></i>
+                                </span>
+                                <input type="text" id="name" name="name" class="vr-input" 
+                                       placeholder="Enter your username" required>
+                            </div>
+                            <span class="vr-error-text" id="nameError"></span>
+                        </div>
+
+                        <div class="vr-form-group">
+                            <label for="email" class="vr-label">Email Address</label>
+                            <div class="vr-input-group">
+                                <span class="vr-input-group__addon">
+                                    <i class="fas fa-envelope"></i>
+                                </span>
+                                <input type="email" id="email" name="email" class="vr-input" 
+                                       placeholder="Enter your email address" required>
+                            </div>
+                            <span class="vr-error-text" id="emailError"></span>
+                        </div>
+
+                        <div class="vr-form-group">
+                            <label for="password" class="vr-label">Password</label>
+                            <div class="vr-input-group">
+                                <span class="vr-input-group__addon">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" id="password" name="password" class="vr-input" 
+                                       placeholder="Enter your password" required>
+                                <button type="button" class="vr-password-toggle">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <span class="vr-error-text" id="passwordError"></span>
+                        </div>
+
+                        <div class="vr-form-group">
+                            <label for="confirmPassword" class="vr-label">Confirm Password</label>
+                            <div class="vr-input-group">
+                                <span class="vr-input-group__addon">
+                                    <i class="fas fa-lock"></i>
+                                </span>
+                                <input type="password" id="confirmPassword" name="confirmPassword" class="vr-input" 
+                                       placeholder="Confirm your password" required>
+                                <button type="button" class="vr-password-toggle">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <span class="vr-error-text" id="confirmPasswordError"></span>
+                        </div>
+
+                        <button type="submit" class="vr-btn vr-btn--primary vr-auth__submit" id="registerButton">
+                            <span>Create Account</span>
+                            <div class="vr-spinner vr-spinner--sm"></div>
+                        </button>
+                    </form>
+
+                    <div class="vr-auth__footer">
+                        <p>Already have an account? 
+                            <a href="login.html" class="vr-auth__link">
+                                <span>Sign In</span>
+                                <i class="fas fa-arrow-right"></i>
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="footerContainer"></div>
+
+    <!-- Toast Container -->
+    <div class="vr-toast-container" id="toastContainer"></div>
+
+    <!-- Services -->
+    <script src="/js/services/api.service.js"></script>
+    <script src="/js/services/toast.service.js"></script>
+    <script src="/js/core/utils.js"></script>
+    <script src="/js/core/componentLoader.js"></script>
+    <script src="/js/services/auth.service.js"></script>
+    
+    <!-- Page Script -->
+    <script src="/js/pages/register.js"></script>
+</body>
+</html> 

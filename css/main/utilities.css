@@ -1,0 +1,83 @@
+/* Display */
+.vr-block { display: block; }
+.vr-inline { display: inline; }
+.vr-inline-block { display: inline-block; }
+.vr-flex { display: flex; }
+.vr-grid { display: grid; }
+.vr-hidden { display: none; }
+
+/* Flex Utilities */
+.vr-flex-row { flex-direction: row; }
+.vr-flex-col { flex-direction: column; }
+.vr-items-center { align-items: center; }
+.vr-justify-center { justify-content: center; }
+.vr-justify-between { justify-content: space-between; }
+.vr-flex-wrap { flex-wrap: wrap; }
+.vr-flex-1 { flex: 1; }
+.vr-gap-sm { gap: var(--vr-spacing-sm); }
+.vr-gap-md { gap: var(--vr-spacing-md); }
+.vr-gap-lg { gap: var(--vr-spacing-lg); }
+
+/* Text Utilities */
+.vr-text-center { text-align: center; }
+.vr-text-left { text-align: left; }
+.vr-text-right { text-align: right; }
+.vr-text-sm { font-size: var(--vr-text-sm); }
+.vr-text-base { font-size: var(--vr-text-base); }
+.vr-text-lg { font-size: var(--vr-text-lg); }
+.vr-text-xl { font-size: var(--vr-text-xl); }
+.vr-font-bold { font-weight: 700; }
+.vr-font-medium { font-weight: 500; }
+.vr-font-normal { font-weight: 400; }
+
+/* Spacing */
+.vr-m-0 { margin: 0; }
+.vr-mt-sm { margin-top: var(--vr-spacing-sm); }
+.vr-mt-md { margin-top: var(--vr-spacing-md); }
+.vr-mt-lg { margin-top: var(--vr-spacing-lg); }
+.vr-mb-sm { margin-bottom: var(--vr-spacing-sm); }
+.vr-mb-md { margin-bottom: var(--vr-spacing-md); }
+.vr-mb-lg { margin-bottom: var(--vr-spacing-lg); }
+.vr-p-0 { padding: 0; }
+.vr-p-sm { padding: var(--vr-spacing-sm); }
+.vr-p-md { padding: var(--vr-spacing-md); }
+.vr-p-lg { padding: var(--vr-spacing-lg); }
+
+/* Colors */
+.vr-text-primary { color: var(--vr-primary); }
+.vr-text-error { color: var(--vr-error); }
+.vr-text-success { color: var(--vr-success); }
+.vr-text-warning { color: var(--vr-warning); }
+.vr-text-gray { color: var(--vr-gray-500); }
+
+/* Backgrounds */
+.vr-bg-primary { background-color: var(--vr-primary); }
+.vr-bg-light { background-color: var(--vr-light); }
+.vr-bg-gray-50 { background-color: var(--vr-gray-50); }
+.vr-bg-gray-100 { background-color: var(--vr-gray-100); }
+
+/* Borders */
+.vr-rounded-sm { border-radius: var(--vr-radius-sm); }
+.vr-rounded-md { border-radius: var(--vr-radius-md); }
+.vr-rounded-lg { border-radius: var(--vr-radius-lg); }
+.vr-rounded-full { border-radius: var(--vr-radius-full); }
+
+/* Shadows */
+.vr-shadow-sm { box-shadow: var(--vr-shadow-sm); }
+.vr-shadow-md { box-shadow: var(--vr-shadow-md); }
+.vr-shadow-lg { box-shadow: var(--vr-shadow-lg); }
+
+/* Animations */
+.vr-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--vr-light);
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: none;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

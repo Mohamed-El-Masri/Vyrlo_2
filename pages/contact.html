@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Vyrlo</title>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/main/style.css">
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="/css/pages/contact.css">
+</head>
+<body>
+    <!-- Header Container -->
+    <div id="headerContainer"></div>
+
+    <!-- Main Content -->
+    <main class="vr-main">
+        <!-- Hero Section -->
+        <section class="vr-contact-hero">
+            <div class="vr-container">
+                <div class="vr-contact-hero__content">
+                    <h1 class="vr-contact-hero__title">Get in Touch</h1>
+                    <p class="vr-contact-hero__description">
+                        Have questions or suggestions? We'd love to hear from you. Our team is always here to help.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="vr-contact">
+            <div class="vr-container">
+                <div class="vr-contact__grid">
+                    <!-- Contact Info -->
+                    <div class="vr-contact-info">
+                        <div class="vr-contact-info__item" data-scroll-reveal>
+                            <div class="vr-contact-info__icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="vr-contact-info__content">
+                                <h3>Visit Us</h3>
+                                <p>123 Business Avenue<br>New York, NY 10001<br>United States</p>
+                            </div>
+                        </div>
+
+                        <div class="vr-contact-info__item" data-scroll-reveal>
+                            <div class="vr-contact-info__icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="vr-contact-info__content">
+                                <h3>Call Us</h3>
+                                <p>
+                                    <a href="tel:+1234567890">+1 (234) 567-890</a><br>
+                                    Monday to Friday, 9am to 6pm
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="vr-contact-info__item" data-scroll-reveal>
+                            <div class="vr-contact-info__icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="vr-contact-info__content">
+                                <h3>Email Us</h3>
+                                <p>
+                                    <a href="mailto:support@vyrlo.com">support@vyrlo.com</a><br>
+                                    We'll respond within 24 hours
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="vr-contact-info__item" data-scroll-reveal>
+                            <div class="vr-contact-info__icon">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <div class="vr-contact-info__content">
+                                <h3>Live Chat</h3>
+                                <p>Chat with our support team<br>Available 24/7</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="vr-contact-form" data-scroll-reveal>
+                        <h2 class="vr-contact-form__title">Send us a Message</h2>
+                        <form id="contactForm" class="vr-contact-form__content">
+                            <div class="vr-contact-form__grid">
+                                <div class="vr-form-group">
+                                    <label for="name">Full Name</label>
+                                    <input type="text" id="name" name="name" required 
+                                           placeholder="Enter your full name">
+                                </div>
+                                <div class="vr-form-group">
+                                    <label for="email">Email Address</label>
+                                    <input type="email" id="email" name="email" required 
+                                           placeholder="Enter your email">
+                                </div>
+                            </div>
+                            <div class="vr-form-group vr-contact-form__full">
+                                <label for="subject">Subject</label>
+                                <input type="text" id="subject" name="subject" required 
+                                       placeholder="What is this about?">
+                            </div>
+                            <div class="vr-form-group vr-contact-form__full">
+                                <label for="message">Message</label>
+                                <textarea id="message" name="message" required 
+                                          placeholder="Write your message here..."></textarea>
+                            </div>
+                            <button type="submit" class="vr-contact-form__submit">
+                                <span>Send Message</span>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Map Section -->
+                <div class="vr-map" id="map" data-scroll-reveal></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="footerContainer"></div>
+
+    <!-- Toast Container -->
+    <div class="vr-toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script type="module" src="/js/core/utils.js"></script>
+    <script type="module" src="/js/core/componentLoader.js"></script>
+    <script type="module" src="/js/services/toast.service.js"></script>
+    <script type="module" src="/js/pages/contact.js"></script>
+</body>
+</html> 

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Listing - Vyrlo</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/main/style.css">
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="/css/pages/add-listing.css">
+</head>
+<body>
+    <!-- Header Container -->
+    <div id="headerContainer"></div>
+
+    <!-- Main Content -->
+    <main class="vr-main">
+        <div class="vr-add-listing">
+            <div class="vr-container">
+                <div class="vr-add-listing__header">
+                    <h1 class="vr-add-listing__title">Add New Listing</h1>
+                    <p class="vr-add-listing__subtitle">Fill in the details below to create your listing</p>
+                </div>
+
+                <form id="addListingForm" class="vr-add-listing__form">
+                    <!-- Basic Information -->
+                    <section class="vr-add-listing__section">
+                        <h2 class="vr-add-listing__section-title">Basic Information</h2>
+                        
+                        <div class="vr-form-group">
+                            <label for="listingName" class="vr-label">Listing Name</label>
+                            <input type="text" id="listingName" name="listingName" class="vr-input" 
+                                   placeholder="Enter your business name" required>
+                        </div>
+
+                        <div class="vr-form-group">
+                            <label for="category" class="vr-label">Category</label>
+                            <select id="category" name="category" class="vr-input" required>
+                                <option value="">Select a category</option>
+                                <!-- Categories will be loaded here -->
+                            </select>
+                        </div>
+
+                        <div class="vr-form-group">
+                            <label for="description" class="vr-label">Description</label>
+                            <textarea id="description" name="description" class="vr-input" 
+                                    placeholder="Describe your business" rows="4" required></textarea>
+                        </div>
+                    </section>
+
+                    <!-- Contact Information -->
+                    <section class="vr-add-listing__section">
+                        <h2 class="vr-add-listing__section-title">Contact Information</h2>
+                        
+                        <div class="vr-form-group">
+                            <label for="phone" class="vr-label">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" class="vr-input" 
+                                   placeholder="Enter phone number" required>
+                        </div>
+
+                        <div class="vr-form-group">
+                            <label for="email" class="vr-label">Email Address</label>
+                            <input type="email" id="email" name="email" class="vr-input" 
+                                   placeholder="Enter email address" required>
+                        </div>
+
+                        <div class="vr-form-group">
+                            <label for="website" class="vr-label">Website (Optional)</label>
+                            <input type="url" id="website" name="website" class="vr-input" 
+                                   placeholder="Enter website URL">
+                        </div>
+                    </section>
+
+                    <!-- Location -->
+                    <section class="vr-add-listing__section">
+                        <h2 class="vr-add-listing__section-title">Location</h2>
+                        
+                        <div class="vr-form-group">
+                            <label for="address" class="vr-label">Address</label>
+                            <input type="text" id="address" name="address" class="vr-input" 
+                                   placeholder="Enter business address" required>
+                        </div>
+
+                        <div class="vr-form-group">
+                            <label for="location" class="vr-label">City/Area</label>
+                            <input type="text" id="location" name="location" class="vr-input" 
+                                   placeholder="Enter city or area" required>
+                        </div>
+
+                        <div class="vr-form-group vr-form-group--map">
+                            <label class="vr-label">Pin Location on Map</label>
+                            <div id="map" class="vr-add-listing__map"></div>
+                            <input type="hidden" id="latitude" name="latitude">
+                            <input type="hidden" id="longitude" name="longitude">
+                        </div>
+                    </section>
+
+                    <!-- Business Hours -->
+                    <section class="vr-add-listing__section">
+                        <h2 class="vr-add-listing__section-title">Business Hours</h2>
+                        <div id="businessHours" class="vr-business-hours">
+                            <!-- Business hours inputs will be generated here -->
+                        </div>
+                    </section>
+
+                    <!-- Images -->
+                    <section class="vr-add-listing__section">
+                        <h2 class="vr-add-listing__section-title">Images</h2>
+                        
+                        <div class="vr-form-group">
+                            <label class="vr-label">Main Image</label>
+                            <div class="vr-file-upload" id="mainImageUpload">
+                                <input type="file" accept="image/*" id="mainImage" name="mainImage" required>
+                                <div class="vr-file-upload__preview">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <span>Click or drag image here</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="vr-form-group">
+                            <label class="vr-label">Gallery Images (Optional)</label>
+                            <div class="vr-file-upload" id="galleryUpload">
+                                <input type="file" accept="image/*" id="gallery" name="gallery" multiple>
+                                <div class="vr-file-upload__preview">
+                                    <i class="fas fa-images"></i>
+                                    <span>Add up to 5 gallery images</span>
+                                </div>
+                            </div>
+                            <div class="vr-gallery-preview" id="galleryPreview"></div>
+                        </div>
+                    </section>
+
+                    <!-- Submit Button -->
+                    <div class="vr-add-listing__actions">
+                        <button type="submit" class="vr-btn vr-btn--primary vr-add-listing__submit">
+                            <span>Create Listing</span>
+                            <div class="vr-spinner"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="footerContainer"></div>
+
+    <!-- Toast Container -->
+    <div class="vr-toast-container" id="toastContainer"></div>
+
+    <!-- Leaflet CSS and JS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- Core Services -->
+    <script src="/js/services/api.service.js"></script>
+    <script src="/js/services/toast.service.js"></script>
+    <script src="/js/core/utils.js"></script>
+    <script src="/js/core/componentLoader.js"></script>
+    <script src="/js/services/auth.service.js"></script>
+    
+    <!-- Page Script -->
+    <script src="/js/pages/add-listing.js"></script>
+</body>
+</html> 

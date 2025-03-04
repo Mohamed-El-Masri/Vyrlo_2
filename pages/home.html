@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vyrlo - Find Local Services</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/favicon.png">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="/css/main/variables.css">
+    <link rel="stylesheet" href="/css/main/reset.css">
+    <link rel="stylesheet" href="/css/main/utilities.css">
+    <link rel="stylesheet" href="/css/main/animations.css">
+    <link rel="stylesheet" href="/css/main/style.css">
+    <!-- Component CSS -->
+    <link rel="stylesheet" href="/css/components/buttons.css">
+    <link rel="stylesheet" href="/css/components/cards.css">
+    <link rel="stylesheet" href="/css/components/dropdown.css">
+    <link rel="stylesheet" href="/css/components/forms.css">
+    <link rel="stylesheet" href="/css/components/header.css">
+    <link rel="stylesheet" href="/css/components/footer.css">
+    <link rel="stylesheet" href="/css/components/toast.css">
+    <link rel="stylesheet" href="/css/components/loaders.css">
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="/css/pages/home.css">
+</head>
+<body>
+    <!-- Header Container -->
+    <div id="headerContainer"></div>
+
+    <!-- Main Content -->
+    <main class="vr-main">
+        <!-- Hero Section -->
+        <section class="vr-hero" data-scroll-reveal>
+            <div class="vr-hero__background">
+                <div class="vr-hero__overlay"></div>
+            </div>
+            <div class="vr-container">
+                <div class="vr-hero__content">
+                    <h1 class="vr-hero__title">Find Local Services Near You</h1>
+                    <p class="vr-hero__subtitle">Connect with trusted local businesses and service providers in your area</p>
+                    
+                    <form class="vr-search-form" id="searchForm">
+                        <div class="vr-search-form__group">
+                            <div class="vr-search-form__input-wrapper">
+                                <i class="fas fa-search vr-search-form__icon"></i>
+                                <input 
+                                    type="text" 
+                                    class="vr-search-form__input" 
+                                    placeholder="What service are you looking for?"
+                                    id="searchInput"
+                                    autocomplete="off"
+                                >
+                                <div class="vr-search-form__suggestions" id="searchSuggestions"></div>
+                            </div>
+                            <div class="vr-search-form__input-wrapper">
+                                <i class="fas fa-map-marker-alt vr-search-form__icon"></i>
+                                <input 
+                                    type="text" 
+                                    class="vr-search-form__input" 
+                                    placeholder="Location"
+                                    id="locationInput"
+                                    autocomplete="off"
+                                >
+                                <div class="vr-search-form__suggestions" id="locationSuggestions"></div>
+                            </div>
+                            <button type="submit" class="vr-btn vr-btn--primary vr-search-form__button">
+                                <i class="fas fa-search"></i>
+                                <span>Search</span>
+                            </button>
+                        </div>
+                        <div class="vr-search-form__popular">
+                            <span>Popular:</span>
+                            <a href="#" class="vr-search-form__tag">Restaurants</a>
+                            <a href="#" class="vr-search-form__tag">Dentists</a>
+                            <a href="#" class="vr-search-form__tag">Home Services</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Categories Section -->
+        <section class="vr-section vr-categories" data-scroll-reveal="fade-up">
+            <div class="vr-container">
+                <div class="vr-section__header">
+                    <span class="vr-section__subtitle" data-scroll-reveal="fade-up">Browse Services</span>
+                    <h2 class="vr-section__title" data-scroll-reveal="fade-up">Popular Categories</h2>
+                    <p class="vr-section__description" data-scroll-reveal="fade-up">Discover a wide range of services tailored to meet your specific needs</p>
+                </div>
+                <div class="vr-categories__grid" id="categoriesGrid"></div>
+                <div class="vr-section__footer">
+                    <button class="vr-btn vr-btn--outline vr-btn--load-more" id="loadMoreCategories">
+                        <span>View More Categories</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Featured Listings -->
+        <section class="vr-section vr-featured" data-scroll-reveal="fade-up">
+            <div class="vr-container">
+                <div class="vr-section__header">
+                    <span class="vr-section__subtitle" data-scroll-reveal="fade-up">Discover Excellence</span>
+                    <h2 class="vr-section__title" data-scroll-reveal="fade-up">Featured Listings</h2>
+                    <p class="vr-section__description" data-scroll-reveal="fade-up">Explore our handpicked selection of top-rated services and exceptional businesses in your area</p>
+                </div>
+                <div class="vr-featured__grid" id="featuredGrid"></div>
+                <div class="vr-section__footer">
+                    <button class="vr-btn vr-btn--outline vr-btn--load-more" id="loadMoreListings">
+                        <span>View More Listings</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it Works -->
+        <section class="vr-section vr-how-it-works" data-scroll-reveal="fade-up">
+            <div class="vr-container">
+                <div class="vr-section__header">
+                    <span class="vr-section__subtitle" data-scroll-reveal="fade-up">Simple Process</span>
+                    <h2 class="vr-section__title" data-scroll-reveal="fade-up">How Vyrlo Works</h2>
+                    <p class="vr-section__description" data-scroll-reveal="fade-up">Experience the simplicity of finding and booking services with our streamlined process</p>
+                </div>
+                <div class="vr-how-it-works__grid">
+                    <div class="vr-how-it-works__item">
+                        <div class="vr-how-it-works__icon-wrapper">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="vr-how-it-works__number">1</div>
+                        <h3 class="vr-how-it-works__title">Find or List</h3>
+                        <p class="vr-how-it-works__text">Search for services or create your business listing to reach more customers</p>
+                    </div>
+                    <div class="vr-how-it-works__item">
+                        <div class="vr-how-it-works__icon-wrapper">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <div class="vr-how-it-works__number">2</div>
+                        <h3 class="vr-how-it-works__title">Connect & Engage</h3>
+                        <p class="vr-how-it-works__text">Contact businesses directly or manage your listing and respond to customer inquiries</p>
+                    </div>
+                    <div class="vr-how-it-works__item">
+                        <div class="vr-how-it-works__icon-wrapper">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="vr-how-it-works__number">3</div>
+                        <h3 class="vr-how-it-works__title">Review & Grow</h3>
+                        <p class="vr-how-it-works__text">Share your experience with reviews or enhance your business visibility with premium features</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    
+    </main>
+
+    <!-- Footer Container -->
+    <div id="footerContainer"></div>
+
+    <!-- Toast Container -->
+    <div class="vr-toast-container" id="toastContainer"></div>
+
+    <!-- Core Services -->
+    <script src="/js/services/api.service.js"></script>
+    <script src="/js/services/toast.service.js"></script>
+    <script src="/js/core/utils.js"></script>
+    <script src="/js/core/componentLoader.js"></script>
+    <script src="/js/services/auth.service.js"></script>
+    
+    <!-- Page Script -->
+    <script src="/js/pages/home.js"></script>
+</body>
+</html>

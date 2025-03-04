@@ -1,0 +1,65 @@
+Vyrlo/
+├── css/
+│   ├── main/
+│   │   ├── style.css          # Global styles and variables
+│   │   ├── header.css         # Header component styles
+│   │   ├── footer.css         # Footer component styles
+│   │   ├── getStarted.css     # Authentication modals styles
+│   │   └── animations.css     # Global animations
+│   │
+│   ├── home/
+│   │   ├── heroSection.css    # Hero section with search
+│   │   ├── categorySwiper.css # Categories slider
+│   │   ├── nearbyListings.css # Nearby listings section
+│   │   ├── featuredServices.css
+│   │   ├── boostSection.css
+│   │   └── adsCards.css
+│   │
+│   └── pages/
+│       ├── addListing/        # Add listing page styles
+│       ├── allListings/       # All listings page styles
+│       ├── listingDetails/    # Single listing page styles
+│       ├── profile/           # User profile styles
+│       └── dashboard/         # Dashboard styles
+│
+├── js/
+│   ├── main/
+│   │   ├── app.js            # Main application logic
+│   │   ├── auth.js           # Authentication handling
+│   │   ├── component.js      # Shared components
+│   │   └── getCategories.js  # Categories management
+│   │
+│   ├── services/
+│   │   ├── authService.js    # Authentication API calls
+│   │   ├── listingService.js # Listing management API calls
+│   │   └── storageService.js # Local storage management
+│   │
+│   └── pages/
+│       ├── addListing/
+│       ├── allListings/
+│       ├── listingDetails/
+│       ├── profile/
+│       └── dashboard/
+│
+├── images/
+│   ├── logo/
+│   ├── icons/
+│   ├── background/
+│   └── defaults/
+│
+├── docs/
+│   ├── home-page.md          # Home page documentation
+│   ├── add-listing.md        # Add listing documentation
+│   ├── all-listings.md       # Listings page documentation
+│   ├── listing-details.md    # Single listing documentation
+│   ├── profile.md            # Profile page documentation
+│   └── dashboard.md          # Dashboard documentation
+│
+└── pages/
+    ├── index.html            # Home page
+    ├── addListing.html       # Add new listing
+    ├── allListings.html      # Browse all listings
+    ├── listingDetails.html   # Single listing view
+    ├── profile.html          # User profile
+    └── dashboard.html        # User dashboard
+
