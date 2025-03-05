@@ -7,6 +7,7 @@
     border-radius: 50%;
     overflow: hidden;
     background: var(--vr-gray-100);
+    flex-shrink: 0;
 }
 
 /* Avatar Sizes */
@@ -22,6 +23,38 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: opacity 0.2s ease;
+}
+
+.vr-avatar__image[src=""] {
+    opacity: 0;
+}
+
+.vr-avatar__image:not([src]) {
+    opacity: 0;
+}
+
+/* Avatar Fallback */
+.vr-avatar::before {
+    content: attr(data-initials);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: var(--vr-font-medium);
+    color: var(--vr-primary);
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.vr-avatar[data-initials]::before {
+    opacity: 1;
+}
+
+.vr-avatar__image:not([src]) + .vr-avatar::before,
+.vr-avatar__image[src=""] + .vr-avatar::before {
+    opacity: 1;
 }
 
 /* Avatar with Border */
@@ -51,22 +84,84 @@
     position: absolute;
     bottom: 0;
     right: 0;
+    width: 24px;
+    height: 24px;
     background: var(--vr-primary);
     color: var(--vr-light);
-    width: 20px;
-    height: 20px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 12px;
     cursor: pointer;
-    transition: all var(--vr-transition-fast);
+    border: 2px solid var(--vr-light);
+    transition: all 0.2s ease;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+.vr-avatar:hover .vr-avatar__edit {
+    opacity: 1;
+    transform: scale(1);
 }
 
 .vr-avatar__edit:hover {
     background: var(--vr-primary-dark);
     transform: scale(1.1);
+}
+
+/* Avatar Upload */
+.vr-avatar--upload {
+    cursor: pointer;
+}
+
+.vr-avatar--upload input[type="file"] {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    cursor: pointer;
+    opacity: 0;
+}
+
+.vr-avatar--upload::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.vr-avatar--upload:hover::after {
+    opacity: 1;
+}
+
+.vr-avatar--upload:hover .vr-avatar__edit {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Avatar Loading State */
+.vr-avatar--loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, var(--vr-gray-100) 25%, var(--vr-gray-200) 50%, var(--vr-gray-100) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
 }
 
 /* Avatar Group */
@@ -90,20 +185,6 @@
     z-index: 1;
 }
 
-/* Avatar with Upload */
-.vr-avatar--upload {
-    cursor: pointer;
-    transition: opacity var(--vr-transition-fast);
-}
-
-.vr-avatar--upload:hover {
-    opacity: 0.8;
-}
-
-.vr-avatar--upload input[type="file"] {
-    display: none;
-}
-
 /* Placeholder Avatar */
 .vr-avatar--placeholder {
     background: var(--vr-primary-bg);
@@ -116,5 +197,11 @@
     .vr-avatar--responsive {
         width: 32px;
         height: 32px;
+    }
+
+    .vr-avatar__edit {
+        width: 20px;
+        height: 20px;
+        font-size: 10px;
     }
 } 

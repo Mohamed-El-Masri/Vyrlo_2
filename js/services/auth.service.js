@@ -4,129 +4,110 @@
 class AuthService {
     constructor() {
         this.API_BASE_URL = 'https://virlo.vercel.app';
-        this.TOKEN_KEY = 'vr_token';
-        this.USER_KEY = 'vr_user';
-        this.PROFILE_KEY = 'vr_profile';
-        this.initializeAuthListeners();
+        
+        // Initialize state
+        this.token = null;
+        this.user = null;
+        this.profile = null;
+        this.uiUpdateCallbacks = new Set();
+
+        // Try to restore state from storage
+        this.restoreState();
     }
 
-    initializeAuthListeners() {
-        // Listen for storage changes
-        window.addEventListener('storage', (e) => {
-            if (e.key === this.TOKEN_KEY || e.key === this.USER_KEY || e.key === this.PROFILE_KEY) {
-                this.updateUI();
-            }
-        });
-
-        // Update UI when page becomes visible
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                this.updateUI();
-            }
-        });
-    }
-
-    async updateUI() {
+    restoreState() {
         try {
-            const token = this.getToken();
-            const user = this.getUser();
-            const profile = this.getProfile();
+            this.token = localStorage.getItem('vr_token');
+            const storedUser = localStorage.getItem('vr_user');
+            const storedProfile = localStorage.getItem('vr_profile');
 
-            await this.updateAuthViews(user, profile, token);
-            
-            if (user && profile) {
-                await this.updateUserDropdown(user, profile);
+            if (this.token) {
+                // Get user data from token
+                const decoded = this.parseJwt(this.token);
+                if (decoded) {
+                    this.user = {
+                        id: decoded.userId,
+                        name: decoded.name,
+                        email: decoded.email
+                    };
+                    localStorage.setItem('vr_user', JSON.stringify(this.user));
+                }
+
+                if (storedProfile) {
+                    this.profile = JSON.parse(storedProfile);
+                }
+
+                // Fetch profile if we have user ID
+                if (this.user?.id) {
+                    this.fetchAndStoreProfile(this.user.id);
+                }
+            } else {
+                this.clearAuthState();
             }
         } catch (error) {
-            console.error('Error updating UI:', error);
+            console.error('Error restoring auth state:', error);
+            this.clearAuthState();
         }
     }
 
-    async updateAuthViews(user, profile, token) {
-        const guestView = document.getElementById('guestView');
-        const userView = document.getElementById('userView');
-
-        if (!guestView || !userView) {
-            throw new Error('Auth views not found');
-        }
-
-        if (token && user) {
-            guestView.style.display = 'none';
-            userView.style.display = 'flex';
-        } else {
-            guestView.style.display = 'flex';
-            userView.style.display = 'none';
+    parseJwt(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => 
+                '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+            ).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (error) {
+            console.error('JWT parse error:', error);
+            return null;
         }
     }
 
-    async updateUserDropdown(user, profile) {
-        // Get elements
-        const profileName = document.getElementById('profileName');
-        const headerAvatar = document.getElementById('headerAvatar');
-        const profileTrigger = document.getElementById('profileTrigger');
-        const profileDropdown = document.getElementById('profileDropdown');
-        const logoutBtn = document.getElementById('logoutBtn');
-
-        if (!profileName || !headerAvatar || !profileTrigger || !profileDropdown || !logoutBtn) {
-            throw new Error('User dropdown elements not found');
+    onAuthStateChange(callback) {
+        if (typeof callback === 'function') {
+            this.uiUpdateCallbacks.add(callback);
+            // Initial call with current state
+            callback(this.isAuthenticated());
         }
-
-        // Update name and avatar
-        profileName.textContent = `Hello, ${user.name}`;
-        if (profile && profile.avatar) {
-            headerAvatar.src = profile.avatar;
-        }
-
-        // Setup dropdown listeners
-        this.setupDropdownListeners(profileTrigger, profileDropdown);
-
-        // Setup logout handler
-        logoutBtn.addEventListener('click', () => this.logout());
     }
 
-    setupDropdownListeners(trigger, dropdown) {
-        // Remove existing listeners
-        trigger.removeEventListener('click', this.toggleDropdown);
-        document.removeEventListener('click', this.closeDropdown);
-        document.removeEventListener('keydown', this.handleEscKey);
-
-        // Store dropdown reference
-        this.activeDropdown = dropdown;
-
-        // Toggle dropdown
-        this.toggleDropdown = (e) => {
-            e.stopPropagation();
-            const isActive = dropdown.classList.contains('active');
-            if (isActive) {
-                dropdown.classList.remove('active');
-            } else {
-                dropdown.classList.add('active');
+    notifyAuthStateChange() {
+        this.uiUpdateCallbacks.forEach(callback => {
+            try {
+                callback(this.isAuthenticated());
+            } catch (error) {
+                console.error('Error in auth state change callback:', error);
             }
-        };
-
-        // Close dropdown when clicking outside
-        this.closeDropdown = (e) => {
-            if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
-                dropdown.classList.remove('active');
-            }
-        };
-
-        // Close dropdown on Escape key
-        this.handleEscKey = (e) => {
-            if (e.key === 'Escape') {
-                dropdown.classList.remove('active');
-            }
-        };
-
-        // Add listeners
-        trigger.addEventListener('click', this.toggleDropdown);
-        document.addEventListener('click', this.closeDropdown);
-        document.addEventListener('keydown', this.handleEscKey);
+        });
     }
 
-    /**
-     * Login user
-     */
+    async register(name, email, password) {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/signup`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username: name, email, password })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 409) {
+                    throw new Error('This email is already registered');
+                }
+                throw new Error(data.message || 'Registration failed');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Registration error:', error);
+            throw error;
+        }
+    }
+
     async login(email, password) {
         try {
             const response = await fetch(`${this.API_BASE_URL}/signin`, {
@@ -137,40 +118,32 @@ class AuthService {
                 body: JSON.stringify({ email, password })
             });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Login failed');
-            }
-
             const data = await response.json();
-            
-            if (data.token) {
-                // Store token
-                this.setToken(data.token);
-                
-                // Parse and store user data from token
-                const user = this.parseJwt(data.token);
-                
-                if (user) {
-                    this.setUser(user);
-                    
-                    // Fetch and store profile data
-                    const profile = await this.fetchAndStoreProfile(user.userId);
-                    
-                    // Update UI
-                    await this.updateUI();
 
-                    // Show success message
-                    if (window.toastService) {
-                        window.toastService.success('Successfully logged in');
-                    }
-
-                    // Delay redirect to ensure UI updates are complete
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                    window.location.href = '/pages/home.html';
-                }
+            if (!response.ok) {
+                throw new Error(data.message || 'Login failed');
             }
 
+            // Save token
+            this.setToken(data.token);
+
+            // Get user data from token
+            const decoded = this.parseJwt(data.token);
+            if (decoded) {
+                const user = {
+                    id: decoded.userId,
+                    name: decoded.name,
+                    email: decoded.email
+                };
+            this.setUser(user);
+            
+                // Fetch profile
+                await this.fetchAndStoreProfile(user.id);
+            }
+            
+            // Notify UI of state change
+            this.notifyAuthStateChange();
+            
             return data;
         } catch (error) {
             console.error('Login error:', error);
@@ -178,136 +151,95 @@ class AuthService {
         }
     }
 
-    /**
-     * Register new user
-     */
-    async register(userData) {
+    async logout() {
+        this.clearAuthState();
+        this.notifyAuthStateChange();
+        window.location.href = '/pages/login.html';
+    }
+
+    async forgotPassword(email) {
         try {
-            const response = await fetch(`${this.API_BASE_URL}/signup`, {
+            const response = await fetch(`${this.API_BASE_URL}/forgetpass/request`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(userData)
+                body: JSON.stringify({ email })
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Registration failed');
+                throw new Error(data.message || 'Failed to send reset instructions');
             }
 
-            return await response.json();
+            return data;
         } catch (error) {
+            console.error('Forgot password error:', error);
             throw error;
         }
     }
 
-    /**
-     * Logout user
-     */
-    async logout() {
+    async resetPassword(email, newPassword, otp) {
         try {
-            // Clear stored data
-            localStorage.removeItem(this.TOKEN_KEY);
-            localStorage.removeItem(this.USER_KEY);
-            localStorage.removeItem(this.PROFILE_KEY);
-            
-            // Update UI
-            await this.updateUI();
-            
-            // Redirect to login page
-            window.location.href = '/pages/login.html';
+            const response = await fetch(`${this.API_BASE_URL}/forgetpass/reset`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, newPassword, otp })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to reset password');
+            }
+
+            return data;
         } catch (error) {
-            console.error('Logout error:', error);
-        }
-    }
-
-    /**
-     * Parse JWT token
-     */
-    parseJwt(token) {
-        try {
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-
-            return JSON.parse(jsonPayload);
-        } catch (error) {
-            console.error('Error parsing JWT:', error);
-            return null;
-        }
-    }
-
-    /**
-     * Set authentication token
-     */
-    setToken(token) {
-        localStorage.setItem(this.TOKEN_KEY, token);
-    }
-
-    /**
-     * Get authentication token
-     */
-    getToken() {
-        return localStorage.getItem(this.TOKEN_KEY);
-    }
-
-    /**
-     * Set user data
-     */
-    setUser(user) {
-        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-    }
-
-    /**
-     * Get current user
-     */
-    getUser() {
-        const userStr = localStorage.getItem(this.USER_KEY);
-        return userStr ? JSON.parse(userStr) : null;
-    }
-
-    /**
-     * Check if user is authenticated
-     */
-    isAuthenticated() {
-        const token = this.getToken();
-        return !!token;
-    }
-
-    /**
-     * Get user data from token
-     */
-    async getUserData() {
-        const token = this.getToken();
-        if (!token) return null;
-
-        try {
-            const userData = await ApiService.get('/user/profile');
-            this.setUser(userData);
-            return userData;
-        } catch (error) {
-            console.error('Error fetching user data:', error);
-            this.logout();
+            console.error('Reset password error:', error);
             throw error;
         }
     }
 
-    /**
-     * Update user profile
-     */
+    async changePassword(oldPassword, newPassword) {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/change-pass`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${this.token}`
+                },
+                body: JSON.stringify({ oldPassword, newPassword })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 403) {
+                    throw new Error('Incorrect old password');
+                }
+                throw new Error(data.message || 'Failed to change password');
+            }
+
+            return data;
+        } catch (error) {
+            console.error('Change password error:', error);
+            throw error;
+        }
+    }
+
     async updateProfile(userId, profileData) {
         try {
             const formData = new FormData();
             
-            // Add profile fields to FormData
+            // Add profile fields
             Object.keys(profileData).forEach(key => {
                 if (key === 'profilePic' && profileData[key] instanceof File) {
-                    formData.append(key, profileData[key]);
+                        formData.append('profilePic', profileData[key]);
                 } else if (key === 'socialAccounts' && Array.isArray(profileData[key])) {
-                    formData.append(key, JSON.stringify(profileData[key]));
+                    formData.append('socialAccounts', JSON.stringify(profileData[key]));
                 } else {
                     formData.append(key, profileData[key]);
                 }
@@ -316,123 +248,29 @@ class AuthService {
             const response = await fetch(`${this.API_BASE_URL}/profile/${userId}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${this.getToken()}`
+                    'Authorization': `Bearer ${this.token}`
                 },
                 body: formData
             });
 
+            const data = await response.json();
+
             if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Profile update failed');
+                if (response.status === 400) {
+                    throw new Error('Invalid file type');
+                }
+                throw new Error(data.message || 'Failed to update profile');
             }
 
-            const data = await response.json();
-            this.setUser({ ...this.getUser(), ...data });
+            // Update stored profile
+            this.setProfile(data);
+            
+            // Trigger UI update
+            this.notifyAuthStateChange();
 
             return data;
         } catch (error) {
-            throw error;
-        }
-    }
-
-    /**
-     * Get user profile
-     */
-    async getProfile(userId) {
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/profile/${userId}`, {
-                headers: {
-                    'Authorization': `Bearer ${this.getToken()}`
-                }
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to fetch profile');
-            }
-
-            return await response.json();
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    /**
-     * Change password
-     */
-    async changePassword(currentPassword, newPassword) {
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/change-pass`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${this.getToken()}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    oldPassword: currentPassword,
-                    newPassword: newPassword
-                })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Password change failed');
-            }
-
-            return await response.json();
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    /**
-     * Request password reset
-     */
-    async forgotPassword(email) {
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/send-otp`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Password reset request failed');
-            }
-
-            return await response.json();
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    /**
-     * Reset password with token
-     */
-    async resetPassword(email, newPassword, otp) {
-        try {
-            const response = await fetch(`${this.API_BASE_URL}/forgetpass/reset`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email,
-                    newPassword,
-                    otp
-                })
-            });
-
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Password reset failed');
-            }
-
-            return await response.json();
-        } catch (error) {
+            console.error('Update profile error:', error);
             throw error;
         }
     }
@@ -441,47 +279,306 @@ class AuthService {
         try {
             const response = await fetch(`${this.API_BASE_URL}/profile/${userId}`, {
                 headers: {
-                    'Authorization': `Bearer ${this.getToken()}`
+                    'Authorization': `Bearer ${this.token}`
                 }
             });
 
-            if (!response.ok) throw new Error('Failed to fetch profile');
-
-            const profileData = await response.json();
-
-            if (Array.isArray(profileData) && profileData.length > 0) {
-                const profile = profileData[0];
-                this.setProfile(profile);
-                return profile;
+            if (!response.ok) {
+                throw new Error('Failed to fetch profile');
             }
-            return null;
+
+            const data = await response.json();
+            
+            // Handle empty response by creating a new profile
+            if (!data || !Array.isArray(data) || data.length === 0) {
+                const newProfile = {
+                    _id: null,
+                    userId: {
+                        _id: userId,
+                        username: this.user?.name || '',
+                        email: this.user?.email || '',
+                        isBanned: false
+                    },
+                    numberOfProjects: 0,
+                    profilePic: ['/images/defaults/default-avatar.png'],
+                    socialAccounts: [],
+                    title: '',
+                    phoneNumber: '',
+                    address: '',
+                    city: '',
+                    state: '',
+                    zipCode: '',
+                    about: '',
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                this.setProfile(this.transformProfileData(newProfile));
+                return this.profile;
+            }
+            
+            // Get first profile from array
+            const profileData = data[0];
+            
+            // Transform and store profile
+            this.setProfile(this.transformProfileData(profileData));
+            return this.profile;
         } catch (error) {
             console.error('Error fetching profile:', error);
-            return null;
+            // Set default profile if fetch fails
+            const defaultProfile = {
+                _id: null,
+                userId: {
+                    _id: userId,
+                    username: this.user?.name || '',
+                    email: this.user?.email || '',
+                    isBanned: false
+                },
+                numberOfProjects: 0,
+                profilePic: ['/images/defaults/default-avatar.png'],
+                socialAccounts: [],
+                title: '',
+                phoneNumber: '',
+                address: '',
+                city: '',
+                state: '',
+                zipCode: '',
+                about: '',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            this.setProfile(this.transformProfileData(defaultProfile));
+            return this.profile;
         }
     }
 
+    // Helper method to transform API profile data to our internal format
+    transformProfileData(profileData) {
+        return {
+            id: profileData._id,
+            userId: profileData.userId?._id,
+            name: profileData.userId?.username || this.user?.name || '',
+            email: profileData.userId?.email || this.user?.email || '',
+            avatar: (profileData.profilePic && profileData.profilePic[0]) || '/images/defaults/default-avatar.png',
+            title: profileData.title || '',
+            phoneNumber: profileData.phoneNumber || '',
+            address: profileData.address || '',
+            city: profileData.city || '',
+            state: profileData.state || '',
+            zipCode: profileData.zipCode || '',
+            about: profileData.about || '',
+            numberOfProjects: parseInt(profileData.numberOfProjects) || 0,
+            socialAccounts: Array.isArray(profileData.socialAccounts) 
+                ? profileData.socialAccounts.map(account => ({
+                    id: account._id,
+                    platform: account.platform,
+                    url: account.url
+                }))
+                : [],
+            createdAt: profileData.createdAt,
+            updatedAt: profileData.updatedAt,
+            isBanned: profileData.userId?.isBanned || false
+        };
+    }
+
+    clearAuthState() {
+        this.token = null;
+        this.user = null;
+        this.profile = null;
+        
+        localStorage.removeItem('vr_token');
+        localStorage.removeItem('vr_user');
+        localStorage.removeItem('vr_profile');
+    }
+
+    setToken(token) {
+        this.token = token;
+        localStorage.setItem('vr_token', token);
+    }
+
+    setUser(user) {
+        this.user = user;
+        localStorage.setItem('vr_user', JSON.stringify(user));
+    }
+
     setProfile(profile) {
-        localStorage.setItem(this.PROFILE_KEY, JSON.stringify(profile));
+        this.profile = profile;
+        localStorage.setItem('vr_profile', JSON.stringify(profile));
+    }
+
+    getToken() {
+        return this.token;
+    }
+
+    getUser() {
+        return this.user;
     }
 
     getProfile() {
-        const profile = localStorage.getItem(this.PROFILE_KEY);
-        return profile ? JSON.parse(profile) : null;
+        return this.profile;
+    }
+
+    isAuthenticated() {
+        return this.token !== null;
+    }
+
+    getUserId() {
+        return this.user?.id;
+    }
+
+    updateUI() {
+        // Common UI elements
+        const authLinks = document.querySelector('.auth-links');
+        const userMenu = document.querySelector('.user-menu');
+        const profileMenuItems = document.querySelectorAll('.profile-menu-item');
+        const adminMenuItems = document.querySelectorAll('.admin-menu-item');
+        const authRequiredElements = document.querySelectorAll('[data-requires-auth]');
+        
+        // Update authentication-dependent UI elements
+        if (this.isAuthenticated()) {
+            // Show/hide main navigation elements
+            if (authLinks) authLinks.style.display = 'none';
+            if (userMenu) {
+                userMenu.style.display = 'flex';
+                
+                // Update user info in menu
+                const userAvatar = userMenu.querySelector('.user-avatar');
+                const userName = userMenu.querySelector('.user-name');
+                const userEmail = userMenu.querySelector('.user-email');
+                
+                if (userAvatar && this.profile) {
+                    userAvatar.src = this.profile.avatar;
+                    userAvatar.alt = this.user?.name || 'User Avatar';
+                }
+                
+                if (userName && this.user) {
+                    userName.textContent = this.user.name;
+                }
+
+                if (userEmail && this.user) {
+                    userEmail.textContent = this.user.email;
+                }
+            }
+
+            // Show elements that require authentication
+            authRequiredElements.forEach(element => {
+                element.style.display = '';
+            });
+
+            // Update profile-specific elements
+            if (this.profile) {
+                profileMenuItems.forEach(item => {
+                    item.style.display = '';
+                });
+
+                // Update any profile information on the current page
+                this.updateProfileInfo();
+            }
+
+        } else {
+            // User is logged out - hide authenticated elements
+            if (authLinks) authLinks.style.display = 'flex';
+            if (userMenu) userMenu.style.display = 'none';
+            
+            // Hide elements that require authentication
+            authRequiredElements.forEach(element => {
+                element.style.display = 'none';
+            });
+
+            // Hide profile menu items
+            profileMenuItems.forEach(item => {
+                item.style.display = 'none';
+            });
+
+            // Hide admin menu items
+            adminMenuItems.forEach(item => {
+                item.style.display = 'none';
+            });
+        }
+
+        // Update page-specific elements
+        this.updatePageSpecific();
+    }
+
+    updateProfileInfo() {
+        // Update profile information if on profile page
+        const profileElements = {
+            avatar: document.querySelector('.profile-avatar'),
+            name: document.querySelector('.profile-name'),
+            email: document.querySelector('.profile-email'),
+            title: document.querySelector('.profile-title'),
+            phone: document.querySelector('.profile-phone'),
+            address: document.querySelector('.profile-address'),
+            about: document.querySelector('.profile-about')
+        };
+
+        if (this.profile && this.user) {
+            Object.entries(profileElements).forEach(([key, element]) => {
+                if (!element) return;
+                
+                switch(key) {
+                    case 'avatar':
+                        element.src = this.profile.avatar;
+                        element.alt = this.user.name;
+                        break;
+                    case 'name':
+                        element.textContent = this.user.name;
+                        break;
+                    case 'email':
+                        element.textContent = this.user.email;
+                        break;
+                    default:
+                        if (this.profile[key]) {
+                            element.textContent = this.profile[key];
+                        }
+                }
+            });
+        }
+    }
+
+    updatePageSpecific() {
+        // Get current page path
+        const currentPath = window.location.pathname;
+        
+        // Handle specific pages
+        if (currentPath.includes('/profile.html')) {
+            this.updateProfileInfo();
+        } else if (currentPath.includes('/settings.html')) {
+            // Update settings page elements
+            const settingsForm = document.querySelector('.settings-form');
+            if (settingsForm && this.user) {
+                const emailInput = settingsForm.querySelector('[name="email"]');
+                if (emailInput) emailInput.value = this.user.email;
+            }
+        }
+        
+        // Redirect if page requires authentication
+        const requiresAuth = document.body.hasAttribute('data-requires-auth');
+        if (requiresAuth && !this.isAuthenticated()) {
+            window.location.href = '/pages/login.html';
+        }
+    }
+
+    // Add this method to register for UI updates
+    registerUIComponent(element, updateCallback) {
+        if (element && typeof updateCallback === 'function') {
+            this.onAuthStateChange(() => {
+                updateCallback(element, this.isAuthenticated(), this.user, this.profile);
+            });
+        }
     }
 }
 
 // Create global instance
-window.AuthService = new AuthService();
+window.authService = new AuthService();
 
 // Update header UI on page load and after any navigation
 document.addEventListener('DOMContentLoaded', () => {
-    window.AuthService.updateUI();
+    window.authService.updateUI();
 });
 
 // Optional: Update header when the page becomes visible again
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-        window.AuthService.updateUI();
+        window.authService.updateUI();
     }
 }); 

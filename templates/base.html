@@ -46,12 +46,17 @@
     <!-- Toast Container -->
     <div class="vr-toast-container" id="toastContainer"></div>
 
-    <!-- Core JS -->
-    <script type="module" src="/js/core/utils.js"></script>
-    <script type="module" src="/js/services/api.service.js"></script>
-    <script type="module" src="/js/services/toast.service.js"></script>
-    <script type="module" src="/js/services/listing.service.js"></script>
-    <script type="module" src="/js/core/componentLoader.js"></script>
+    <!-- Core Services (Order matters!) -->
+    <script src="/js/core/utils.js"></script>
+    <script src="/js/services/toast.service.js"></script>
+    <script src="/js/services/api.service.js"></script>
+    <script src="/js/services/auth.service.js"></script>
+    <script src="/js/services/listing.service.js"></script>
+    <script src="/js/core/modal.js"></script>
+    <script src="/js/core/componentLoader.js"></script>
+    
+    <!-- Main Application Script -->
+    <script src="/js/core/main.js"></script>
     
     <!-- Page Specific JS -->
     {{pageScripts}}

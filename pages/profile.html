@@ -4,35 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Profile - Vyrlo</title>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Main CSS -->
     <link rel="stylesheet" href="/css/main/style.css">
-    <!-- Page CSS -->
     <link rel="stylesheet" href="/css/pages/profile.css">
 </head>
 <body>
-    <!-- Header Container -->
     <div id="headerContainer"></div>
-
-    <!-- Main Content -->
     <main class="vr-main">
         <div class="vr-profile">
             <div class="vr-container">
-                <!-- Profile Header -->
                 <div class="vr-profile__header">
                     <div class="vr-profile__cover">
-                        <img src="/images/defaults/default-cover.jpg" alt="Cover" id="coverImage">
+                        <img src="/images/defaults/default-cover.jpg" alt="Cover" id="coverImage" class="vr-profile__cover-image">
                         <button class="vr-btn vr-btn--icon vr-profile__cover-edit" id="editCover">
                             <i class="fas fa-camera"></i>
                         </button>
                     </div>
                     <div class="vr-avatar vr-avatar--2xl vr-avatar--upload">
-                        <img src="/images/defaults/default-avatar.png" 
-                             alt="Avatar" 
-                             class="vr-avatar__image"
-                             id="avatarImage"
-                             onerror="this.src='/images/defaults/default-avatar.png'">
+                        <img src="/images/defaults/default-avatar.png" alt="Avatar" class="vr-avatar__image" id="avatarImage" onerror="this.src='/images/defaults/default-avatar.png'">
                         <input type="file" id="avatarInput" accept="image/*">
                         <button class="vr-avatar__edit" id="editAvatar">
                             <i class="fas fa-camera"></i>
@@ -41,6 +29,8 @@
                     <div class="vr-profile__info">
                         <h1 class="vr-profile__name" id="userName">Loading...</h1>
                         <p class="vr-profile__email" id="userEmail">Loading...</p>
+                        <p class="vr-profile__phone" id="userPhone">Phone: Loading...</p>
+                        <p class="vr-profile__address" id="userAddress">Address: Loading...</p>
                         <div class="vr-profile__stats">
                             <div class="vr-profile__stat">
                                 <span class="vr-profile__stat-value" id="listingsCount">0</span>
@@ -54,58 +44,32 @@
                     </div>
                 </div>
 
-                <!-- Profile Navigation -->
                 <nav class="vr-profile__nav">
-                    <a href="/pages/my-listings.html" class="vr-profile__nav-link">
-                        <i class="fas fa-list"></i>
-                        <span>My Listings</span>
-                    </a>
-                    <a href="/pages/add-listing.html" class="vr-profile__nav-link">
-                        <i class="fas fa-plus"></i>
-                        <span>Add Listing</span>
-                    </a>
-                    <a href="/pages/settings.html" class="vr-profile__nav-link">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
+                    <a href="/pages/my-listings.html" class="vr-profile__nav-link"><i class="fas fa-list"></i><span>My Listings</span></a>
+                    <a href="/pages/add-listing.html" class="vr-profile__nav-link"><i class="fas fa-plus"></i><span>Add Listing</span></a>
+                    <a href="/pages/settings.html" class="vr-profile__nav-link"><i class="fas fa-cog"></i><span>Settings</span></a>
                 </nav>
 
-                <!-- Profile Content -->
                 <div class="vr-profile__content">
-                    <!-- Recent Activity -->
                     <section class="vr-profile__section">
                         <h2 class="vr-profile__section-title">Recent Activity</h2>
-                        <div class="vr-profile__activity" id="recentActivity">
-                            <!-- Activity items will be loaded here -->
-                        </div>
+                        <div class="vr-profile__activity" id="recentActivity">Loading...</div>
                     </section>
-
-                    <!-- Recent Reviews -->
                     <section class="vr-profile__section">
                         <h2 class="vr-profile__section-title">Recent Reviews</h2>
-                        <div class="vr-profile__reviews" id="recentReviews">
-                            <!-- Reviews will be loaded here -->
-                        </div>
+                        <div class="vr-profile__reviews" id="recentReviews">Loading...</div>
                     </section>
                 </div>
             </div>
         </div>
     </main>
-
-    <!-- Footer Container -->
     <div id="footerContainer"></div>
-
-    <!-- Toast Container -->
     <div class="vr-toast-container" id="toastContainer"></div>
-
-    <!-- Core Services -->
     <script src="/js/services/api.service.js"></script>
     <script src="/js/services/toast.service.js"></script>
     <script src="/js/core/utils.js"></script>
     <script src="/js/core/componentLoader.js"></script>
     <script src="/js/services/auth.service.js"></script>
-    
-    <!-- Page Script -->
     <script src="/js/pages/profile.js"></script>
 </body>
-</html> 
+</html>

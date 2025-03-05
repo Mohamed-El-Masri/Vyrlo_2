@@ -1,15 +1,38 @@
 .vr-toast-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
   z-index: var(--vr-z-tooltip);
   display: flex;
   flex-direction: column;
   gap: var(--vr-spacing-sm);
+  pointer-events: none;
+  padding: var(--vr-spacing-md);
+}
+
+/* Container Positions */
+.vr-toast-container--top-right {
+  top: 0;
+  right: 0;
+}
+
+.vr-toast-container--top-left {
+  top: 0;
+  left: 0;
+}
+
+.vr-toast-container--bottom-right {
+  bottom: 0;
+  right: 0;
+}
+
+.vr-toast-container--bottom-left {
+  bottom: 0;
+  left: 0;
 }
 
 .vr-toast {
+  position: relative;
   min-width: 300px;
+  max-width: 500px;
   padding: var(--vr-spacing-md);
   border-radius: var(--vr-radius-md);
   background: var(--vr-light);
@@ -17,20 +40,29 @@
   display: flex;
   align-items: flex-start;
   gap: var(--vr-spacing-sm);
-  animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s;
+  pointer-events: auto;
+  transform: translateX(120%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.vr-toast--visible {
+  transform: translateX(0);
 }
 
 .vr-toast__icon {
   flex-shrink: 0;
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: var(--vr-text-lg);
 }
 
 .vr-toast__content {
   flex: 1;
+  min-width: 0;
 }
 
 .vr-toast__title {
@@ -40,19 +72,54 @@
 }
 
 .vr-toast__message {
+  color: var(--vr-gray-700);
   font-size: var(--vr-text-sm);
-  color: var(--vr-gray-600);
+  line-height: var(--vr-leading-normal);
+  margin-right: var(--vr-spacing-lg);
 }
 
 .vr-toast__close {
-  flex-shrink: 0;
-  opacity: 0.5;
-  transition: opacity var(--vr-transition-fast);
+  position: absolute;
+  top: var(--vr-spacing-sm);
+  right: var(--vr-spacing-sm);
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: none;
+  color: var(--vr-gray-400);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+  padding: 0;
 }
 
 .vr-toast__close:hover {
-  opacity: 1;
+  color: var(--vr-gray-600);
+}
+
+.vr-toast__progress {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  transform-origin: left;
+}
+
+.vr-toast__progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: currentColor;
+  animation: toast-progress var(--duration) linear;
 }
 
 /* Toast Variants */
@@ -60,34 +127,51 @@
   border-left: 4px solid var(--vr-success);
 }
 
+.vr-toast--success .vr-toast__icon {
+  color: var(--vr-success);
+}
+
 .vr-toast--error {
   border-left: 4px solid var(--vr-error);
+}
+
+.vr-toast--error .vr-toast__icon {
+  color: var(--vr-error);
 }
 
 .vr-toast--warning {
   border-left: 4px solid var(--vr-warning);
 }
 
+.vr-toast--warning .vr-toast__icon {
+  color: var(--vr-warning);
+}
+
 .vr-toast--info {
   border-left: 4px solid var(--vr-primary);
 }
 
-@keyframes slideInRight {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
+.vr-toast--info .vr-toast__icon {
+  color: var(--vr-primary);
 }
 
-@keyframes fadeOut {
-  from {
-    opacity: 1;
+/* Animations */
+@keyframes toast-progress {
+  to { transform: scaleX(0); }
+}
+
+/* Responsive Styles */
+@media (max-width: 576px) {
+  .vr-toast-container {
+    left: 0;
+    right: 0;
+    padding: var(--vr-spacing-sm);
   }
-  to {
-    opacity: 0;
+
+  .vr-toast {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    margin: 0 var(--vr-spacing-sm);
   }
 }

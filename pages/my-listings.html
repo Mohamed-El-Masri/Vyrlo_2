@@ -4,34 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Listings - Vyrlo</title>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Main CSS -->
     <link rel="stylesheet" href="/css/main/style.css">
-    <!-- Page CSS -->
     <link rel="stylesheet" href="/css/pages/my-listings.css">
 </head>
 <body>
-    <!-- Header Container -->
     <div id="headerContainer"></div>
-
-    <!-- Main Content -->
     <main class="vr-main">
         <div class="vr-my-listings">
             <div class="vr-container">
-                <!-- Page Header -->
                 <div class="vr-my-listings__header">
-                    <div class="vr-my-listings__title-group">
-                        <h1 class="vr-my-listings__title">My Listings</h1>
-                        <p class="vr-my-listings__subtitle">Manage your business listings</p>
-                    </div>
+                    <h1 class="vr-my-listings__title">My Listings</h1>
+                    <p class="vr-my-listings__subtitle">Manage your business listings</p>
                     <a href="/pages/add-listing.html" class="vr-btn vr-btn--primary">
                         <i class="fas fa-plus"></i>
                         <span>Add New Listing</span>
                     </a>
                 </div>
-
-                <!-- Listings Stats -->
                 <div class="vr-my-listings__stats">
                     <div class="vr-stat-card">
                         <div class="vr-stat-card__icon">
@@ -61,13 +49,9 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Listings Grid -->
                 <div class="vr-my-listings__grid" id="listingsGrid">
                     <!-- Listings will be loaded here -->
                 </div>
-
-                <!-- Empty State -->
                 <div class="vr-my-listings__empty" id="emptyState" style="display: none;">
                     <div class="vr-empty-state">
                         <i class="fas fa-store"></i>
@@ -77,8 +61,6 @@
                         </a>
                     </div>
                 </div>
-
-                <!-- Load More -->
                 <div class="vr-my-listings__footer">
                     <button class="vr-btn vr-btn--outline vr-btn--load-more" id="loadMore">
                         <span>Load More</span>
@@ -88,38 +70,13 @@
             </div>
         </div>
     </main>
-
-    <!-- Footer Container -->
     <div id="footerContainer"></div>
-
-    <!-- Toast Container -->
     <div class="vr-toast-container" id="toastContainer"></div>
-
-    <!-- Delete Confirmation Modal -->
-    <div class="vr-modal" id="deleteModal">
-        <div class="vr-modal__container">
-            <div class="vr-modal__header">
-                <h3 class="vr-modal__title">Delete Listing</h3>
-                <button class="vr-modal__close">&times;</button>
-            </div>
-            <div class="vr-modal__content">
-                <p>Are you sure you want to delete this listing? This action cannot be undone.</p>
-            </div>
-            <div class="vr-modal__footer">
-                <button class="vr-btn vr-btn--outline" id="cancelDelete">Cancel</button>
-                <button class="vr-btn vr-btn--danger" id="confirmDelete">Delete</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Core Services -->
     <script src="/js/services/api.service.js"></script>
     <script src="/js/services/toast.service.js"></script>
     <script src="/js/core/utils.js"></script>
     <script src="/js/core/componentLoader.js"></script>
     <script src="/js/services/auth.service.js"></script>
-    
-    <!-- Page Script -->
     <script src="/js/pages/my-listings.js"></script>
 </body>
-</html> 
+</html>

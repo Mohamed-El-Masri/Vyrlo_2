@@ -3,108 +3,214 @@
  */
 
 class ApiService {
-    static BASE_URL = 'https://virlo.vercel.app';
+    constructor() {
+        this.BASE_URL = 'https://virlo.vercel.app';
+        this.requestInterceptors = [];
+        this.responseInterceptors = [];
+        this.errorInterceptors = [];
 
-    static async get(url) {
-        return this.request(url, 'GET');
+        this.initializeDefaultInterceptors();
     }
 
-    static async post(url, data) {
-        return this.request(url, 'POST', data);
+    addRequestInterceptor(interceptor) {
+        this.requestInterceptors.push(interceptor);
     }
 
-    static async put(url, data) {
-        return this.request(url, 'PUT', data);
+    addResponseInterceptor(interceptor) {
+        this.responseInterceptors.push(interceptor);
     }
 
-    static async delete(url) {
-        return this.request(url, 'DELETE');
+    addErrorInterceptor(interceptor) {
+        this.errorInterceptors.push(interceptor);
     }
 
-    static async request(url, method, data = null) {
-        const headers = {
-            'Content-Type': 'application/json'
-        };
-
-        // Add auth token if available
-        const token = localStorage.getItem('vr_token');
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
+    async applyRequestInterceptors(config) {
+        let currentConfig = { ...config };
+        for (const interceptor of this.requestInterceptors) {
+            currentConfig = await interceptor(currentConfig);
         }
+        return currentConfig;
+    }
 
-        const config = {
-            method,
-            headers,
-            mode: 'cors',
-            credentials: 'omit'
-        };
-
-        if (data) {
-            config.body = JSON.stringify(data);
+    async applyResponseInterceptors(response) {
+        let currentResponse = response;
+        for (const interceptor of this.responseInterceptors) {
+            currentResponse = await interceptor(currentResponse);
         }
+        return currentResponse;
+    }
 
+    async applyErrorInterceptors(error) {
+        let currentError = error;
+        for (const interceptor of this.errorInterceptors) {
+            try {
+                currentError = await interceptor(currentError);
+            } catch (e) {
+                console.error('Error in error interceptor:', e);
+            }
+        }
+        throw currentError;
+    }
+
+    async request(url, method, data = null) {
         try {
-            const response = await fetch(`${this.BASE_URL}${url}`, config);
-            
-            // Handle 401 Unauthorized
-            if (response.status === 401) {
-                // Clear auth data
-                localStorage.removeItem('vr_token');
-                localStorage.removeItem('vr_user');
-                window.location.href = '/pages/login.html';
-                throw new Error('Unauthorized');
+            // Prepare request config
+            let config = {
+                method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                mode: 'cors',
+                credentials: 'omit'
+            };
+
+            // Add auth token if available
+            const token = window.authService?.getToken();
+            if (token) {
+                config.headers['Authorization'] = `Bearer ${token}`;
             }
 
-            const responseData = await response.json();
+            // Add request body if present
+            if (data) {
+                config.body = JSON.stringify(data);
+            }
 
-            // Handle API error responses
+            // Apply request interceptors
+            config = await this.applyRequestInterceptors(config);
+
+            // Make the request
+            const response = await fetch(`${this.BASE_URL}${url}`, config);
+            
+            // Handle response
+            let responseData;
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                responseData = await response.json();
+            } else {
+                responseData = await response.text();
+            }
+
+            // Apply response interceptors
+            responseData = await this.applyResponseInterceptors(responseData);
+
+            // Handle error responses
             if (!response.ok) {
-                throw new Error(responseData.message || 'API request failed');
+                const error = new Error(responseData.message || 'API request failed');
+                error.status = response.status;
+                error.data = responseData;
+                throw error;
             }
 
             return responseData;
         } catch (error) {
-            console.error('API request error:', error);
-            throw error;
+            // Apply error interceptors
+            return this.applyErrorInterceptors(error);
         }
     }
 
+    async get(url, params = {}) {
+        const queryString = new URLSearchParams(params).toString();
+        return this.request(`${url}${queryString ? `?${queryString}` : ''}`, 'GET');
+    }
+
+    async post(url, data) {
+        return this.request(url, 'POST', data);
+    }
+
+    async put(url, data) {
+        return this.request(url, 'PUT', data);
+    }
+
+    async delete(url) {
+        return this.request(url, 'DELETE');
+    }
+
+    // Helper methods for common operations
+    async uploadFile(url, file, onProgress) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`${this.BASE_URL}${url}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${window.authService?.getToken()}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('File upload failed');
+            }
+
+            return await response.json();
+        } catch (error) {
+            return this.applyErrorInterceptors(error);
+        }
+    }
+
+    // Initialize default interceptors
+    initializeDefaultInterceptors() {
+        // Add auth error interceptor
+        this.addErrorInterceptor(async (error) => {
+            if (error.status === 401) {
+                // Clear auth state and redirect to login
+                window.authService?.clearAuthState();
+                window.location.href = '/pages/login.html';
+            }
+            return error;
+        });
+
+        // Add response error handler
+        this.addErrorInterceptor(async (error) => {
+            // Show error toast
+            window.toastService?.error(
+                error.message || 'An error occurred while processing your request'
+            );
+            return error;
+        });
+    }
+
     // Categories
-    static async getCategories() {
+    async getCategories() {
         return this.get('/categories');
     }
 
     // Listings
-    static async getListings(params = {}) {
+    async getListings(params = {}) {
         const queryString = new URLSearchParams(params).toString();
         return this.get(`/listings${queryString ? `?${queryString}` : ''}`);
     }
 
-    static async getListing(id) {
+    async getListing(id) {
         return this.get(`/listings/${id}`);
     }
 
-    static async createListing(listingData) {
+    async createListing(listingData) {
         return this.post('/listings', listingData);
     }
 
-    static async updateListing(id, listingData) {
+    async updateListing(id, listingData) {
         return this.put(`/listings/${id}`, listingData);
     }
 
-    static async deleteListing(id) {
+    async deleteListing(id) {
         return this.delete(`/listings/${id}`);
     }
 
     // Profile
-    static async getProfile(userId) {
+    async getProfile(userId) {
         return this.get(`/profile/${userId}`);
     }
 
-    static async updateProfile(userId, profileData) {
+    async updateProfile(userId, profileData) {
         return this.put(`/profile/${userId}`, profileData);
     }
 }
 
-// Make it globally available
+// Create global instance
+window.apiService = new ApiService();
+
+// Initialize default interceptors
+window.apiService.initializeDefaultInterceptors(); 
 window.ApiService = ApiService; 
