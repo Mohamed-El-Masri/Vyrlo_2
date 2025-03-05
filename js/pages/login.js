@@ -7,7 +7,7 @@ class LoginPage {
         this.form = document.getElementById('loginForm');
         this.emailInput = document.getElementById('email');
         this.passwordInput = document.getElementById('password');
-        this.submitButton = document.querySelector('.vr-auth__submit');
+        this.submitButton = this.form.querySelector('.vr-auth__submit');
         
         this.init();
     }
@@ -18,25 +18,23 @@ class LoginPage {
         await this.componentLoader.loadFooter();
         
         // Add event listeners
-        if (this.form) {
-            this.form.addEventListener('submit', this.handleSubmit.bind(this));
-        }
-        if (this.emailInput) {
-            this.emailInput.addEventListener('input', () => this.clearError(this.emailInput));
-        }
-        if (this.passwordInput) {
-            this.passwordInput.addEventListener('input', () => this.clearError(this.passwordInput));
-        }
-        
-        // Password toggle
+        this.setupEventListeners();
+    }
+
+    setupEventListeners() {
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        this.emailInput.addEventListener('input', () => this.clearError(this.emailInput));
+        this.passwordInput.addEventListener('input', () => this.clearError(this.passwordInput));
+        this.setupPasswordToggle();
+    }
+
+    setupPasswordToggle() {
         const toggleButton = document.querySelector('.vr-password-toggle');
-        if (toggleButton) {
-            toggleButton.addEventListener('click', () => {
-                const type = this.passwordInput.type === 'password' ? 'text' : 'password';
-                this.passwordInput.type = type;
-                toggleButton.querySelector('i').className = `fas fa-${type === 'password' ? 'eye' : 'eye-slash'}`;
-            });
-        }
+        toggleButton.addEventListener('click', () => {
+            const type = this.passwordInput.type === 'password' ? 'text' : 'password';
+            this.passwordInput.type = type;
+            toggleButton.querySelector('i').className = `fas fa-${type === 'password' ? 'eye' : 'eye-slash'}`;
+        });
     }
 
     clearError(input) {

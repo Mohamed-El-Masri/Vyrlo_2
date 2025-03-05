@@ -1,0 +1,181 @@
+.vr-profile {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.vr-profile__title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.vr-profile__info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.vr-avatar {
+    margin-right: 20px;
+}
+
+.vr-profile__details {
+    flex-grow: 1;
+}
+
+.vr-profile__form {
+    margin-top: 20px;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.vr-form-group {
+    margin-bottom: 15px;
+}
+
+.vr-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.vr-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.vr-btn {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.vr-btn--primary {
+    background-color: #28a745;
+}
+
+.vr-btn:hover {
+    opacity: 0.9;
+}
+
+.breadcrumb-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image: url(../../images/background/hero-bg.jpg);
+    background-size: cover;
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 20rem;
+    margin-bottom: 4rem;
+}
+
+.layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: #19365fa3;
+    width: 100%;
+    height: 24rem;
+    z-index: 1;
+}
+
+.content-data {
+    position: relative;
+    z-index: 2;
+    color: white;
+}
+
+.breadcrumb-section h2 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.breadcrumb-section p {
+    font-family: 'Poppins', sans-serif;
+    font-size: 18px;
+    font-weight: 400;
+    color: #ddd;
+}
+
+.input input, textarea {
+    padding: 1rem;
+    background-color: #f2f5f9;
+    border: 2px solid #ebedf5;
+    width: 100%;
+    margin-bottom: .5rem;
+    color: #4f5777;
+}
+
+textarea {
+    height: 10rem;
+}
+
+button.save-changes {
+    width: 10rem;
+    border: none;
+    padding: 1rem;
+    color: white;
+    background-color: #e4074e;
+    border-radius: 5px;
+}
+
+.profile-image {
+    width: 12rem;
+    height: 12rem;
+    border-radius: 200px;
+    margin: 1rem;
+}
+
+.profile-info {
+    min-width: 70%;
+    text-align: center;
+    margin: 2.5rem 0;
+}
+
+ul {
+    padding: 0;
+}
+
+li.profile-item a {
+    padding: 15px 20px;
+    color: #4f5777;
+    font-size: 14px;
+    display: inline-block;
+    font-weight: 500;
+    width: 100%;
+    transition: all ease 0.4s;
+    border-bottom: 1px dashed #e0e4e8;
+}
+
+li.profile-item.active a {
+    color: var(--primary-color);
+    background-color: #fee6ec;
+    border-bottom: 1px dashed var(--primary-color);
+}
+
+li.profile-item a:hover {
+    color: var(--primary-color);
+    background-color: #fee6ec;
+}
+
+.i {
+    margin-right: 5px;
+}
+
+#Email {
+    background-color: #f0f0f0;
+    color: #666;
+    border: 1px solid #ccc;
+    cursor: not-allowed;
+}

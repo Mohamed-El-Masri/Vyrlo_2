@@ -4,9 +4,9 @@
 
 :root {
   /* Primary Colors with Variants */
-  --vr-primary: #2563eb;
-  --vr-primary-light: rgba(37, 99, 235, 0.1);
-  --vr-primary-dark: #1d4ed8;
+  --vr-primary: #2A9D8F;
+  --vr-primary-light: #4DB5A9;
+  --vr-primary-dark: #1F756A;
   --vr-primary-bg: rgba(42, 157, 143, 0.1);
 
   --vr-secondary: #264653;
@@ -30,34 +30,33 @@
   --vr-terra-dark: #D35335;
 
   /* Extended Neutral Palette */
-  --vr-dark: #000000;
-  --vr-gray-900: #111827;
-  --vr-gray-800: #1f2937;
-  --vr-gray-700: #374151;
-  --vr-gray-600: #4b5563;
-  --vr-gray-500: #6b7280;
-  --vr-gray-400: #9ca3af;
-  --vr-gray-300: #d1d5db;
-  --vr-gray-200: #e5e7eb;
-  --vr-gray-100: #f3f4f6;
-  --vr-gray-50: #f9fafb;
-  --vr-light: #ffffff;
+  --vr-dark: #1A1A1A;
+  --vr-gray-900: #2D2D2D;
+  --vr-gray-800: #3D3D3D;
+  --vr-gray-700: #4D4D4D;
+  --vr-gray-600: #5D5D5D;
+  --vr-gray-500: #707070;
+  --vr-gray-400: #909090;
+  --vr-gray-300: #B3B3B3;
+  --vr-gray-200: #D4D4D4;
+  --vr-gray-100: #F5F5F5;
+  --vr-light: #FFFFFF;
 
   /* Status Colors with Variants */
-  --vr-success: #16a34a;
-  --vr-success-light: rgba(22, 163, 74, 0.1);
+  --vr-success: #52B788;
+  --vr-success-light: #74C7A0;
   --vr-success-dark: #3E9D6D;
 
-  --vr-warning: #ca8a04;
-  --vr-warning-light: rgba(202, 138, 4, 0.1);
+  --vr-warning: #F4A261;
+  --vr-warning-light: #F6B787;
   --vr-warning-dark: #E88B3D;
 
-  --vr-error: #dc2626;
-  --vr-error-light: rgba(220, 38, 38, 0.1);
+  --vr-error: #E76F51;
+  --vr-error-light: #EC8D75;
   --vr-error-dark: #D35335;
 
   /* Typography - Updated for English */
-  --vr-font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --vr-font-main: 'Inter', sans-serif;          /* Clean, highly legible font for body text */
   --vr-font-headers: 'Plus Jakarta Sans', sans-serif;  /* Modern font for headers */
   --vr-font-special: 'Urbanist', sans-serif;    /* For special text elements */
 
@@ -73,10 +72,10 @@
   --vr-text-sm: 0.875rem;     /* 14px */
   --vr-text-base: 1rem;       /* 16px */
   --vr-text-lg: 1.125rem;     /* 18px */
-  --vr-text-xl: 1.25rem;     /* 20px */
-  --vr-text-2xl: 1.5rem;     /* 24px */
-  --vr-text-3xl: 1.875rem;    /* 30px */
-  --vr-text-4xl: 2.25rem;     /* 36px */
+  --vr-text-xl: 1.375rem;     /* 22px */
+  --vr-text-2xl: 1.75rem;     /* 28px */
+  --vr-text-3xl: 2.25rem;     /* 36px */
+  --vr-text-4xl: 3rem;        /* 48px */
 
   /* Line Heights - Optimized for English */
   --vr-leading-none: 1;
@@ -91,27 +90,24 @@
   --vr-spacing-md: 1rem;
   --vr-spacing-lg: 1.5rem;
   --vr-spacing-xl: 2rem;
-  --vr-spacing-2xl: 3rem;
   
   /* Border Radius */
-  --vr-radius-sm: 0.25rem;
-  --vr-radius-md: 0.5rem;
-  --vr-radius-lg: 0.75rem;
-  --vr-radius-xl: 1rem;
-  --vr-radius-full: 9999px;
+  --vr-radius-sm: 4px;
+  --vr-radius-md: 8px;
+  --vr-radius-lg: 16px;
   
   /* Shadows with More Variants */
   --vr-shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
-  --vr-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --vr-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --vr-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --vr-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --vr-shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+  --vr-shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --vr-shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+  --vr-shadow-xl: 0 20px 25px rgba(0,0,0,0.1);
   --vr-shadow-inner: inset 0 2px 4px rgba(0,0,0,0.05);
 
   /* Transitions */
-  --vr-transition-fast: 150ms;
-  --vr-transition-normal: 300ms;
-  --vr-transition-slow: 500ms;
+  --vr-transition-fast: 150ms ease;
+  --vr-transition-normal: 250ms ease;
+  --vr-transition-slow: 350ms ease;
 
   /* Z-index Scale */
   --vr-z-0: 0;
