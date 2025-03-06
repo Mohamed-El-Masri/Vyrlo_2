@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Listing - Vyrlo</title>
+    <link rel="stylesheet" href="../../css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+<body class="vr-page vr-profile-page">
+    <!-- Include Header -->
+    <div id="header-container"></div>
+
+    <main class="vr-main">
+        <div class="vr-container">
+            <div class="vr-profile">
+                <!-- Profile Sidebar -->
+                <div id="sidebar-container"></div>
+                
+                <!-- Profile Content -->
+                <div class="vr-profile__content">
+                    <h2 class="vr-profile__page-title">Add New Listing</h2>
+                    
+                    <!-- Include the listing form -->
+                    <div id="listingFormContainer"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Include Footer -->
+    <div id="footer-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="../../js/services/toast-service.js"></script>
+    <script src="../../js/services/auth-service.js"></script>
+    <script src="../../js/utils/component-loader.js"></script>
+    <script src="../../js/components/listingWizard.js"></script>
+    <script src="../../js/pages/profile/add-listing.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            loadComponent('#header-container', '../../components/header.html');
+            loadComponent('#footer-container', '../../components/footer.html');
+            loadComponent('#sidebar-container', '../../components/profile/sidebar.html');
+            loadComponent('#listingFormContainer', '../../components/profile/addListing.html');
+        });
+    </script>
+</body>
+</html>

@@ -193,14 +193,22 @@
 
                 <!-- Main Image Upload -->
                 <div class="vr-media-main">
-                    <h6 class="vr-media-subtitle">Main Photo (Required)</h6>
+                    <h6 class="vr-media-subtitle">Main Photo (Optional)</h6>
+                    <div class="vr-alert vr-alert--info">
+                        <div class="vr-alert__icon"><i class="fas fa-info-circle"></i></div>
+                        <div class="vr-alert__content">
+                            <div class="vr-alert__title">Image Upload Temporarily Disabled</div>
+                            <div class="vr-alert__message">
+                                Image uploads are currently simulated. Your listing will use placeholder images until the feature is fully enabled.
+                            </div>
+                        </div>
+                    </div>
                     <div class="vr-media-main-upload" id="mainImageUpload">
                         <input type="file" 
                                id="mainImage" 
                                name="mainImage" 
                                accept="image/*" 
                                class="vr-media-input"
-                               required
                                hidden>
                         <div class="vr-media-placeholder">
                             <i class="fas fa-cloud-upload-alt"></i>
@@ -235,7 +243,34 @@
                         </div>
                         <div id="galleryPreview" class="vr-media-preview-grid"></div>
                     </div>
-                    <small class="vr-media-help">You can select multiple photos at once</small>
+                    <small class="vr-media-help">Preview only. Images will be saved as placeholders.</small>
+                </div>
+
+                <!-- Required Contact Information -->
+                <div class="vr-form-section">
+                    <h6 class="vr-form-section-title">
+                        <i class="fa-solid fa-address-card"></i> Contact Information
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="vr-form-group">
+                                <label for="email">Email Address*</label>
+                                <input type="email" id="email" name="email" class="vr-input" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="vr-form-group">
+                                <label for="mobile">Mobile Number*</label>
+                                <input type="tel" id="mobile" name="mobile" class="vr-input" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="vr-form-group">
+                                <label for="taxNumber">Tax Number (Optional)</label>
+                                <input type="text" id="taxNumber" name="taxNumber" class="vr-input">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Video URL -->
