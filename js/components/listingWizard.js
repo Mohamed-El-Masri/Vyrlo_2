@@ -220,6 +220,11 @@ class ListingWizard {
 
         // Update step UI with animation
         this.updateStepUI(stepNumber, direction);
+
+        // Initialize media handlers on step 5
+        if (stepNumber === 5) {
+            this.setupMediaHandlers();
+        }
     }
 
     initializeMap() {
@@ -1141,6 +1146,8 @@ class ListingWizard {
     }
 
     setupMediaHandlers() {
+        if (this.currentStep !== 5) return;
+
         this.setupMainImageUpload();
         this.setupGalleryUpload();
         this.setupVideoPreview();
@@ -1155,39 +1162,35 @@ class ListingWizard {
 
         if (!dropZone || !input || !preview || !previewImg || !removeBtn) return;
 
-        // Обработчики перетаскивания
-        dropZone.addEventListener('dragenter', (e) => {
+        const handleDragOver = (e) => {
             e.preventDefault();
             dropZone.classList.add('vr-media-dragover');
-        });
+        };
 
-        dropZone.addEventListener('dragleave', (e) => {
+        const handleDragLeave = (e) => {
             e.preventDefault();
             dropZone.classList.remove('vr-media-dragover');
-        });
+        };
 
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-
-        dropZone.addEventListener('drop', (e) => {
+        const handleDrop = (e) => {
             e.preventDefault();
             dropZone.classList.remove('vr-media-dragover');
             
             const file = e.dataTransfer.files[0];
             if (file) this.handleMainImage(file);
-        });
+        };
 
-        // Клик по зоне загрузки
+        // Setup event listeners
+        dropZone.addEventListener('dragover', handleDragOver);
+        dropZone.addEventListener('dragleave', handleDragLeave);
+        dropZone.addEventListener('drop', handleDrop);
         dropZone.addEventListener('click', () => input.click());
 
-        // Выбор файла через input
         input.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) this.handleMainImage(file);
         });
 
-        // Удаление изображения
         removeBtn.addEventListener('click', () => {
             input.value = '';
             preview.style.display = 'none';
@@ -1197,29 +1200,101 @@ class ListingWizard {
         });
     }
 
-    handleMainImage(file) {
+    async handleMainImage(file) {
+        try {
+            if (!this.validateImageFile(file)) return;
+
+            const preview = document.querySelector('.vr-media-preview');
+            const previewImg = document.getElementById('mainImagePreview');
+            
+            // Show loading state
+            preview.classList.add('vr-media-loading');
+            
+            // Process image
+            const processedImage = await this.processImage(file);
+            
+            // Update preview
+            preview.style.display = 'block';
+            previewImg.src = URL.createObjectURL(processedImage);
+            this.formData.mainImage = processedImage;
+            
+            // Update form
+            this.updateFormData();
+            window.toastService?.success('Main image updated successfully');
+            
+        } catch (error) {
+            console.error('Error handling main image:', error);
+            window.toastService?.error('Failed to process image');
+        } finally {
+            document.querySelector('.vr-media-preview')?.classList.remove('vr-media-loading');
+        }
+    }
+
+    validateImageFile(file) {
+        // Check file type
         if (!file.type.startsWith('image/')) {
             window.toastService?.error('Please upload an image file');
-            return;
+            return false;
         }
 
-        if (file.size > 5 * 1024 * 1024) { // 5MB
+        // Check file size (5MB)
+        if (file.size > 5 * 1024 * 1024) {
             window.toastService?.error('Image size should not exceed 5MB');
-            return;
+            return false;
         }
 
-        const preview = document.querySelector('.vr-media-preview');
-        const previewImg = document.getElementById('mainImagePreview');
-        
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            previewImg.src = e.target.result;
-            preview.style.display = 'block';
-            this.formData.mainImage = file;
-            this.updateFormData();
-        };
+        // Check dimensions
+        return true;
+    }
 
-        reader.readAsDataURL(file);
+    async processImage(file) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                try {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    // Calculate new dimensions
+                    let { width, height } = img;
+                    const maxSize = 1920;
+                    
+                    if (width > maxSize || height > maxSize) {
+                        if (width > height) {
+                            height *= maxSize / width;
+                            width = maxSize;
+                        } else {
+                            width *= maxSize / height;
+                            height = maxSize;
+                        }
+                    }
+                    
+                    // Set canvas size
+                    canvas.width = width;
+                    canvas.height = height;
+                    
+                    // Draw and compress image
+                    ctx.drawImage(img, 0, 0, width, height);
+                    
+                    // Convert to file
+                    canvas.toBlob(
+                        (blob) => {
+                            const processedFile = new File([blob], file.name, {
+                                type: 'image/jpeg',
+                                lastModified: Date.now()
+                            });
+                            resolve(processedFile);
+                        },
+                        'image/jpeg',
+                        0.8
+                    );
+                } catch (error) {
+                    reject(error);
+                }
+            };
+            img.onerror = reject;
+            img.src = URL.createObjectURL(file);
+        });
     }
 
     setupGalleryUpload() {
@@ -1229,8 +1304,13 @@ class ListingWizard {
 
         if (!dropZone || !input || !preview) return;
 
-        // Drag and drop handlers
-        dropZone.addEventListener('dragenter', (e) => {
+        const handleFiles = (files) => {
+            const allowedFiles = Array.from(files).slice(0, 10);
+            this.handleGalleryImages(allowedFiles);
+        };
+
+        // Setup event listeners
+        dropZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             dropZone.classList.add('vr-media-dragover');
         });
@@ -1240,29 +1320,17 @@ class ListingWizard {
             dropZone.classList.remove('vr-media-dragover');
         });
 
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.classList.remove('vr-media-dragover');
-            
-            const files = Array.from(e.dataTransfer.files);
-            this.handleGalleryImages(files);
+            handleFiles(e.dataTransfer.files);
         });
 
-        // Click to upload
         dropZone.addEventListener('click', () => input.click());
-
-        // File input change
-        input.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            this.handleGalleryImages(files);
-        });
+        input.addEventListener('change', (e) => handleFiles(e.target.files));
     }
 
-    handleGalleryImages(files) {
+    async handleGalleryImages(files) {
         const preview = document.getElementById('galleryPreview');
         const currentImages = preview.querySelectorAll('.vr-media-preview-item').length;
         
@@ -1271,41 +1339,46 @@ class ListingWizard {
             return;
         }
 
-        files.forEach(file => {
-            if (!file.type.startsWith('image/')) {
-                window.toastService?.error(`${file.name} is not an image file`);
-                return;
+        for (const file of files) {
+            try {
+                if (!this.validateImageFile(file)) continue;
+
+                const processedImage = await this.processImage(file);
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    const item = document.createElement('div');
+                    item.className = 'vr-media-preview-item';
+                    item.innerHTML = `
+                        <img src="${e.target.result}" alt="Gallery image">
+                        <button type="button" class="vr-media-remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    `;
+
+                    item.querySelector('.vr-media-remove').addEventListener('click', () => {
+                        item.remove();
+                        this.updateGalleryData();
+                    });
+
+                    preview.appendChild(item);
+                    this.updateGalleryData();
+                };
+
+                reader.readAsDataURL(processedImage);
+
+            } catch (error) {
+                console.error(`Error processing image ${file.name}:`, error);
+                window.toastService?.error(`Failed to process ${file.name}`);
             }
+        }
+    }
 
-            if (file.size > 5 * 1024 * 1024) {
-                window.toastService?.error(`${file.name} exceeds 5MB size limit`);
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const item = document.createElement('div');
-                item.className = 'vr-media-preview-item';
-                item.innerHTML = `
-                    <img src="${e.target.result}" alt="Gallery image">
-                    <button type="button" class="vr-media-remove">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-
-                item.querySelector('.vr-media-remove').addEventListener('click', () => {
-                    item.remove();
-                    this.updateFormData();
-                });
-
-                preview.appendChild(item);
-                if (!this.formData.gallery) this.formData.gallery = [];
-                this.formData.gallery.push(file);
-                this.updateFormData();
-            };
-
-            reader.readAsDataURL(file);
-        });
+    updateGalleryData() {
+        const preview = document.getElementById('galleryPreview');
+        const images = preview.querySelectorAll('img');
+        this.formData.gallery = Array.from(images).map(img => img.src);
+        this.updateFormData();
     }
 
     setupVideoPreview() {
@@ -1315,14 +1388,23 @@ class ListingWizard {
 
         if (!input || !previewBtn || !preview) return;
 
-        previewBtn.addEventListener('click', () => {
+        let debounceTimer;
+
+        const handlePreview = () => {
             const url = input.value.trim();
             if (!url) {
-                window.toastService?.error('Please enter a video URL');
+                preview.innerHTML = '';
                 return;
             }
             this.handleVideoUrl(url);
+        };
+
+        input.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(handlePreview, 500);
         });
+
+        previewBtn.addEventListener('click', handlePreview);
     }
 
     handleVideoUrl(url) {
@@ -1336,11 +1418,11 @@ class ListingWizard {
             return;
         }
 
-        const embedUrl = `https://www.youtube.com/embed/${videoId}`;
         preview.innerHTML = `
             <iframe 
-                src="${embedUrl}" 
-                frameborder="0" 
+                src="https://www.youtube.com/embed/${videoId}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen>
             </iframe>
         `;
