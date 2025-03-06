@@ -18,24 +18,53 @@
     <div id="headerContainer"></div>
 
     <main>
-        <div class="breadcrumb-section">
+        <!-- Enhanced Hero Section -->
+        <div class="breadcrumb-section vr-profile-hero">
             <div class="layer"></div>
             <div class="content-data container">
-                <h2>Hello, <span id="profileName">....</span></h2>
-                <p>Edit & View Your Profile</p>
+                <h2 class="vr-animate-slide-down">Hello, <span id="profileName">....</span></h2>
+                <p class="vr-animate-fade-in vr-delay-1">Manage your personal information and account settings</p>
+                <!-- Status Badge -->
+                <div class="vr-profile-status vr-animate-fade-in vr-delay-2">
+                    <span class="vr-badge vr-badge--success">
+                        <i class="fa-solid fa-circle-check"></i> Verified Account
+                    </span>
+                </div>
             </div>
         </div>
 
         <div class="container-fluid">
             <div class="row">
+                <!-- Enhanced Sidebar -->
                 <section class="col-md-4 col-lg-3 p-3">
-                    <div class="block">
-                        <div class="profile-info">
-                            <img src="/images/defaults/default-avatar.png" alt="profile image" class="profile-image" id="profileAvatar">
-                            <h4 class="name" id="profileDisplayName">User Name</h4>
-                            <p class="location" id="profileLocation">Location</p>
+                    <div class="block vr-profile vr-profile-card">
+                        <div class="profile-info vr-profile__info">
+                            <div class="vr-avatar-container">
+                                <img src="/images/defaults/default-avatar.png" alt="profile image" class="profile-image vr-avatar" id="profileAvatar">
+                                <div class="vr-avatar-edit">
+                                    <label for="avatarUpload">
+                                        <i class="fa-solid fa-camera"></i>
+                                    </label>
+                                    <input type="file" id="avatarUpload" class="d-none">
+                                </div>
+                            </div>
+                            <div class="vr-profile__details">
+                                <h4 class="name" id="profileDisplayName">User Name</h4>
+                                <p class="location" id="profileLocation"><i class="fa-solid fa-location-dot"></i> Location</p>
+                                <p class="vr-profile-joindate"><i class="fa-regular fa-calendar"></i> Member since <span id="joinDate">January 2023</span></p>
+                            </div>
+                            <div class="vr-profile-stats">
+                                <div class="vr-stat">
+                                    <span class="vr-stat-number" id="listingsCount">0</span>
+                                    <span class="vr-stat-label">Listings</span>
+                                </div>
+                                <div class="vr-stat">
+                                    <span class="vr-stat-number" id="favoritesCount">0</span>
+                                    <span class="vr-stat-label">Saved</span>
+                                </div>
+                            </div>
                         </div>
-                        <ul>
+                        <ul class="vr-profile-menu">
                             <li class="active profile-item">
                                 <a href="/pages/profile.html">
                                     <i class="fa-regular fa-user"></i>
@@ -61,7 +90,7 @@
                                 </a>
                             </li>
                             <li class="profile-item log-out">
-                                <a href="">
+                                <a href="javascript:void(0)" id="logoutLink">
                                     <i class="fa-solid fa-power-off"></i>
                                     Log Out
                                 </a>
@@ -70,56 +99,125 @@
                     </div>
                 </section>
 
+                <!-- Enhanced Content Area -->
                 <section class="col-md-8 col-lg-9 p-3">
-                    <div class="dashboard block p-4">
-                        <form id="editProfileForm" method="POST"> <!-- شيل الـ action -->  
-                            <h5>My Account</h5>  
-                            <div class="row p-2">  
-                                <div class="col-md-6">  
+                    <div class="dashboard block p-4 vr-profile__form vr-animate-scale-in">
+                        <div class="vr-profile-header">
+                            <h5><i class="fa-solid fa-user-gear"></i> My Account</h5>
+                            <span class="vr-badge vr-badge--primary">Personal Info</span>
+                        </div>
+                        
+                        <form id="editProfileForm" method="POST">
+                            <div class="row p-2">
+                                <!-- Personal Information Section -->
+                                <div class="vr-form-section">
+                                    <h6 class="vr-form-section-title"><i class="fa-solid fa-user-shield"></i> Personal Details</h6>
                                     
-                                    <div class="input">  
-                                        <p>Email</p>  
-                                        <input type="email" value="" id="Email" readonly>  
-                                        <span class="error-message" id="EmailError" style="color: red; font-size: 0.8rem"></span>  
-                                    </div>  
-                                    <div class="input">  
-                                        <p>Phone</p>  
-                                        <input type="text" value="" id="phoneNumber" name="phoneNumber">  
-                                        <span class="error-message" id="PhoneError" style="color: red; font-size: 0.8rem"></span>  
-                                        <div class="input">  
-                                            <p>Address</p>  
-                                            <input type="text" value="" id="Address" name="address">  
-                                            <span class="error-message" id="AddressError" style="color: red; font-size: 0.8rem"></span>  
-                                        </div>  
-                                    </div>  
-                                </div>  
-                                <div class="col-md-6">  
+                                    <div class="input vr-form-group">
+                                        <label for="title">Title</label>
+                                        <input type="text" id="title" name="title" class="vr-input">
+                                        <span class="error-message" id="titleError"></span>
+                                    </div>
                                     
-                                    <div class="input">  
-                                        <p>City</p>  
-                                        <input type="text" value="" id="City" name="city">  
-                                        <span class="error-message" id="CityError" style="color: red; font-size: 0.8rem"></span>  
-                                    </div>  
-                                    <div class="input">  
-                                        <p>State</p>  
-                                        <input type="text" value="" id="State" name="state">  
-                                        <span class="error-message" id="StateError" style="color: red; font-size: 0.8rem"></span>  
-                                    </div>  
-                                </div>  
-                            </div>  
-                            <button class="save-changes">Save Changes</button>  
-                        </form>  
+                                    <div class="input vr-form-group">
+                                        <label for="phoneNumber">Phone</label>
+                                        <div class="vr-input-icon">
+                                            <i class="fa-solid fa-phone"></i>
+                                            <input type="text" id="phoneNumber" name="phoneNumber" class="vr-input">
+                                        </div>
+                                        <span class="error-message" id="phoneError"></span>
+                                    </div>
+                                    
+                                    <div class="input vr-form-group">
+                                        <label for="bio">About Me</label>
+                                        <textarea id="bio" name="about" class="vr-input" placeholder="Tell us about yourself..."></textarea>
+                                        <span class="error-message" id="bioError"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Address Section -->
+                                <div class="vr-form-section">
+                                    <h6 class="vr-form-section-title"><i class="fa-solid fa-map-location-dot"></i> Address Information</h6>
+                                    
+                                    <div class="input vr-form-group">
+                                        <label for="Address">Address</label>
+                                        <div class="vr-input-icon">
+                                            <i class="fa-solid fa-location-dot"></i>
+                                            <input type="text" id="Address" name="address" class="vr-input">
+                                        </div>
+                                        <span class="error-message" id="AddressError"></span>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="input vr-form-group">
+                                                <label for="City">City</label>
+                                                <input type="text" id="City" name="city" class="vr-input">
+                                                <span class="error-message" id="CityError"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="input vr-form-group">
+                                                <label for="State">State</label>
+                                                <input type="text" id="State" name="state" class="vr-input">
+                                                <span class="error-message" id="StateError"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="input vr-form-group">
+                                                <label for="zipCode">Zip Code</label>
+                                                <input type="text" id="zipCode" name="zipCode" class="vr-input">
+                                                <span class="error-message" id="zipCodeError"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Social Media Section -->
+                                <div class="vr-form-section">
+                                    <h6 class="vr-form-section-title"><i class="fa-solid fa-share-nodes"></i> Social Media</h6>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="input vr-form-group">
+                                                <label for="facebook"><i class="fa-brands fa-facebook" style="color: #1877F2;"></i> Facebook</label>
+                                                <div class="vr-input-icon">
+                                                    <i class="fa-brands fa-facebook"></i>
+                                                    <input type="url" value="" id="facebook" name="facebook" class="vr-input" placeholder="https://facebook.com/username">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="input vr-form-group">
+                                                <label for="instagram"><i class="fa-brands fa-instagram" style="color: #E1306C;"></i> Instagram</label>
+                                                <div class="vr-input-icon">
+                                                    <i class="fa-brands fa-instagram"></i>
+                                                    <input type="url" value="" id="instagram" name="instagram" class="vr-input" placeholder="https://instagram.com/username">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="vr-form-actions">
+                                <button type="button" class="vr-btn vr-btn--outline mr-2">Cancel</button>
+                                <button type="submit" class="save-changes vr-btn vr-btn--primary">
+                                    <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </section>
             </div>
         </div>
     </main>
 
-    <footer id="footer"></footer>
+    <!-- Footer Container -->
+    <div id="footerContainer"></div>
 
     <!-- Toast Container -->
     <div class="vr-toast-container" id="toastContainer"></div>
-
     <!-- Core Services -->
     <script src="/js/services/api.service.js"></script>
     <script src="/js/services/toast.service.js"></script>
@@ -128,4 +226,4 @@
     <script src="/js/services/auth.service.js"></script>
     <script src="/js/pages/profile.js"></script>
 </body>
-</html> 
+</html>

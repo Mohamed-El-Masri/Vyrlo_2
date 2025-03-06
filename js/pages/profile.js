@@ -1,161 +1,300 @@
 class ProfilePage {
     constructor() {
         this.API_BASE_URL = 'https://virlo.vercel.app';
+        this.form = document.getElementById('editProfileForm');
         this.init();
     }
 
     async init() {
-        await this.loadUserProfile();
-        // await this.loadUserListings(); // Commenting out the listings fetch
-        this.attachEventListeners();
+        try {
+            if (!this.getUserId()) {
+                window.location.href = '/pages/login.html';
+                return;
+            }
+            await this.loadUserProfile();
+            this.setupEventListeners();
+        } catch (error) {
+            console.error('Initialization error:', error);
+            window.toastService?.error('Failed to initialize profile page');
+        }
     }
 
     async loadUserProfile() {
         try {
             const userId = this.getUserId();
-            console.log('Fetching profile for user ID:', userId);
-            const response = await fetch(`${this.API_BASE_URL}/profile/${userId}`);
+            if (!userId) throw new Error('User ID not found');
 
-            if (!response.ok) throw new Error('Failed to load user profile');
+            const token = this.getToken();
+            if (!token) throw new Error('Authentication token not found');
+
+            const response = await fetch(`${this.API_BASE_URL}/profile/${userId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
 
             const data = await response.json();
-            console.log('Profile data received:', data);
+            if (!data || !data[0]) {
+                throw new Error('Invalid profile data received');
+            }
+
             this.updateProfileUI(data);
         } catch (error) {
             console.error('Error loading user profile:', error);
-            window.toastService.error('Failed to load profile');
+            if (error.message.includes('Authentication')) {
+                window.location.href = '/pages/login.html';
+            } else {
+                window.toastService?.error('Failed to load profile data');
+            }
         }
     }
 
     updateProfileUI(data) {
-        const userData = data[0].userId;
-        const profileNameElement = document.getElementById('profileDisplayName');
-        const profileNameInBreadcrumb = document.querySelector('main h2 span#profileName');
-        const profileUserName = document.getElementById('Name');
-        const profileEmailElement = document.getElementById('Email');
-        const profileLocationElement = document.getElementById('profileLocation');
-        const profileAddressElement = document.getElementById('Address');
-        const profileCityElement = document.getElementById('City');
-        const profileStateElement = document.getElementById('State');
-        const profileAvatarElement = document.getElementById('profileAvatar');
-        const profilePhoneElement = document.getElementById('phoneNumber');
-     
-        if (profileNameElement) {
-            profileNameElement.textContent = userData.username;
-        }
-        if (profileNameInBreadcrumb) {
-            profileNameInBreadcrumb.innerHTML = userData.username;
-        }
-        if (profileUserName) {
-            profileUserName.value = userData.username || ''; // إضافة || '' كاحتياطي  
-        }
-
-        if (profilePhoneElement) {
-            profilePhoneElement.value = data[0].phoneNumber|| 'error loading phone number';
-        }
-
-        if (profileEmailElement) {
-            profileEmailElement.value = userData.email || ''; // إضافة || '' كاحتياطي  
-        }
-
-        if (profileLocationElement) {
-            // دمج المدينة والدولة لعرض الموقع بشكل كامل  
-            profileLocationElement.textContent = (data[0].city ? data[0].city + ', ' : '') + (data[0].state || 'Location not specified');
-        }
-
-        if (profileAddressElement) {
-            profileAddressElement.value = data[0].address || '';
-        }
-
-        if (profileCityElement) {
-            profileCityElement.value = data[0].city || '';
-        }
-
-        if (profileStateElement) {
-            profileStateElement.value = data[0].state || '';
-        }
-
-        if (profileAvatarElement) {
-            profileAvatarElement.src = data[0].profilePic?.length > 0 ? data[0].profilePic[0] : '/images/defaults/default-avatar.png';
-        }
-    }
-    async loadUserListings() {
         try {
-            const userId = this.getUserId();
-            console.log('Fetching listings for user ID:', userId);
-            const response = await fetch(`${this.API_BASE_URL}/listing/user`, {
-                headers: { 'Authorization': `Bearer ${this.getToken()}` }
+            if (!data || !data[0] || !data[0].userId) {
+                throw new Error('Invalid profile data structure');
+            }
+
+            const profile = data[0];
+            const userData = profile.userId;
+
+            // Fix breadcrumb username update
+            const breadcrumbUsername = document.querySelector('.breadcrumb-section h2 span#profileName');
+            if (breadcrumbUsername) {
+                breadcrumbUsername.textContent = userData.username;
+            }
+
+            // Update member since date
+            const joinDate = document.getElementById('joinDate');
+            if (joinDate && profile.createdAt) {
+                const date = new Date(profile.createdAt);
+                const formattedDate = new Intl.DateTimeFormat('en-US', {
+                    month: 'long',
+                    year: 'numeric'
+                }).format(date);
+                joinDate.textContent = formattedDate;
+            }
+
+            // Update username in breadcrumb and profile
+            this.safeUpdateElement('profileDisplayName', userData.username);
+            this.safeUpdateElement('profileName', userData.username);
+            this.safeUpdateElement('Email', userData.email, false, 'value');
+            
+            // Update title and other profile details
+            this.safeUpdateElement('title', profile.title || '', false, 'value');
+            
+            // Update listings count
+            this.safeUpdateElement('listingsCount', profile.numberOfProjects || 0);
+
+            // Update profile details
+            const profileFields = {
+                'phoneNumber': profile.phoneNumber,
+                'Address': profile.address,
+                'City': profile.city,
+                'State': profile.state,
+                'zipCode': profile.zipCode,
+                'bio': profile.about
+            };
+
+            Object.entries(profileFields).forEach(([id, value]) => {
+                this.safeUpdateElement(id, value || '', false, 'value');
             });
-            if (!response.ok) throw new Error('Failed to load user listings');
-            const listings = await response.json();
-            console.log('User listings received:', listings);
-            this.displayUserListings(listings);
+
+            // Update location display
+            const location = this.formatLocation(profile.city, profile.state);
+            this.safeUpdateElement('profileLocation', location);
+
+            // Update avatar - handle empty array case
+            this.updateAvatar(profile.profilePic);
+
+            // Update social accounts
+            this.updateSocialAccounts(profile.socialAccounts);
+
+            // Remove or hide saved count since it's not needed
+            const savedCountElement = document.getElementById('favoritesCount');
+            if (savedCountElement) {
+                savedCountElement.parentElement.style.display = 'none';
+            }
+
         } catch (error) {
-            console.error('Error loading user listings:', error);
-            window.toastService.error('Failed to load listings');
+            console.error('Error updating UI:', error);
+            window.toastService?.error('Failed to update profile display');
         }
     }
 
-    displayUserListings(listings) {
-        const listingsGrid = document.getElementById('userListings');
-        listingsGrid.innerHTML = listings.map(listing => `
-            <div class='vr-listing-card'>
-                <h3>${listing.listingName}</h3>
-                <p>${listing.location}</p>
-                <button class='vr-btn vr-btn--outline' onclick='editListing(${listing._id})'>Edit</button>
-                <button class='vr-btn vr-btn--danger' onclick='deleteListing(${listing._id})'>Delete</button>
-            </div>
-        `).join('');
+    formatLocation(city, state) {
+        return (city ? city + ', ' : '') + (state || 'Location not specified');
     }
 
-    async handleEditProfile(event) {
-        event.preventDefault();
-        const userId = this.getUserId();
-        const username = document.getElementById('Name').value;
-        const email = document.getElementById('Email').value;
-        const phoneNumber = document.getElementById('phoneNumber').value;
-        const address = document.getElementById('Address').value;
-        const city = document.getElementById('City').value;
-        const state = document.getElementById('State').value;
+    safeUpdateElement(id, value, isHTML = false, property = 'textContent') {
+        const element = document.getElementById(id);
+        if (element) {
+            try {
+                if (isHTML) {
+                    element.innerHTML = value;
+                } else {
+                    element[property] = value;
+                }
+            } catch (error) {
+                console.error(`Error updating element ${id}:`, error);
+            }
+        }
+    }
+
+    updateAvatar(profilePic) {
+        const avatarElement = document.getElementById('profileAvatar');
+        if (avatarElement) {
+            // Check if profilePic is an array and has items
+            avatarElement.src = Array.isArray(profilePic) && profilePic.length > 0
+                ? profilePic[0]
+                : '/images/defaults/default-avatar.png';
+            
+            avatarElement.onerror = () => {
+                avatarElement.src = '/images/defaults/default-avatar.png';
+            };
+        }
+    }
+
+    updateSocialAccounts(accounts) {
+        if (Array.isArray(accounts)) {
+            accounts.forEach(account => {
+                if (account?.platform && account?.url) {
+                    this.safeUpdateElement(account.platform, account.url, false, 'value');
+                }
+            });
+        }
+    }
+
+    setupEventListeners() {
+        // Handle avatar upload
+        const avatarUpload = document.getElementById('avatarUpload');
+        if (avatarUpload) {
+            avatarUpload.addEventListener('change', this.handleAvatarUpload.bind(this));
+        }
+
+        // Handle form submission
+        if (this.form) {
+            this.form.addEventListener('submit', this.handleSubmit.bind(this));
+        }
+
+        // Handle logout
+        const logoutLink = document.getElementById('logoutLink');
+        if (logoutLink) {
+            logoutLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handleLogout();
+            });
+        }
+    }
+
+    async handleAvatarUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
 
         try {
-            const response = await fetch(`${this.API_BASE_URL}/profile/${userId}`, {
+            const formData = new FormData();
+            formData.append('profilePic', file);
+
+            const response = await fetch(`${this.API_BASE_URL}/profile/upload/${this.getUserId()}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${this.getToken()}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) throw new Error('Failed to upload profile picture');
+
+            const result = await response.json();
+            document.getElementById('profileAvatar').src = result.imageUrl;
+            window.toastService.success('Profile picture updated successfully');
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            window.toastService.error('Failed to upload profile picture');
+        }
+    }
+
+    async handleSubmit(event) {
+        event.preventDefault();
+
+        const formData = {
+            title: document.getElementById('title').value,
+            phoneNumber: document.getElementById('phoneNumber').value,
+            address: document.getElementById('Address').value,
+            city: document.getElementById('City').value,
+            state: document.getElementById('State').value,
+            zipCode: document.getElementById('zipCode').value,
+            about: document.getElementById('bio').value,
+            socialAccounts: [
+                {
+                    platform: 'facebook',
+                    url: document.getElementById('facebook')?.value || ''
+                },
+                {
+                    platform: 'instagram',
+                    url: document.getElementById('instagram')?.value || ''
+                }
+            ]
+        };
+
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/profile/${this.getUserId()}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${this.getToken()}`
                 },
-                body: JSON.stringify({
-                    phoneNumber: phoneNumber,
-                    address: address,
-                    city: city,
-                    state: state
-                })
+                body: JSON.stringify(formData)
             });
 
             if (!response.ok) throw new Error('Failed to update profile');
+            
             window.toastService.success('Profile updated successfully');
-            await this.loadUserProfile(); // Reload the profile to reflect changes
+            await this.loadUserProfile(); // Refresh profile data
         } catch (error) {
             console.error('Error updating profile:', error);
             window.toastService.error('Failed to update profile');
         }
     }
 
-    attachEventListeners() {
-        const form = document.getElementById('editProfileForm');
-        form.addEventListener('submit', (event) => this.handleEditProfile(event));
+    handleLogout() {
+        localStorage.removeItem('vr_token');
+        localStorage.removeItem('vr_user');
+        window.location.href = '/pages/login.html';
     }
 
     getUserId() {
-        // Logic to retrieve user ID from local storage or token
-        return JSON.parse(localStorage.getItem('vr_user')).id;
+        try {
+            const user = localStorage.getItem('vr_user');
+            if (!user) return null;
+            const userData = JSON.parse(user);
+            return userData?.id || null;
+        } catch (error) {
+            console.error('Error getting user ID:', error);
+            return null;
+        }
     }
 
     getToken() {
-        return localStorage.getItem('vr_token');
+        try {
+            return localStorage.getItem('vr_token') || null;
+        } catch (error) {
+            console.error('Error getting token:', error);
+            return null;
+        }
     }
 }
 
-// Initialize the profile page
-const profilePage = new ProfilePage(); 
+// Safe initialization
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        new ProfilePage();
+    } catch (error) {
+        console.error('Failed to initialize profile page:', error);
+        window.toastService?.error('Failed to load profile page');
+    }
+});
