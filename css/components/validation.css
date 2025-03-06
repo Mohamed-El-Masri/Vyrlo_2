@@ -1,0 +1,52 @@
+.vr-input.is-invalid {
+    border-color: var(--vr-error);
+    background-color: var(--vr-error-bg);
+}
+
+.vr-validation-message {
+    display: none;
+    color: var(--vr-error);
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    animation: slideDown 0.2s ease-out;
+}
+
+.vr-validation-message.show {
+    display: block;
+}
+
+.vr-step-validation {
+    color: var(--vr-error);
+    font-size: 0.875rem;
+    padding: var(--vr-spacing-sm);
+    margin-top: var(--vr-spacing-md);
+    border-radius: var(--vr-radius-md);
+    background-color: var(--vr-error-bg);
+    display: none;
+}
+
+.vr-step-validation.show {
+    display: block;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.vr-wizard-step.invalid .vr-step-icon {
+    border-color: var(--vr-error);
+    color: var(--vr-error);
+}
+
+.vr-wizard-step.valid .vr-step-icon {
+    border-color: var(--vr-success);
+    color: var(--vr-success);
+}

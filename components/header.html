@@ -12,10 +12,10 @@
 
     <!-- Main Navigation -->
     <nav class="vr-header__nav" id="mainNav">
-      <a href="/pages/home.html" class="vr-header__link">Home</a>
-      <a href="/pages/listings.html" class="vr-header__link">Listings</a>
-      <a href="/pages/about.html" class="vr-header__link">About</a>
-      <a href="/pages/contact.html" class="vr-header__link">Contact</a>
+      <a href="/pages/home.html" class="vr-header__link" data-page="home">Home</a>
+      <a href="/pages/listings.html" class="vr-header__link" data-page="listings">Listings</a>
+      <a href="/pages/about.html" class="vr-header__link" data-page="about">About</a>
+      <a href="/pages/contact.html" class="vr-header__link" data-page="contact">Contact</a>
     </nav>
 
     <!-- Auth Section -->
@@ -34,9 +34,10 @@
 
       <!-- Authenticated View -->
       <div class="vr-header__user" id="userView" style="display: none;">
+        <!-- User Menu -->
         <div class="vr-header__user-menu">
-          <button class="vr-header__user-trigger" id="profileTrigger">
-            <div class="vr-avatar vr-avatar--md vr-avatar--bordered">
+          <button class="vr-header__user-trigger" id="profileTrigger" aria-expanded="false">
+            <div class="vr-avatar vr-avatar--md">
               <img src="/images/defaults/default-avatar.png" 
                    alt="Profile" 
                    class="vr-avatar__image"
@@ -49,6 +50,19 @@
 
           <div class="vr-header__dropdown" id="profileDropdown">
             <div class="vr-dropdown__content">
+              <div class="vr-dropdown__user-info">
+                <div class="vr-avatar vr-avatar--lg">
+                  <img src="/images/defaults/default-avatar.png" 
+                       alt="Profile"
+                       id="dropdownAvatar"
+                       onerror="this.src='/images/defaults/default-avatar.png'">
+                </div>
+                <div class="vr-dropdown__user-details">
+                  <h4 id="dropdownName">User Name</h4>
+                  <p id="dropdownEmail">user@example.com</p>
+                </div>
+              </div>
+              <hr class="vr-dropdown__divider">
               <a href="/pages/profile.html" class="vr-dropdown__item">
                 <i class="fas fa-user"></i>
                 <span>My Profile</span>
@@ -60,10 +74,6 @@
               <a href="/pages/add-listing.html" class="vr-dropdown__item">
                 <i class="fas fa-plus"></i>
                 <span>Add Listing</span>
-              </a>
-              <a href="/pages/settings.html" class="vr-dropdown__item">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
               </a>
               <hr class="vr-dropdown__divider">
               <button class="vr-dropdown__item vr-dropdown__item--danger" id="logoutBtn">
@@ -78,5 +88,5 @@
   </div>
 </header>
 
-<!-- Notification Toast Container -->
+<!-- Toast Container -->
 <div class="vr-toast-container" id="toastContainer"></div>

@@ -41,25 +41,25 @@
 
 /* Alert Variants */
 .vr-alert--success {
-  background: var(--vr-success-bg);
+  background: var(--vr-success-light);
   border: 1px solid var(--vr-success);
   color: var(--vr-success-dark);
 }
 
 .vr-alert--error {
-  background: var(--vr-error-bg);
+  background: var(--vr-error-light);
   border: 1px solid var(--vr-error);
   color: var(--vr-error-dark);
 }
 
 .vr-alert--warning {
-  background: var(--vr-warning-bg);
+  background: var(--vr-warning-light);
   border: 1px solid var(--vr-warning);
   color: var(--vr-warning-dark);
 }
 
 .vr-alert--info {
-  background: var(--vr-primary-bg);
+  background: var(--vr-primary-light);
   border: 1px solid var(--vr-primary);
   color: var(--vr-primary-dark);
 }

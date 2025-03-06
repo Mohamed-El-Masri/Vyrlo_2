@@ -143,7 +143,7 @@ class RegisterPage {
         try {
             this.setLoading(true);
             
-            await window.ApiService.post('/signup', {
+            await window.apiService.post('/signup', {
                 username: this.nameInput.value.trim(),
                 email: this.emailInput.value.trim(),
                 password: this.passwordInput.value

@@ -21,77 +21,139 @@ const DEFAULT_OPTIONS = {
 class ToastService {
     constructor() {
         this.container = document.getElementById('toastContainer');
-        this.toasts = [];
-        this.defaultDuration = 3000; // 3 seconds
+        this.toasts = new Map();
+        this.defaultOptions = {
+            duration: 3000,
+            type: 'info',
+            position: 'top-right',
+            showProgress: true,
+            pauseOnHover: true
+        };
     }
 
-    show(message, type = 'info', duration = this.defaultDuration) {
-        const toast = this.createToast(message, type);
-        this.toasts.push(toast);
+    show(message, options = {}) {
+        const settings = { ...this.defaultOptions, ...options };
+        const toastId = this.generateId();
+        
+        // Create toast element
+        const toast = this.createToast(message, settings, toastId);
+        this.toasts.set(toastId, { element: toast, timer: null });
+        
+        // Add to container
         this.container.appendChild(toast);
-
-        // Trigger reflow to enable animation
-        toast.offsetHeight;
-        toast.classList.add('vr-toast--visible');
-
-        // Auto remove after duration
-        setTimeout(() => {
-            this.remove(toast);
-        }, duration);
-
-        return toast;
-    }
-
-    success(message, duration) {
-        return this.show(message, 'success', duration);
-    }
-
-    error(message, duration) {
-        return this.show(message, 'error', duration);
-    }
-
-    info(message, duration) {
-        return this.show(message, 'info', duration);
-    }
-
-    warning(message, duration) {
-        return this.show(message, 'warning', duration);
-    }
-
-    remove(toast) {
-        const index = this.toasts.indexOf(toast);
-        if (index > -1) {
-            this.toasts.splice(index, 1);
-            toast.classList.remove('vr-toast--visible');
+        
+        // Trigger animation
+        requestAnimationFrame(() => {
+            toast.classList.add('vr-toast--visible');
             
-            // Remove from DOM after animation
-            setTimeout(() => {
-                if (toast.parentNode === this.container) {
-                    this.container.removeChild(toast);
-                }
-            }, 300); // Match CSS transition duration
+            if (settings.showProgress) {
+                this.startProgress(toastId, settings.duration);
+            }
+        });
+
+        // Setup auto remove
+        if (settings.duration > 0) {
+            const timer = setTimeout(() => {
+                this.remove(toastId);
+            }, settings.duration);
+            
+            this.toasts.get(toastId).timer = timer;
+        }
+
+        // Setup pause on hover
+        if (settings.pauseOnHover) {
+            toast.addEventListener('mouseenter', () => this.pause(toastId));
+            toast.addEventListener('mouseleave', () => this.resume(toastId));
+        }
+
+        return toastId;
+    }
+
+    success(message, options = {}) {
+        return this.show(message, { ...options, type: 'success' });
+    }
+
+    error(message, options = {}) {
+        return this.show(message, { ...options, type: 'error' });
+    }
+
+    warning(message, options = {}) {
+        return this.show(message, { ...options, type: 'warning' });
+    }
+
+    info(message, options = {}) {
+        return this.show(message, { ...options, type: 'info' });
+    }
+
+    remove(toastId) {
+        const toast = this.toasts.get(toastId);
+        if (!toast) return;
+
+        clearTimeout(toast.timer);
+        toast.element.classList.remove('vr-toast--visible');
+        
+        // Remove after animation
+        setTimeout(() => {
+            if (toast.element.parentNode === this.container) {
+                this.container.removeChild(toast.element);
+            }
+            this.toasts.delete(toastId);
+        }, 300);
+    }
+
+    pause(toastId) {
+        const toast = this.toasts.get(toastId);
+        if (!toast) return;
+
+        clearTimeout(toast.timer);
+        
+        const progress = toast.element.querySelector('.vr-toast__progress');
+        if (progress) {
+            progress.style.animationPlayState = 'paused';
         }
     }
 
-    createToast(message, type) {
+    resume(toastId) {
+        const toast = this.toasts.get(toastId);
+        if (!toast) return;
+
+        const progress = toast.element.querySelector('.vr-toast__progress');
+        if (progress) {
+            progress.style.animationPlayState = 'running';
+            
+            const remaining = parseFloat(progress.style.getPropertyValue('--progress')) * 
+                            this.defaultOptions.duration;
+            
+            toast.timer = setTimeout(() => {
+                this.remove(toastId);
+            }, remaining);
+        }
+    }
+
+    createToast(message, settings, toastId) {
         const toast = document.createElement('div');
-        toast.className = `vr-toast vr-toast--${type}`;
+        toast.className = `vr-toast vr-toast--${settings.type}`;
+        toast.setAttribute('role', 'alert');
+        toast.setAttribute('aria-live', 'polite');
         
-        const icon = this.getIconForType(type);
+        const icon = this.getIconForType(settings.type);
         
         toast.innerHTML = `
             <div class="vr-toast__icon">
                 <i class="${icon}"></i>
             </div>
             <div class="vr-toast__content">
-                ${message}
+                <div class="vr-toast__message">${message}</div>
+                ${settings.showProgress ? '<div class="vr-toast__progress"></div>' : ''}
             </div>
-            <button class="vr-toast__close">&times;</button>
+            <button class="vr-toast__close" aria-label="Close notification">
+                <i class="fas fa-times"></i>
+            </button>
         `;
 
         // Add close button handler
         toast.querySelector('.vr-toast__close').addEventListener('click', () => {
-            this.remove(toast);
+            this.remove(toastId);
         });
 
         return toast;
@@ -99,24 +161,33 @@ class ToastService {
 
     getIconForType(type) {
         switch (type) {
-            case 'success':
-                return 'fas fa-check-circle';
-            case 'error':
-                return 'fas fa-times-circle';
-            case 'warning':
-                return 'fas fa-exclamation-circle';
+            case 'success': return 'fas fa-check-circle';
+            case 'error': return 'fas fa-times-circle';
+            case 'warning': return 'fas fa-exclamation-circle';
             case 'info':
-            default:
-                return 'fas fa-info-circle';
+            default: return 'fas fa-info-circle';
         }
     }
 
-    clear() {
-        while (this.toasts.length) {
-            this.remove(this.toasts[0]);
+    startProgress(toastId, duration) {
+        const toast = this.toasts.get(toastId);
+        if (!toast) return;
+
+        const progress = toast.element.querySelector('.vr-toast__progress');
+        if (progress) {
+            progress.style.setProperty('--duration', `${duration}ms`);
+            progress.style.animation = `toast-progress ${duration}ms linear`;
         }
+    }
+
+    generateId() {
+        return `toast-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    clear() {
+        this.toasts.forEach((toast, id) => this.remove(id));
     }
 }
 
 // Initialize the service and make it globally available
-window.ToastService = new ToastService(); 
+window.toastService = new ToastService(); 

@@ -7,6 +7,8 @@
   font-weight: var(--vr-font-medium);
   transition: all var(--vr-transition-fast);
   gap: var(--vr-spacing-sm);
+  background-color: var(--vr-primary);
+  color: var(--vr-light);
 }
 
 .vr-btn--primary {
