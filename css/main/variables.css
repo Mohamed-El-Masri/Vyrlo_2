@@ -4,9 +4,9 @@
 
 :root {
   /* Primary Colors with Variants */
-  --vr-primary: #2563eb;
+  --vr-primary: #2a9d8f;
   --vr-primary-light: rgba(37, 99, 235, 0.1);
-  --vr-primary-dark: #1d4ed8;
+  --vr-primary-dark: #1e5647;
   --vr-primary-bg: rgba(42, 157, 143, 0.1);
 
   --vr-secondary: #264653;

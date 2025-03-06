@@ -408,6 +408,11 @@
     color: var(--danger-color) !important;
 }
 
+
+
+.vr-input{
+    padding-left: 78px !important;
+}
 /* Responsive Styles */
 @media (max-width: 768px) {
     .vr-auth__content {
