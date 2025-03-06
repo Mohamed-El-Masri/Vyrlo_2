@@ -241,36 +241,74 @@ class ListingWizard {
         mapContainer.innerHTML = '';
 
         try {
+            // Create a fallback UI in case map tiles fail to load
+            const fallbackDiv = document.createElement('div');
+            fallbackDiv.className = 'vr-map-fallback';
+            fallbackDiv.innerHTML = `
+                <div class="vr-map-fallback__content">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <h4>Map service unavailable</h4>
+                    <p>You can still manually enter your location information below.</p>
+                </div>
+            `;
+            mapContainer.appendChild(fallbackDiv);
+            
             // Wait a bit for the DOM to be ready
             setTimeout(() => {
                 if (!this.map) {
-                    this.map = L.map(mapContainer).setView([30.0444, 31.2357], 13);
-                    
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '© OpenStreetMap contributors'
-                    }).addTo(this.map);
+                    try {
+                        this.map = L.map(mapContainer, {
+                            // Added error handlers
+                            attributionControl: false,
+                        }).setView([30.0444, 31.2357], 13);
+                        
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            attribution: '© OpenStreetMap contributors',
+                            // Error handling for tiles
+                            errorTileUrl: '../../images/map-fallback-tile.png'
+                        }).addTo(this.map);
 
-                    // Bind the click handler with the correct context
-                    this.map.on('click', (e) => this.handleMapClick(e));
+                        // Show offline warning if tiles fail to load
+                        this.map.on('tileerror', () => {
+                            if (!document.querySelector('.vr-map-offline-warning')) {
+                                const warning = document.createElement('div');
+                                warning.className = 'vr-map-offline-warning';
+                                warning.innerHTML = `
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>Map data couldn't be loaded. You can still manually enter location.</span>
+                                `;
+                                mapContainer.appendChild(warning);
+                            }
+                        });
 
-                    // Restore marker if coordinates exist
-                    if (this.formData?.latitude && this.formData?.longitude) {
-                        const latlng = {
-                            lat: parseFloat(this.formData.latitude),
-                            lng: parseFloat(this.formData.longitude)
-                        };
-                        this.marker = L.marker(latlng).addTo(this.map);
-                        this.map.setView(latlng, 13);
+                        // Bind the click handler with the correct context
+                        this.map.on('click', (e) => this.handleMapClick(e));
+
+                        // Restore marker if coordinates exist
+                        if (this.formData?.latitude && this.formData?.longitude) {
+                            const latlng = {
+                                lat: parseFloat(this.formData.latitude),
+                                lng: parseFloat(this.formData.longitude)
+                            };
+                            this.marker = L.marker(latlng).addTo(this.map);
+                            this.map.setView(latlng, 13);
+                        }
+
+                        // Fix map display
+                        this.map.invalidateSize();
+                    } catch (mapError) {
+                        console.error('Map initialization error:', mapError);
+                        fallbackDiv.style.display = 'flex';
                     }
-
-                    // Fix map display
-                    this.map.invalidateSize();
                 }
             }, 100);
 
         } catch (error) {
             console.error('Error initializing map:', error);
             this.cleanupMap();
+            // Show fallback UI
+            const fallbackUI = document.querySelector('.vr-map-fallback');
+            if (fallbackUI) fallbackUI.style.display = 'flex';
         }
     }
 
@@ -337,6 +375,28 @@ class ListingWizard {
             this.showLocationSuggestions(results);
         } catch (error) {
             console.error('Location search error:', error);
+            // Show graceful fallback for search
+            let suggestionsContainer = document.getElementById('locationSuggestions');
+            
+            if (!suggestionsContainer) {
+                suggestionsContainer = document.createElement('div');
+                suggestionsContainer.id = 'locationSuggestions';
+                suggestionsContainer.className = 'vr-location-suggestions';
+                document.getElementById('location').parentNode.appendChild(suggestionsContainer);
+            }
+            
+            suggestionsContainer.innerHTML = `
+                <div class="vr-location-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span>Location search is unavailable. Please enter location manually.</span>
+                </div>
+            `;
+            suggestionsContainer.style.display = 'block';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                suggestionsContainer.style.display = 'none';
+            }, 5000);
         }
     }
 
@@ -489,8 +549,14 @@ class ListingWizard {
         event.preventDefault();
         
         try {
-            // Check if token exists and is valid
+            // Show loading state
+            this.showLoadingIndicator(true);
+            this.submitButton.disabled = true;
+
+            // Get raw token from localStorage
             const token = localStorage.getItem('vr_token');
+            console.log('Token from localStorage:', token ? 'Found' : 'Not found');
+            
             if (!token) {
                 window.toastService?.error('Please login to create a listing');
                 // Redirect to login page
@@ -506,12 +572,13 @@ class ListingWizard {
             let userMobile = "123456789";
             
             try {
-                const userData = localStorage.getItem('vr_user');
+                // Try both possible user data storage keys
+                const userData = localStorage.getItem('vr_user') || localStorage.getItem('vr_profile');
                 if (userData) {
                     const user = JSON.parse(userData);
-                    userId = user._id || userId;
+                    userId = user.userId || user.id || userId;
                     userEmail = user.email || userEmail;
-                    userMobile = user.mobile || userMobile;
+                    userMobile = user.phoneNumber || user.mobile || userMobile;
                     console.log("User data retrieved:", user);
                 } else {
                     console.warn("No user data found in localStorage");
@@ -524,24 +591,20 @@ class ListingWizard {
                 return;
             }
 
-            // Show loading state
-            this.showLoadingIndicator(true);
-            this.submitButton.disabled = true;
-
-            // Get the selected category
-            const selectedCategory = this.categories.find(c => c._id === this.formData.categoryId) || {};
+            // Include all selected amenities in the listing data
+            const amenitiesList = Array.from(this.selectedFeatures);
 
             // Prepare listing data according to API structure
             let listingData = {
                 userId: userId,
                 listingName: this.formData.listingName,
-                categoryId: selectedCategory, // Send full category object
+                categoryId: this.formData.categoryId,
                 location: this.formData.location || 'Sample Location',
                 longitude: this.formData.longitude || "-122.4194",
                 latitude: this.formData.latitude || "37.7749",
                 reviewIds: [],
                 description: this.formData.description,
-                amenitielsList: Array.from(this.selectedFeatures),
+                amenitielsList: amenitiesList,
                 itemsIds: [],
                 isActive: true,
                 gallery: ["https://placehold.co/600x400?text=Gallery+1", "https://placehold.co/600x400?text=Gallery+2"],
@@ -556,44 +619,92 @@ class ListingWizard {
 
             console.log("Sending listing data:", listingData);
             
-            // Create listing
-            const response = await fetch(`${this.API_BASE_URL}/listing`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(listingData)
-            });
-
-            console.log("Response status:", response.status);
+            // IMPORTANT: Use 'token' as key (not 'Authorization')
+            // The API expects the raw token without 'Bearer ' prefix
+            const headers = {
+                'Content-Type': 'application/json',
+                'token': token // Direct use of raw token
+            };
             
-            if (!response.ok) {
-                let errorMessage = 'Failed to create listing';
+            console.log("Request headers:", headers);
+            
+            // Added retry mechanism
+            const maxRetries = 3;
+            let retryCount = 0;
+            let success = false;
+            
+            while (!success && retryCount < maxRetries) {
                 try {
-                    const errorData = await response.json();
-                    console.error("Server error response:", errorData);
-                    errorMessage = errorData.message || errorMessage;
-                } catch (jsonError) {
-                    console.error("Error parsing error response:", jsonError);
-                    errorMessage = response.statusText || errorMessage;
+                    const response = await fetch(`${this.API_BASE_URL}/listing`, {
+                        method: 'POST',
+                        headers: headers,
+                        body: JSON.stringify(listingData)
+                    });
+                    
+                    console.log("Response status:", response.status);
+                    
+                    if (response.ok) {
+                        success = true;
+                        const result = await response.json();
+                        console.log("Listing created successfully:", result);
+                        
+                        // Success handling
+                        window.toastService?.success('Listing created successfully');
+                        
+                        // Clear form data from localStorage
+                        localStorage.removeItem('listingWizardState');
+                        
+                        // Redirect to listings page
+                        setTimeout(() => {
+                            window.location.href = '/pages/profile/myListings.html';
+                        }, 1500);
+                        
+                        break;
+                    } else {
+                        // Try to get detailed error message
+                        let errorMessage = 'Failed to create listing';
+                        try {
+                            const errorData = await response.json();
+                            console.error("Server error response:", errorData);
+                            errorMessage = errorData.message || errorMessage;
+                            
+                            // Special handling for token errors - try to refresh token
+                            if (
+                                errorMessage.includes('token') || 
+                                errorMessage.toLowerCase().includes('auth') || 
+                                response.status === 401 || 
+                                response.status === 403
+                            ) {
+                                console.warn("Auth error detected, refreshing token...");
+                                if (window.AuthHelper && retryCount < maxRetries - 1) {
+                                    token = window.AuthHelper.getRefreshedToken();
+                                    headers.Authorization = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+                                }
+                            }
+                        } catch (jsonError) {
+                            console.error("Error parsing error response:", jsonError);
+                            errorMessage = response.statusText || errorMessage;
+                        }
+                        
+                        if (retryCount === maxRetries - 1) {
+                            throw new Error(errorMessage);
+                        }
+                    }
+                } catch (fetchError) {
+                    console.error("Fetch error:", fetchError);
+                    if (retryCount === maxRetries - 1) {
+                        throw fetchError;
+                    }
                 }
-                throw new Error(errorMessage);
+                
+                // Increment retry counter
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    console.log(`Retrying... (${retryCount}/${maxRetries})`);
+                    // Wait before retrying (exponential backoff)
+                    await new Promise(resolve => setTimeout(resolve, 1000 * retryCount));
+                }
             }
-
-            const result = await response.json();
-            console.log("Listing created successfully:", result);
-            
-            // Success handling
-            window.toastService?.success('Listing created successfully');
-            
-            // Clear form data from localStorage
-            localStorage.removeItem('listingWizardState');
-            
-            // Redirect to listings page
-            setTimeout(() => {
-                window.location.href = '/pages/profile/myListings.html';
-            }, 1500);
 
         } catch (error) {
             console.error('Submit error:', error);
@@ -624,35 +735,35 @@ class ListingWizard {
         }
     }
 
-    async uploadImage(formData) {
-        try {
-            const token = localStorage.getItem('vr_token');
-            if (!token) {
-                throw new Error('Authentication required');
-            }
+    // async uploadImage(formData) {
+    //     try {
+    //         const token = localStorage.getItem('vr_token');
+    //         if (!token) {
+    //             throw new Error('Authentication required');
+    //         }
 
-            // Change to correct upload endpoint
-            const response = await fetch(`${this.API_BASE_URL}/files/upload`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                body: formData
-            });
+    //         // Change to correct upload endpoint
+    //         const response = await fetch(`${this.API_BASE_URL}/files/upload`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Authorization': `Bearer ${token}`
+    //             },
+    //             body: formData
+    //         });
 
-            if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.message || 'Failed to upload image');
-            }
+    //         if (!response.ok) {
+    //             const error = await response.json();
+    //             throw new Error(error.message || 'Failed to upload image');
+    //         }
 
-            const data = await response.json();
-            return { url: data.url }; // Make sure to return the correct image URL format
-        } catch (error) {
-            console.error('Image upload error:', error);
-            window.toastService?.error('Failed to upload image: ' + error.message);
-            return { url: null };
-        }
-    }
+    //         const data = await response.json();
+    //         return { url: data.url }; // Make sure to return the correct image URL format
+    //     } catch (error) {
+    //         console.error('Image upload error:', error);
+    //         window.toastService?.error('Failed to upload image: ' + error.message);
+    //         return { url: null };
+    //     }
+    // }
 
     convertBusinessHours() {
         const converted = {};
@@ -746,6 +857,10 @@ class ListingWizard {
     updateFormData() {
         const formData = new FormData(this.form);
         this.formData = Object.fromEntries(formData.entries());
+        
+        // Make sure to save the selectedFeatures in formData
+        this.formData.amenitiesList = Array.from(this.selectedFeatures);
+        
         this.formData.businessHours = this.businessHours;
         this.formData.is24Hours = this.is24Hours;
         this.saveState();
@@ -786,10 +901,10 @@ class ListingWizard {
         
         console.log('Selected category:', category);
 
-        // Store category data
+        // Store category data - use just the ID for the API
         this.formData.categoryId = category._id;
         this.formData.categoryName = category.categoryName;
-        this.formData.category = category; // Store full category object
+        this.formData.category = category; // Store full category object for UI
         this.saveState(); // Save to localStorage
 
         // Update UI
@@ -807,7 +922,9 @@ class ListingWizard {
 
     renderFeatures(category) {
         const container = document.getElementById('featuresContainer');
-        if (!container || !category?.amenities?.length) {
+        if (!container) return;
+        
+        if (!category?.amenities?.length) {
             container.innerHTML = '<p class="vr-empty-state">No features available for this category</p>';
             return;
         }
@@ -842,11 +959,11 @@ class ListingWizard {
         // Setup add feature button
         const addFeatureBtn = document.getElementById('addCustomFeature');
         if (addFeatureBtn) {
-            addFeatureBtn.onclick = () => this.showFeatureDialog(category._id);
+            addFeatureBtn.onclick = () => this.showFeatureDialog();
         }
     }
 
-    showFeatureDialog(categoryId) {
+    showFeatureDialog() {
         const dialog = document.getElementById('featureDialog');
         const input = dialog.querySelector('#newFeature');
         
@@ -854,78 +971,71 @@ class ListingWizard {
         input.value = '';
         input.focus();
 
-        const handleDialog = async (e) => {
+        const handleDialog = (e) => {
             const action = e.target.dataset.action;
             if (action === 'confirm') {
                 const feature = input.value.trim();
                 if (feature) {
-                    await this.addCustomFeature(categoryId, feature);
+                    this.addCustomFeature(feature);
                 }
             }
             dialog.style.display = 'none';
         };
 
+        // Remove any existing event listeners
+        const buttons = dialog.querySelectorAll('[data-action]');
+        buttons.forEach(button => {
+            button.replaceWith(button.cloneNode(true));
+        });
+        
+        // Add new event listeners
         dialog.querySelectorAll('[data-action]').forEach(button => {
-            button.addEventListener('click', handleDialog, { once: true });
+            button.addEventListener('click', handleDialog);
         });
     }
 
-    async addCustomFeature(categoryId, feature) {
-        try {
-            const category = this.categories.find(c => c._id === categoryId);
-            if (!category) throw new Error('Category not found');
-
-            const token = localStorage.getItem('vr_token');
-            if (!token) throw new Error('Authentication required');
-
-            // Get current amenities
-            const updatedAmenities = category.amenities ? [...category.amenities] : [];
-            
-            // Add new feature if it doesn't exist
-            if (!updatedAmenities.includes(feature)) {
-                updatedAmenities.push(feature);
+    addCustomFeature(featureName) {
+        // No need to update API, just add to local list
+        if (!featureName || this.selectedFeatures.has(featureName)) return;
+        
+        // Add to selectedFeatures
+        this.selectedFeatures.add(featureName);
+        
+        // Update UI
+        const container = document.getElementById('featuresContainer');
+        if (!container) return;
+        
+        const featureItem = document.createElement('div');
+        featureItem.className = 'vr-feature-item active vr-feature-item--custom';
+        featureItem.innerHTML = `
+            <label class="vr-feature-label">
+                <input type="checkbox" 
+                       name="amenitiesList" 
+                       value="${featureName}"
+                       checked>
+                <span class="vr-feature-text">${featureName}</span>
+            </label>
+            <span class="vr-feature-badge">Custom</span>
+        `;
+        
+        container.appendChild(featureItem);
+        
+        // Add event listener for the new checkbox
+        const checkbox = featureItem.querySelector('input[type="checkbox"]');
+        checkbox.addEventListener('change', (e) => {
+            if (!e.target.checked) {
+                this.selectedFeatures.delete(featureName);
+                featureItem.classList.remove('active');
+            } else {
+                this.selectedFeatures.add(featureName);
+                featureItem.classList.add('active');
             }
-
-            const response = await fetch(`${this.API_BASE_URL}/categories/${categoryId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify({
-                    amenities: updatedAmenities
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Failed to update category');
-            }
-
-            // Update local data
-            const updatedCategory = await response.json();
-            const index = this.categories.findIndex(c => c._id === categoryId);
-            if (index !== -1) {
-                this.categories[index] = updatedCategory;
-            }
-
-            // Update formData with latest category
-            this.formData.category = updatedCategory;
-            this.saveState();
-
-            // Re-render features
-            this.renderFeatures(updatedCategory);
-            
-            // Auto-select the new feature
-            this.selectedFeatures.add(feature);
             this.updateFormData();
-            
-            window.toastService?.success('Feature added successfully');
-            
-        } catch (error) {
-            console.error('Error adding feature:', error);
-            window.toastService?.error(error.message || 'Failed to add feature. Please check your permissions.');
-        }
+        });
+        
+        // Update form data
+        this.updateFormData();
+        window.toastService?.success('Custom feature added');
     }
 
     renderBusinessHours() {
