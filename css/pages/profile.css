@@ -273,7 +273,7 @@
 }
 
 .vr-form-group {
-    margin-bottom: var(--vr-spacing-md);
+    margin-bottom: var (--vr-spacing-md);
     position: relative;
 }
 
@@ -291,7 +291,7 @@
     border: 1px solid var(--vr-gray-300);
     border-radius: var(--vr-radius-sm);
     background-color: var(--vr-gray-50);
-    color: var(--vr-gray-800);
+    color: var (--vr-gray-800);
     transition: all var(--vr-transition-fast);
     font-size: 0.95rem;
 }
@@ -882,3 +882,165 @@ main {
 footer {
     margin-top: auto;
 }
+
+/* ...existing styles... */
+
+.vr-profile-menu .profile-item {
+    transition: all var(--vr-transition-normal);
+}
+
+.vr-profile-menu .profile-item.active {
+    background-color: var(--vr-primary-light);
+    border-left: 3px solid var(--vr-primary);
+}
+
+.vr-profile-menu .profile-item.active a {
+    color: var(--vr-primary);
+    font-weight: var(--vr-font-semibold);
+}
+
+.vr-profile-menu .profile-item.active i {
+    color: var(--vr-primary);
+}
+
+/* ...rest of existing styles... */
+
+/* Enhanced Sidebar Menu */
+.vr-profile-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.vr-profile-menu .profile-item {
+    margin-bottom: 5px;
+}
+
+.vr-profile-menu .profile-item a {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--vr-gray-700);
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.vr-profile-menu .profile-item a i {
+    width: 24px;
+    margin-right: 12px;
+    font-size: 1.1em;
+    text-align: center;
+}
+
+/* Active State */
+.vr-profile-menu .profile-item.active {
+    background: linear-gradient(to right, var(--vr-primary-light) 0%, transparent 100%);
+    border-left: 4px solid var(--vr-primary);
+}
+
+.vr-profile-menu .profile-item.active a {
+    color: var(--vr-primary);
+    font-weight: 600;
+    padding-left: 16px; /* Adjust for border */
+}
+
+.vr-profile-menu .profile-item.active i {
+    color: var(--vr-primary);
+}
+
+/* Hover State */
+.vr-profile-menu .profile-item:not(.active):hover a {
+    background-color: var(--vr-gray-100);
+    color: var(--vr-primary);
+    transform: translateX(5px);
+}
+
+/* Logout Item */
+.vr-profile-menu .profile-item.log-out {
+    margin-top: 20px;
+    border-top: 1px solid var(--vr-gray-200);
+    padding-top: 15px;
+}
+
+.vr-profile-menu .profile-item.log-out a {
+    color: var(--vr-error);
+}
+
+.vr-profile-menu .profile-item.log-out:hover a {
+    background-color: var(--vr-error-light);
+    color: var(--vr-error);
+}
+
+/* Fix Content Area Display */
+.vr-profile-content {
+    display: none;
+}
+
+.vr-profile-content.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ...rest of existing code... */
+
+/* Component Transitions */
+.vr-profile__content {
+    transition: opacity 0.3s ease-in-out;
+    min-height: 400px; /* Prevent layout shift */
+}
+
+.vr-profile__content.loading {
+    position: relative;
+}
+
+.vr-profile__content.loading::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+/* ...rest of existing code... */
+
+/* Component Container Styles */
+#addListingContainer {
+    display: none;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+#addListingContainer.active {
+    display: block;
+}
+
+.vr-profile__content > div:not(.active) {
+    display: none;
+}
+
+/* Loading Indicator */
+.vr-loading-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: var(--vr-gray-600);
+}
+
+.vr-loading-indicator i {
+    margin-right: 0.5rem;
+}
+
+/* ...rest of existing styles... */

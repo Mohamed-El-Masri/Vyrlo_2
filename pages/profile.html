@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <!-- Main CSS -->
     <link rel="stylesheet" href="/css/main/style.css">
+   <!-- Add listings -->
+   <link rel="stylesheet" href="/css/components/listing-wizard.css">
+   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- Toast -->
+    <link rel="stylesheet" href="/css/components/toast.css">
+
     <!-- Page CSS -->
     <link rel="stylesheet" href="/css/pages/profile.css">
 </head>
@@ -65,25 +71,25 @@
                             </div>
                         </div>
                         <ul class="vr-profile-menu">
-                            <li class="active profile-item">
+                            <li class="profile-item" data-page="profile">
                                 <a href="/pages/profile.html">
                                     <i class="fa-regular fa-user"></i>
                                     My Profile
                                 </a>
                             </li>
-                            <li class="profile-item">
-                                <a href="/pages/newAddListing.html">
+                            <li class="profile-item" data-page="addListing">
+                                <a href="#" onclick="loadAddListingComponent(); return false;">
                                     <i class="fa-solid fa-plus"></i>
                                     Add Listing
                                 </a>
                             </li>
-                            <li class="profile-item">
+                            <li class="profile-item" data-page="userListings">
                                 <a href="/pages/userListings.html">
                                     <i class="fa-solid fa-list"></i>
                                     My Listings
                                 </a>
                             </li>
-                            <li class="profile-item">
+                            <li class="profile-item" data-page="changePassword">
                                 <a href="/pages/change-password.html">
                                     <i class="fa-solid fa-lock"></i>
                                     Change Password
@@ -208,9 +214,14 @@
                             </div>
                         </form>
                     </div>
+                    <div class="vr-profile__content">
+                        <!-- Profile content will be here -->
+                        <div id="addListingContainer"></div>
+                    </div>
                 </section>
             </div>
         </div>
+        <div id="addListingContainer"></div>
     </main>
 
     <!-- Footer Container -->
@@ -225,5 +236,73 @@
     <script src="/js/core/componentLoader.js"></script>
     <script src="/js/services/auth.service.js"></script>
     <script src="/js/pages/profile.js"></script>
+
+    <!-- listing wizard -->
+    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        // Initialize listing wizard after content loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Listen for profile content changes
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.addedNodes.length) {
+                        const wizardForm = document.getElementById('listingWizardForm');
+                        if (wizardForm && !window.listingWizard) {
+                            window.listingWizard = new ListingWizard();
+                        }
+                    }
+                });
+            });
+
+            // Observe profile content area
+            const profileContent = document.querySelector('.vr-profile-content');
+            if (profileContent) {
+                observer.observe(profileContent, { childList: true, subtree: true });
+            }
+        });
+
+        function loadAddListingComponent() {
+            // Remove active class from all items
+            document.querySelectorAll('.profile-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to Add Listing menu item
+            document.querySelector('[data-page="addListing"]').classList.add('active');
+            
+            // Hide other content
+            const mainContent = document.querySelector('.vr-profile__form:not(.vr-listing-wizard)');
+            if (mainContent) {
+                mainContent.style.display = 'none';
+            }
+            
+            // Load the component
+            fetch('/components/profile/addListing.html')
+                .then(response => response.text())
+                .then(html => {
+                    const container = document.getElementById('addListingContainer');
+                    container.innerHTML = html;
+                    container.style.display = 'block';
+                    
+                    // Initialize listing wizard
+                    if (typeof ListingWizard !== 'undefined') {
+                        window.listingWizard = new ListingWizard();
+                    }
+                    
+                    // Update page title
+                    const pageTitle = document.querySelector('.vr-profile-header h5');
+                    if (pageTitle) {
+                        pageTitle.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Add New Listing';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading component:', error);
+                    window.toastService?.error('Failed to load Add Listing component');
+                });
+        }
+    </script>
+    <script src="/js/components/listingWizard.js"></script>
+    
 </body>
 </html>

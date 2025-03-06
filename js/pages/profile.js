@@ -189,6 +189,54 @@ class ProfilePage {
                 this.handleLogout();
             });
         }
+
+        // Add handler for "Add Listing" menu item
+        const addListingLink = document.querySelector('a[href="/pages/newAddListing.html"]');
+        if (addListingLink) {
+            addListingLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.loadAddListingComponent();
+            });
+        }
+    }
+
+    async loadAddListingComponent() {
+        try {
+            const response = await fetch('/components/profile/addListing.html');
+            const html = await response.text();
+            
+            // Update the main content area
+            const contentArea = document.querySelector('.col-md-8 .dashboard');
+            if (contentArea) {
+                contentArea.innerHTML = html;
+                
+                // Load required scripts
+                await this.loadScript('/js/components/addListing.js');
+                await this.loadScript('/css/components/listing-form.css', 'css');
+            }
+        } catch (error) {
+            console.error('Error loading add listing component:', error);
+            window.toastService?.error('Failed to load add listing form');
+        }
+    }
+
+    loadScript(src, type = 'js') {
+        return new Promise((resolve, reject) => {
+            if (type === 'js') {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.body.appendChild(script);
+            } else if (type === 'css') {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = src;
+                link.onload = resolve;
+                link.onerror = reject;
+                document.head.appendChild(link);
+            }
+        });
     }
 
     async handleAvatarUpload(event) {
@@ -293,8 +341,39 @@ class ProfilePage {
 document.addEventListener('DOMContentLoaded', () => {
     try {
         new ProfilePage();
+        handleMenuNavigation();
     } catch (error) {
         console.error('Failed to initialize profile page:', error);
         window.toastService?.error('Failed to load profile page');
     }
 });
+
+// Add this function to handle menu navigation
+function handleMenuNavigation() {
+    document.querySelectorAll('.vr-profile-menu .profile-item a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (link.getAttribute('href') === '#') {
+                e.preventDefault();
+                
+                // Remove active class from all items
+                document.querySelectorAll('.profile-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // Add active class to clicked item
+                link.parentElement.classList.add('active');
+                
+                // Hide all content sections
+                document.querySelectorAll('.vr-profile__content > div').forEach(div => {
+                    div.style.display = 'none';
+                });
+                
+                // Show relevant content
+                if (link.parentElement.dataset.page === 'profile') {
+                    document.querySelector('.vr-profile__form:not(.vr-listing-wizard)').style.display = 'block';
+                    document.getElementById('addListingContainer').style.display = 'none';
+                }
+            }
+        });
+    });
+}
