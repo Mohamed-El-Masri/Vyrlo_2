@@ -23,10 +23,11 @@
 .vr-btn--outline {
   border: 2px solid var(--vr-primary);
   color: var(--vr-primary);
+  background-color: transparent !important;
 }
 
 .vr-btn--outline:hover {
-  background-color: var(--vr-primary);
+  background-color: var(--vr-primary) !important;
   color: var(--vr-light);
 }
 
