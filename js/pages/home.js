@@ -1,13 +1,26 @@
+import { Utils } from '../core/utils.js';
+import { toastService } from '../services/toast.service.js';
+
 class HomePage {
     constructor() {
         // API Configuration
         this.API_BASE_URL = 'https://virlo.vercel.app';
         
+        // Search Configuration
+        this.minSearchLength = 2;
+        this.searchDebounceTime = 300;
+        this.maxSuggestions = {
+            listings: 4,
+            categories: 3,
+            locations: 5
+        };
+        this.selectedIndex = -1;
+        this.currentSuggestions = [];
+        
         this.categoryPage = 1;
         this.listingPage = 1;
         this.isLoadingCategories = false;
         this.isLoadingListings = false;
-        this.searchTimeout = null;
         this.loadedListings = new Set(); // Track loaded listing IDs
         this.previousListingsCount = 0; // Track previous listings count
         this.noMoreListings = false; // Flag to indicate no more listings
@@ -15,27 +28,41 @@ class HomePage {
         // Use the global toastService instance
         this.toastService = window.toastService;
         
+        // Categories Slider Configuration
+        this.categoriesConfig = {
+            scrollStep: 200,
+            scrollBehavior: 'smooth',
+            autoplayDelay: 5000,
+            autoplayEnabled: true
+        };
+        
         this.init();
     }
 
     init() {
-        this.setupVariables();
+        this.setupElements();
         this.setupScrollReveal();
         this.loadInitialContent();
-        this.attachEventListeners();
-        this.initializeSearch();
+        this.setupEventListeners();
+        this.initializeCategoriesSlider();
     }
 
-    setupVariables() {
-        this.categoriesGrid = document.querySelector('.vr-categories__grid');
-        this.featuredGrid = document.querySelector('.vr-featured__grid');
-        this.loadMoreCategoriesBtn = document.getElementById('loadMoreCategories');
-        this.loadMoreListingsBtn = document.getElementById('loadMoreListings');
+    setupElements() {
+        // Search Elements
         this.searchForm = document.getElementById('searchForm');
         this.searchInput = document.getElementById('searchInput');
         this.locationInput = document.getElementById('locationInput');
         this.searchSuggestions = document.getElementById('searchSuggestions');
         this.locationSuggestions = document.getElementById('locationSuggestions');
+        
+        // Other page elements
+        this.categoriesTrack = document.querySelector('.vr-categories__track');
+        this.featuredGrid = document.querySelector('.vr-featured__grid');
+        this.loadMoreListingsBtn = document.getElementById('loadMoreListings');
+        
+        // Categories Slider Elements
+        this.prevButton = document.querySelector('.vr-categories__nav--prev');
+        this.nextButton = document.querySelector('.vr-categories__nav--next');
     }
 
     setupScrollReveal() {
@@ -96,23 +123,46 @@ class HomePage {
         }
     }
 
-    attachEventListeners() {
-        // Load More Buttons
-        this.loadMoreCategoriesBtn?.addEventListener('click', async (e) => {
-            e.preventDefault();
-            await this.loadCategories();
+    setupEventListeners() {
+        // Search Form Events
+        this.searchForm?.addEventListener('submit', (e) => this.handleSearch(e));
+        
+        // Enhanced Search Input Events
+        if (this.searchInput) {
+            this.searchInput.addEventListener('input', Utils.debounce(() => this.handleSearchInput(), this.searchDebounceTime));
+            this.searchInput.addEventListener('focus', () => this.showSearchSuggestions());
+            this.searchInput.addEventListener('keydown', (e) => this.handleSearchKeydown(e));
+        }
+        
+        // Enhanced Location Input Events
+        if (this.locationInput) {
+            this.locationInput.addEventListener('input', Utils.debounce(() => this.handleLocationInput(), this.searchDebounceTime));
+            this.locationInput.addEventListener('focus', () => this.showLocationSuggestions());
+            this.locationInput.addEventListener('keydown', (e) => this.handleLocationKeydown(e));
+        }
+        
+        // Close suggestions on click outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.vr-search-form__input-wrapper') && 
+                !e.target.closest('.vr-search-suggestions')) {
+                this.hideSuggestions();
+                this.hideLocationSuggestions();
+            }
         });
 
+        // Handle escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.hideSuggestions();
+                this.hideLocationSuggestions();
+            }
+        });
+
+        // Load More Listings Button
         this.loadMoreListingsBtn?.addEventListener('click', async (e) => {
             e.preventDefault();
             await this.loadListings();
         });
-
-        // Search Form
-        this.searchForm?.addEventListener('submit', (e) => this.handleSearch(e));
-
-        // Category Click Events
-        this.categoriesGrid?.addEventListener('click', (e) => this.handleCategoryClick(e));
 
         // Listing Click Events
         this.featuredGrid?.addEventListener('click', (e) => {
@@ -122,6 +172,16 @@ class HomePage {
                 if (listingId) {
                     window.location.href = `/pages/listing-details.html?id=${listingId}`;
                 }
+            }
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                this.hideSuggestions();
+                document.body.style.position = '';
+                document.body.style.top = '';
+                document.body.style.width = '';
             }
         });
     }
@@ -136,42 +196,26 @@ class HomePage {
     async loadCategories() {
         if (this.isLoadingCategories) return;
         
-        this.isLoadingCategories = true;
-        this.setLoadingState(this.loadMoreCategoriesBtn, true);
-
-        // Create loader
-        const loader = this.showLoader(this.categoriesGrid);
-
         try {
-            const response = await fetch('https://virlo.vercel.app/categories');
-            const categories = await response.json();
-            
-            // Filter out test categories
-            const filteredCategories = categories.filter(cat => !cat.categoryName.toLowerCase().includes('test'));
-            
-            // Get the next batch of categories
-            const startIndex = (this.categoryPage - 1) * 4;
-            const endIndex = startIndex + 4;
-            const currentBatch = filteredCategories.slice(startIndex, endIndex);
-            
-            // Remove loader before rendering new content
-            loader.remove();
-            
-            this.renderCategories(currentBatch, this.categoryPage > 1);
-            this.categoryPage++;
-            
-            // Hide "Load More" if no more categories
-            if (endIndex >= filteredCategories.length) {
-                this.loadMoreCategoriesBtn.style.display = 'none';
-            } else {
-                this.loadMoreCategoriesBtn.style.display = 'block';
+            this.isLoadingCategories = true;
+            this.showCategoriesLoader();
+
+            const response = await fetch(`${this.API_BASE_URL}/categories`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
             }
+            
+            const categories = await response.json();
+            this.renderCategories(categories);
         } catch (error) {
             console.error('Error loading categories:', error);
-            this.showEmptyState(this.categoriesGrid, 'Failed to load categories');
+            if (this.toastService) {
+                this.toastService.showError('Unable to load categories. Please try again later.');
+            }
+            this.showCategoriesError();
         } finally {
             this.isLoadingCategories = false;
-            this.setLoadingState(this.loadMoreCategoriesBtn, false);
+            this.hideCategoriesLoader();
         }
     }
 
@@ -253,7 +297,9 @@ class HomePage {
         this.featuredGrid.innerHTML = '';
     }
 
-    renderCategories(categories, append = false) {
+    renderCategories(categories) {
+        if (!this.categoriesTrack) return;
+
         const html = categories.map((category, index) => `
             <a href="/pages/listings.html?categoryId=${category._id}" 
                class="vr-categories__item"
@@ -273,13 +319,9 @@ class HomePage {
             </a>
         `).join('');
 
-        if (append) {
-            this.categoriesGrid.insertAdjacentHTML('beforeend', html);
-        } else {
-            this.categoriesGrid.innerHTML = html;
-        }
-
+        this.categoriesTrack.innerHTML = html;
         this.initializeNewElements();
+        this.updateSliderState();
     }
 
     renderListings(listings, append = false) {
@@ -410,80 +452,529 @@ class HomePage {
         });
     }
 
-    initializeSearch() {
-        // Search input event listeners
-        this.searchInput?.addEventListener('input', (e) => this.handleSearchInput(e));
-        this.locationInput?.addEventListener('input', (e) => this.handleLocationInput(e));
-        
-        // Submit form event
-        this.searchForm?.addEventListener('submit', (e) => this.handleSearch(e));
-        
-        // Close suggestions on click outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.vr-search-form__input-wrapper')) {
-                this.searchSuggestions.classList.remove('active');
-                this.locationSuggestions.classList.remove('active');
+    async handleSearchInput() {
+        try {
+            const query = this.searchInput.value.trim();
+            const location = this.locationInput.value.trim();
+            
+            if (!query && !location) {
+                this.hideSuggestions();
+                return;
             }
-        });
 
-        // Load popular categories dynamically
-        this.loadPopularCategories();
+            if (query.length < this.minSearchLength && !location) {
+                return;
+            }
 
-        // Check URL parameters and fill search inputs if coming from listings page
-        const params = new URLSearchParams(window.location.search);
-        if (params.has('name')) {
-            this.searchInput.value = params.get('name');
-        }
-        if (params.has('location')) {
-            this.locationInput.value = params.get('location');
+            const [listingsData, categories] = await Promise.all([
+                this.fetchListings(query, location),
+                this.fetchCategories()
+            ]);
+
+            const suggestions = [];
+            
+            // Add listing suggestions
+            if (listingsData && listingsData.listings) {
+                suggestions.push(...listingsData.listings
+                    .slice(0, this.maxSuggestions.listings)
+                    .map(listing => ({
+                        type: 'listing',
+                        id: listing._id,
+                        name: listing.listingName,
+                        location: listing.location,
+                        category: listing.categoryId?.categoryName || 'Uncategorized',
+                        isActive: listing.isActive
+                    }))
+                );
+            }
+
+            // Add category suggestions
+            if (categories && categories.length && query) {
+                const matchingCategories = categories
+                    .filter(cat => cat.categoryName.toLowerCase().includes(query.toLowerCase()))
+                    .slice(0, this.maxSuggestions.categories)
+                    .map(cat => ({
+                        type: 'category',
+                        id: cat._id,
+                        name: cat.categoryName,
+                        amenities: cat.amenities?.slice(0, 3) || []
+                    }));
+                
+                if (matchingCategories.length) {
+                    suggestions.push(...matchingCategories);
+                }
+            }
+
+            this.currentSuggestions = suggestions;
+            this.displaySuggestions(suggestions);
+        } catch (error) {
+            console.error('Search error:', error);
+            this.toastService.showError('Search is temporarily unavailable. Please try again later.');
+            this.hideSuggestions();
         }
     }
 
-    async handleSearchInput(e) {
-        const value = e.target.value.trim().toLowerCase();
+    handleSearchKeydown(e) {
+        const suggestions = this.searchSuggestions.querySelectorAll('.vr-search-suggestions__item');
         
-        if (this.searchTimeout) {
-            clearTimeout(this.searchTimeout);
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                this.selectedIndex = Math.min(this.selectedIndex + 1, suggestions.length - 1);
+                this.updateSelectedSuggestion(suggestions);
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+                this.updateSelectedSuggestion(suggestions);
+                break;
+                
+            case 'Enter':
+                if (this.selectedIndex >= 0 && this.selectedIndex < suggestions.length) {
+                    e.preventDefault();
+                    const selectedItem = suggestions[this.selectedIndex];
+                    this.handleSuggestionSelect(selectedItem);
+                }
+                break;
+                
+            case 'Escape':
+                e.preventDefault();
+                this.hideSearchSuggestions();
+                break;
         }
+    }
 
-        if (value.length < 2) {
-            this.searchSuggestions.classList.remove('active');
+    updateSelectedSuggestion(suggestions) {
+        suggestions.forEach((item, index) => {
+            item.setAttribute('aria-selected', index === this.selectedIndex);
+            if (index === this.selectedIndex) {
+                item.scrollIntoView({ block: 'nearest' });
+            }
+        });
+    }
+
+    handleSuggestionSelect(item) {
+        const type = item.dataset.type;
+        const id = item.dataset.id;
+        
+        if (type === 'listing') {
+            const listing = item.querySelector('.vr-search-suggestions__name').textContent;
+            this.searchInput.value = listing;
+            this.hideSearchSuggestions();
+        } else if (type === 'category') {
+            window.location.href = `/pages/listings.html?categoryId=${id}`;
+        }
+    }
+
+    async handleLocationInput() {
+        const query = this.locationInput.value.trim().toLowerCase();
+        this.selectedIndex = -1;
+        
+        if (query.length < this.minSearchLength) {
+            this.hideLocationSuggestions();
             return;
         }
 
-        // Show loading indicator immediately
-        this.searchSuggestions.innerHTML = '<div class="vr-search-form__loading">Loading suggestions...</div>';
-        this.searchSuggestions.classList.add('active');
+        this.showLoadingSuggestions(this.locationSuggestions);
+        this.locationInput.setAttribute('aria-expanded', 'true');
 
-        this.searchTimeout = setTimeout(async () => {
-            try {
-                const response = await fetch(`${this.API_BASE_URL}/listing/active/?name=${value}`);
-                const data = await response.json();
+        try {
+            const listings = await this.fetchListings({});
+            const locations = this.processLocationResults(query, listings);
+            this.currentSuggestions = locations;
+            this.renderLocationSuggestions(locations);
+        } catch (error) {
+            console.error('Location search error:', error);
+            this.showErrorSuggestions(this.locationSuggestions);
+        }
+    }
+
+    handleLocationKeydown(e) {
+        const suggestions = this.locationSuggestions.querySelectorAll('.vr-search-suggestions__item');
+        
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                this.selectedIndex = Math.min(this.selectedIndex + 1, suggestions.length - 1);
+                this.updateSelectedSuggestion(suggestions);
+                break;
                 
-                if (!data.listings || data.listings.length === 0) {
-                    this.searchSuggestions.innerHTML = '<div class="vr-search-form__no-results">No results found</div>';
-                    return;
+            case 'ArrowUp':
+                e.preventDefault();
+                this.selectedIndex = Math.max(this.selectedIndex - 1, -1);
+                this.updateSelectedSuggestion(suggestions);
+                break;
+                
+            case 'Enter':
+                if (this.selectedIndex >= 0 && this.selectedIndex < suggestions.length) {
+                    e.preventDefault();
+                    const selectedItem = suggestions[this.selectedIndex];
+                    this.handleLocationSelect(selectedItem);
                 }
+                break;
+                
+            case 'Escape':
+                e.preventDefault();
+                this.hideLocationSuggestions();
+                break;
+        }
+    }
 
-                this.renderSearchSuggestions(data.listings);
-            } catch (error) {
-                console.error('Error fetching search suggestions:', error);
-                this.searchSuggestions.innerHTML = '<div class="vr-search-form__error">Error loading suggestions</div>';
-            }
-        }, 300);
+    handleLocationSelect(item) {
+        const location = item.dataset.location;
+        this.locationInput.value = location;
+        this.hideLocationSuggestions();
     }
 
     async handleSearch(e) {
         e.preventDefault();
-        // Implement search functionality
+        
+        const searchQuery = this.searchInput.value.trim();
+        const locationQuery = this.locationInput.value.trim();
+        
+        if (!searchQuery && !locationQuery) {
+            toastService.warning('Please enter a search term or location');
+            return;
+        }
+
+        // Analytics tracking
+        this.trackSearch(searchQuery, locationQuery);
+
+        // Redirect to listings page with search parameters
+        const params = new URLSearchParams();
+        if (searchQuery) params.set('name', searchQuery);
+        if (locationQuery) params.set('location', locationQuery);
+        
+        window.location.href = `/pages/listings.html?${params.toString()}`;
     }
 
-    async handleLocationInput(e) {
-        // Implement location input functionality
+    trackSearch(searchQuery, locationQuery) {
+        // Implement analytics tracking
+        if (window.gtag) {
+            gtag('event', 'search', {
+                search_term: searchQuery,
+                location: locationQuery
+            });
+        }
     }
 
-    async handleCategoryClick(e) {
-        // Implement category click functionality
+    async fetchListings(query = '', location = '', categoryId = '', lastValue = 1) {
+        try {
+            const url = new URL(`${this.API_BASE_URL}/listing/`);
+            url.searchParams.append('lastValue', lastValue);
+            if (query) url.searchParams.append('name', query);
+            if (location) url.searchParams.append('location', location);
+            if (categoryId) url.searchParams.append('categoryId', categoryId);
+
+            const response = await fetch(url.toString());
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+                const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error('Error fetching listings:', error);
+            this.toastService.showError('Unable to fetch listings. Please try again later.');
+            return { listings: [], lastValue: 1, totalItems: 0 };
+        }
+    }
+
+    async fetchCategories() {
+        const response = await fetch(`${this.API_BASE_URL}/categories`);
+        if (!response.ok) throw new Error('Failed to fetch categories');
+        return response.json();
+    }
+
+    processSearchResults(query, nameResults, categories) {
+        const results = {
+            listings: [],
+            categories: []
+        };
+
+        // Process listings
+        if (nameResults.listings) {
+            results.listings = nameResults.listings
+                .filter(listing => listing.isActive || listing.isPosted)
+                .filter(listing => this.matchesSearch(listing.listingName, query))
+                .slice(0, 4);
+        }
+
+        // Process categories
+        if (categories) {
+            results.categories = categories
+                .filter(category => this.matchesSearch(category.categoryName, query))
+                .slice(0, 3);
+        }
+
+        return results;
+    }
+
+    processLocationResults(query, results) {
+        if (!results.listings) return [];
+
+        // Extract unique locations
+        const locations = [...new Set(
+            results.listings
+                .filter(listing => listing.location)
+                .map(listing => listing.location)
+        )];
+
+        // Filter and sort by relevance
+        return locations
+            .filter(location => this.matchesSearch(location.toLowerCase(), query))
+            .sort((a, b) => {
+                const aScore = this.getMatchScore(a.toLowerCase(), query);
+                const bScore = this.getMatchScore(b.toLowerCase(), query);
+                return bScore - aScore;
+            })
+            .slice(0, 5);
+    }
+
+    matchesSearch(text, query) {
+        if (!text) return false;
+        text = text.toLowerCase();
+        query = query.toLowerCase();
+        
+        // Exact match gets highest priority
+        if (text === query) return true;
+        
+        // Contains match gets second priority
+        if (text.includes(query)) return true;
+        
+        // Fuzzy match gets lowest priority
+        return this.getLevenshteinDistance(text, query) <= 3;
+    }
+
+    getMatchScore(text, query) {
+        if (text === query) return 100;
+        if (text.includes(query)) return 75;
+        return 50 - this.getLevenshteinDistance(text, query);
+    }
+
+    getLevenshteinDistance(str1, str2) {
+        const track = Array(str2.length + 1).fill(null).map(() =>
+            Array(str1.length + 1).fill(null));
+        
+        for (let i = 0; i <= str1.length; i++) track[0][i] = i;
+        for (let j = 0; j <= str2.length; j++) track[j][0] = j;
+        
+        for (let j = 1; j <= str2.length; j++) {
+            for (let i = 1; i <= str1.length; i++) {
+                const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+                track[j][i] = Math.min(
+                    track[j][i - 1] + 1,
+                    track[j - 1][i] + 1,
+                    track[j - 1][i - 1] + indicator
+                );
+            }
+        }
+        
+        return track[str2.length][str1.length];
+    }
+
+    renderSearchSuggestions(results) {
+        const { listings, categories } = results;
+        
+        if (listings.length === 0 && categories.length === 0) {
+            this.showEmptySuggestions(this.searchSuggestions);
+                    return;
+                }
+
+        let html = '';
+
+        // Render listings section
+        if (listings.length > 0) {
+            html += `
+                <div class="vr-search-suggestions__group">
+                    <div class="vr-search-suggestions__title">
+                        <i class="fas fa-store"></i>
+                        <span>Listings</span>
+                    </div>
+                    ${listings.map(listing => `
+                        <div class="vr-search-suggestions__item" data-id="${listing._id}" data-type="listing">
+                            <div class="vr-search-suggestions__icon">
+                                <i class="fas ${this.getCategoryIcon(listing.categoryId?.categoryName)}"></i>
+                            </div>
+                            <div class="vr-search-suggestions__content">
+                                <div class="vr-search-suggestions__name">${listing.listingName}</div>
+                                <div class="vr-search-suggestions__details">
+                                    ${listing.location ? `<span><i class="fas fa-map-marker-alt"></i> ${listing.location}</span>` : ''}
+                                    ${listing.categoryId ? `<span><i class="fas fa-tag"></i> ${listing.categoryId.categoryName}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // Render categories section
+        if (categories.length > 0) {
+            html += `
+                <div class="vr-search-suggestions__group">
+                    <div class="vr-search-suggestions__title">
+                        <i class="fas fa-th-large"></i>
+                        <span>Categories</span>
+                    </div>
+                    ${categories.map(category => `
+                        <div class="vr-search-suggestions__item" data-id="${category._id}" data-type="category">
+                            <div class="vr-search-suggestions__icon">
+                                <i class="fas ${this.getCategoryIcon(category.categoryName)}"></i>
+                            </div>
+                            <div class="vr-search-suggestions__content">
+                                <div class="vr-search-suggestions__name">${category.categoryName}</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        this.searchSuggestions.innerHTML = html;
+        this.searchSuggestions.classList.add('active');
+        this.addSearchSuggestionListeners();
+    }
+
+    renderLocationSuggestions(locations) {
+        if (locations.length === 0) {
+            this.showEmptySuggestions(this.locationSuggestions);
+            return;
+        }
+
+        const html = `
+            <div class="vr-search-suggestions__group">
+                <div class="vr-search-suggestions__title">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Locations</span>
+                </div>
+                ${locations.map(location => `
+                    <div class="vr-search-suggestions__item" data-location="${location}">
+                        <div class="vr-search-suggestions__icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="vr-search-suggestions__content">
+                            <div class="vr-search-suggestions__name">${location}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        this.locationSuggestions.innerHTML = html;
+        this.locationSuggestions.classList.add('active');
+        this.addLocationSuggestionListeners();
+    }
+
+    addSearchSuggestionListeners() {
+        this.searchSuggestions.querySelectorAll('.vr-search-suggestions__item').forEach(item => {
+            item.addEventListener('click', () => {
+                const type = item.dataset.type;
+                const id = item.dataset.id;
+                
+                if (type === 'listing') {
+                    const listing = item.querySelector('.vr-search-suggestions__name').textContent;
+                    this.searchInput.value = listing;
+                    this.hideSearchSuggestions();
+                } else if (type === 'category') {
+                    window.location.href = `/pages/listings.html?categoryId=${id}`;
+                }
+            });
+        });
+    }
+
+    addLocationSuggestionListeners() {
+        this.locationSuggestions.querySelectorAll('.vr-search-suggestions__item').forEach(item => {
+            item.addEventListener('click', () => {
+                const location = item.dataset.location;
+                this.locationInput.value = location;
+                this.hideLocationSuggestions();
+            });
+        });
+    }
+
+    showLoadingSuggestions(container) {
+        container.innerHTML = `
+            <div class="vr-search-suggestions__loading" role="status" aria-label="Loading suggestions">
+                <div class="vr-spinner"></div>
+                <span>Searching...</span>
+            </div>
+        `;
+        container.classList.add('active');
+    }
+
+    showEmptySuggestions(container) {
+        container.innerHTML = `
+            <div class="vr-search-suggestions__empty" role="status" aria-label="No results found">
+                <i class="fas fa-search" aria-hidden="true"></i>
+                <span>No results found</span>
+            </div>
+        `;
+        container.classList.add('active');
+    }
+
+    showErrorSuggestions(container) {
+        container.innerHTML = `
+            <div class="vr-search-suggestions__error" role="alert">
+                <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
+                <span>Error loading suggestions</span>
+            </div>
+        `;
+        container.classList.add('active');
+    }
+
+    hideSearchSuggestions() {
+        this.searchSuggestions?.classList.remove('active');
+        this.searchInput?.setAttribute('aria-expanded', 'false');
+        this.selectedIndex = -1;
+    }
+
+    hideLocationSuggestions() {
+        this.locationSuggestions?.classList.remove('active');
+        this.locationInput?.setAttribute('aria-expanded', 'false');
+        this.selectedIndex = -1;
+    }
+
+    showSearchSuggestions() {
+        if (this.searchInput.value.trim().length >= this.minSearchLength) {
+            this.searchSuggestions.classList.add('active');
+        }
+    }
+
+    showLocationSuggestions() {
+        if (this.locationInput.value.trim().length >= this.minSearchLength) {
+            this.locationSuggestions.classList.add('active');
+        }
+    }
+
+    getCategoryIcon(categoryName) {
+        const icons = {
+            'Restaurant': 'fa-utensils',
+            'Hotel': 'fa-hotel',
+            'Shopping': 'fa-shopping-bag',
+            'Health': 'fa-hospital',
+            'Beauty': 'fa-spa',
+            'Education': 'fa-graduation-cap',
+            'Automotive': 'fa-car',
+            'Real Estate': 'fa-home',
+            'Technology': 'fa-laptop',
+            'Entertainment': 'fa-film',
+            'Sports': 'fa-futbol',
+            'Pets': 'fa-paw',
+            'Legal': 'fa-gavel',
+            'Financial': 'fa-dollar-sign',
+            'Travel': 'fa-plane',
+            'default': 'fa-store'
+        };
+
+        if (!categoryName) return icons.default;
+        
+        // Try to find a matching icon by checking if the category name includes any key
+        const matchingKey = Object.keys(icons).find(key => 
+            categoryName.toLowerCase().includes(key.toLowerCase())
+        );
+        
+        return icons[matchingKey] || icons.default;
     }
 
     async handleListingClick(e) {
@@ -492,10 +983,6 @@ class HomePage {
 
     async loadPopularCategories() {
         // Implement loading popular categories functionality
-    }
-
-    async renderSearchSuggestions(listings) {
-        // Implement rendering search suggestions functionality
     }
 
     handleSave(listingId) {
@@ -513,9 +1000,395 @@ class HomePage {
             this.toastService.info('Share feature coming soon');
         }
     }
+
+    showCategoriesLoader() {
+        if (!this.categoriesTrack) return;
+        
+        const loader = document.createElement('div');
+        loader.className = 'vr-loader';
+        loader.innerHTML = `
+            <div class="vr-spinner"></div>
+            <div class="vr-loader__text">Loading categories...</div>
+        `;
+        
+        this.categoriesTrack.innerHTML = '';
+        this.categoriesTrack.appendChild(loader);
+    }
+
+    hideCategoriesLoader() {
+        if (!this.categoriesTrack) return;
+        const loader = this.categoriesTrack.querySelector('.vr-loader');
+        if (loader) {
+            loader.remove();
+        }
+    }
+
+    showCategoriesError() {
+        if (!this.categoriesTrack) return;
+        
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'vr-empty-state';
+        errorMessage.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Unable to load categories</p>
+            <button class="vr-btn vr-btn--primary" onclick="window.location.reload()">
+                <i class="fas fa-sync"></i> Try Again
+            </button>
+        `;
+        
+        this.categoriesTrack.innerHTML = '';
+        this.categoriesTrack.appendChild(errorMessage);
+    }
+
+    displaySuggestions(suggestions) {
+        if (!this.searchSuggestions) return;
+
+        if (!suggestions || !suggestions.length) {
+            this.searchSuggestions.innerHTML = `
+                <div class="vr-search-suggestions__empty">
+                    <i class="fas fa-search"></i>
+                    <p>No results found</p>
+                </div>
+            `;
+            this.searchSuggestions.classList.add('active');
+            return;
+        }
+
+        const html = suggestions.map((suggestion, index) => `
+            <div class="vr-search-suggestions__item" 
+                 role="option" 
+                 tabindex="0"
+                 aria-selected="${this.selectedIndex === index}"
+                 data-index="${index}"
+                 data-type="${suggestion.type}"
+                 data-id="${suggestion.id}">
+                <div class="vr-search-suggestions__icon">
+                    <i class="fas fa-${suggestion.type === 'listing' ? 'building' : 'tag'}"></i>
+                </div>
+                <div class="vr-search-suggestions__content">
+                    <div class="vr-search-suggestions__name">${suggestion.name}</div>
+                    ${suggestion.type === 'listing' ? `
+                        <div class="vr-search-suggestions__details">
+                            <span><i class="fas fa-map-marker-alt"></i> ${suggestion.location}</span>
+                            ${suggestion.category ? `
+                                <span><i class="fas fa-tag"></i> ${suggestion.category}</span>
+                            ` : ''}
+                        </div>
+                    ` : `
+                        <div class="vr-search-suggestions__details">
+                            ${suggestion.amenities.slice(0, 2).map(amenity => `
+                                <span><i class="fas fa-check"></i> ${amenity}</span>
+                            `).join('')}
+                        </div>
+                    `}
+                </div>
+            </div>
+        `).join('');
+
+        this.searchSuggestions.innerHTML = html;
+        this.searchSuggestions.classList.add('active');
+
+        // Add event listeners
+        this.searchSuggestions.querySelectorAll('.vr-search-suggestions__item').forEach(item => {
+            item.addEventListener('click', () => this.handleSuggestionSelect(item));
+            item.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    this.handleSuggestionSelect(item);
+                }
+            });
+        });
+    }
+
+    hideSuggestions() {
+        this.searchSuggestions?.classList.remove('active');
+        this.searchInput?.setAttribute('aria-expanded', 'false');
+        this.selectedIndex = -1;
+    }
+
+    initializeCategoriesSlider() {
+        if (!this.categoriesTrack) return;
+
+        // Add navigation buttons
+        this.addSliderNavigation();
+
+        // Setup touch handling
+        this.setupTouchHandling();
+
+        // Setup infinite scroll
+        this.setupInfiniteScroll();
+
+        // Setup autoplay with smooth transitions
+        if (this.categoriesConfig.autoplayEnabled) {
+            this.startAutoplay();
+        }
+
+        // Initial state update
+        this.updateSliderState();
+
+        // Handle scroll events with debounce
+        this.categoriesTrack.addEventListener('scroll', Utils.debounce(() => {
+            this.updateSliderState();
+            this.pauseAutoplay();
+        }, 100));
+
+        // Handle resize events
+        window.addEventListener('resize', Utils.debounce(() => {
+            this.updateSliderState();
+        }, 150));
+    }
+
+    addSliderNavigation() {
+        if (!this.prevButton || !this.nextButton) {
+            const sliderContainer = this.categoriesTrack.parentElement;
+            
+            // Create navigation buttons if they don't exist
+            this.prevButton = document.createElement('button');
+            this.nextButton = document.createElement('button');
+            
+            this.prevButton.className = 'vr-categories__nav vr-categories__nav--prev';
+            this.nextButton.className = 'vr-categories__nav vr-categories__nav--next';
+            
+            this.prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            this.nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            
+            sliderContainer.appendChild(this.prevButton);
+            sliderContainer.appendChild(this.nextButton);
+        }
+
+        // Add click handlers
+        this.prevButton.addEventListener('click', () => this.scrollCategories('prev'));
+        this.nextButton.addEventListener('click', () => this.scrollCategories('next'));
+    }
+
+    setupInfiniteScroll() {
+        if (!this.categoriesTrack) return;
+
+        // Store categories count
+        this.categoriesCount = this.categoriesTrack.querySelectorAll('.vr-categories__item').length;
+
+        // Clone first and last items for smooth infinite scroll
+        const items = Array.from(this.categoriesTrack.children);
+        const firstItemClone = items[0].cloneNode(true);
+        const lastItemClone = items[items.length - 1].cloneNode(true);
+        
+        firstItemClone.setAttribute('aria-hidden', 'true');
+        lastItemClone.setAttribute('aria-hidden', 'true');
+        
+        this.categoriesTrack.appendChild(firstItemClone);
+        this.categoriesTrack.insertBefore(lastItemClone, items[0]);
+
+        // Update scroll position to skip clone
+        this.categoriesTrack.scrollLeft = this.getItemWidth();
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                const item = entry.target;
+                
+                if (entry.isIntersecting) {
+                    // Calculate visibility percentage
+                    const ratio = entry.intersectionRatio;
+                    const scale = 0.95 + (ratio * 0.05);
+                    const opacity = 0.6 + (ratio * 0.4);
+                    
+                    item.style.transform = `scale(${scale})`;
+                    item.style.opacity = opacity;
+                    
+                    if (ratio > 0.8) {
+                        item.classList.add('active');
+                    }
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }, {
+            root: this.categoriesTrack,
+            threshold: [0, 0.25, 0.5, 0.75, 1],
+            rootMargin: '0px'
+        });
+
+        this.categoriesTrack.querySelectorAll('.vr-categories__item').forEach(item => {
+            observer.observe(item);
+        });
+    }
+
+    updateSliderState() {
+        if (!this.categoriesTrack) return;
+
+        const { scrollLeft, scrollWidth, clientWidth } = this.categoriesTrack;
+        const itemWidth = this.getItemWidth();
+        
+        // Handle infinite scroll effect
+        if (scrollLeft <= itemWidth / 2) {
+            // If we're at the start (showing cloned last item)
+            this.categoriesTrack.style.scrollBehavior = 'auto';
+            this.categoriesTrack.scrollLeft = scrollWidth - (itemWidth * 3);
+            requestAnimationFrame(() => {
+                this.categoriesTrack.style.scrollBehavior = 'smooth';
+            });
+        } else if (scrollLeft >= scrollWidth - (itemWidth * 1.5)) {
+            // If we're at the end (showing cloned first item)
+            this.categoriesTrack.style.scrollBehavior = 'auto';
+            this.categoriesTrack.scrollLeft = itemWidth;
+            requestAnimationFrame(() => {
+                this.categoriesTrack.style.scrollBehavior = 'smooth';
+            });
+        }
+
+        this.updateActiveItems();
+    }
+
+    updateActiveItems() {
+        if (!this.categoriesTrack) return;
+
+        const items = this.categoriesTrack.querySelectorAll('.vr-categories__item');
+        const { scrollLeft, clientWidth } = this.categoriesTrack;
+        const centerPosition = scrollLeft + (clientWidth / 2);
+
+        items.forEach((item, index) => {
+            // Skip cloned items in counting
+            const isClone = index === 0 || index === items.length - 1;
+            if (!isClone) {
+                const rect = item.getBoundingClientRect();
+                const itemCenter = rect.left + (rect.width / 2);
+                const distanceFromCenter = Math.abs(itemCenter - (clientWidth / 2));
+                const viewportWidth = clientWidth;
+                
+                // Calculate scale and opacity based on distance from center
+                const scale = Math.max(0.95, 1 - (distanceFromCenter / viewportWidth) * 0.1);
+                const opacity = Math.max(0.6, 1 - (distanceFromCenter / viewportWidth) * 0.4);
+                
+                // Apply smooth transitions
+                item.style.transform = `scale(${scale})`;
+                item.style.opacity = opacity;
+                
+                // Update active state
+                if (distanceFromCenter < rect.width / 2) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            }
+        });
+    }
+
+    scrollCategories(direction) {
+        if (!this.categoriesTrack) return;
+
+        const itemWidth = this.getItemWidth();
+        const scrollAmount = direction === 'next' ? itemWidth : -itemWidth;
+
+        this.categoriesTrack.scrollBy({
+            left: scrollAmount,
+            behavior: 'smooth'
+        });
+
+        this.pauseAutoplay();
+    }
+
+    getItemWidth() {
+        const item = this.categoriesTrack.querySelector('.vr-categories__item');
+        if (!item) return 0;
+        
+        const gap = parseInt(getComputedStyle(this.categoriesTrack).gap) || 16;
+        return item.offsetWidth + gap;
+    }
+
+    startAutoplay() {
+        if (this.autoplayInterval) {
+            clearInterval(this.autoplayInterval);
+        }
+
+        this.autoplayInterval = setInterval(() => {
+            this.scrollCategories('next');
+        }, this.categoriesConfig.autoplayDelay);
+    }
+
+    setupTouchHandling() {
+        if (!this.categoriesTrack) return;
+
+        let startX, startScrollLeft, isDragging = false;
+        let lastDragTime = 0, lastDragX = 0;
+        const DRAG_THRESHOLD = 5;
+
+        const startDragging = (e) => {
+            isDragging = true;
+            this.categoriesTrack.classList.add('dragging');
+            startX = e.type === 'mousedown' ? e.pageX : e.touches[0].pageX;
+            startScrollLeft = this.categoriesTrack.scrollLeft;
+            lastDragTime = Date.now();
+            lastDragX = startX;
+        };
+
+        const stopDragging = () => {
+            if (!isDragging) return;
+            
+            isDragging = false;
+            this.categoriesTrack.classList.remove('dragging');
+            
+            // Calculate momentum
+            const dragEndTime = Date.now();
+            const timeDiff = dragEndTime - lastDragTime;
+            const distanceDiff = lastDragX - startX;
+            
+            if (timeDiff < 100 && Math.abs(distanceDiff) > 20) {
+                const momentum = (distanceDiff / timeDiff) * 300;
+                this.categoriesTrack.scrollBy({
+                    left: -momentum,
+                    behavior: 'smooth'
+                });
+            }
+        };
+
+        const drag = (e) => {
+            if (!isDragging) return;
+            
+            e.preventDefault();
+            const x = e.type === 'mousemove' ? e.pageX : e.touches[0].pageX;
+            const diff = x - startX;
+            
+            if (Math.abs(diff) > DRAG_THRESHOLD) {
+                this.categoriesTrack.scrollLeft = startScrollLeft - diff;
+                lastDragTime = Date.now();
+                lastDragX = x;
+            }
+        };
+
+        // Touch events
+        this.categoriesTrack.addEventListener('touchstart', startDragging, { passive: true });
+        this.categoriesTrack.addEventListener('touchend', stopDragging);
+        this.categoriesTrack.addEventListener('touchmove', drag, { passive: false });
+
+        // Mouse events
+        this.categoriesTrack.addEventListener('mousedown', startDragging);
+        this.categoriesTrack.addEventListener('mouseleave', stopDragging);
+        this.categoriesTrack.addEventListener('mouseup', stopDragging);
+        this.categoriesTrack.addEventListener('mousemove', drag);
+
+        // Prevent click during drag
+        this.categoriesTrack.addEventListener('click', (e) => {
+            if (this.categoriesTrack.classList.contains('dragging')) {
+                e.preventDefault();
+            }
+        });
+    }
+
+    pauseAutoplay() {
+        if (this.autoplayInterval) {
+            clearInterval(this.autoplayInterval);
+            
+            // Restart autoplay after user interaction
+            if (this.categoriesConfig.autoplayEnabled) {
+                clearTimeout(this.autoplayTimeout);
+                this.autoplayTimeout = setTimeout(() => {
+                    this.startAutoplay();
+                }, 2000);
+            }
+        }
+    }
 }
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.homePage = new HomePage();
+    new HomePage();
 });

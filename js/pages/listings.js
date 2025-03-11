@@ -1,3 +1,8 @@
+import { Utils } from '../core/utils.js';
+import { componentLoader } from '../core/componentLoader.js';
+import { toastService } from '../services/toast.service.js';
+import { listingService } from '../services/listing.service.js';
+
 /**
  * Listings page functionality
  */
@@ -22,14 +27,19 @@ class ListingsPage {
         this.locationTimeout = null;
 
         // Services
-        this.componentLoader = window.componentLoader;
-        this.toastService = window.toastService;
-        this.listingService = window.listingService;
+        this.componentLoader = componentLoader;
+        this.toastService = toastService;
+        this.listingService = listingService;
         
         this.searchCache = new Map();
         this.searchDebounceTimeout = null;
         this.minSearchLength = 2;
         this.locationDebounceTimeout = null;
+        
+        // Add pagination settings
+        this.itemsPerPage = 12; // Number of items to show per page
+        this.allListings = []; // Store all listings
+        this.filteredListings = []; // Store filtered listings
         
         // Wait for DOM to be ready
         if (document.readyState === 'loading') {
@@ -50,7 +60,7 @@ class ListingsPage {
             console.log('ListingsPage initialized successfully');
         } catch (error) {
             console.error('Error initializing ListingsPage:', error);
-            window.toastService.error('Failed to initialize page');
+            toastService.error('Failed to initialize page');
         }
     }
 
@@ -102,7 +112,7 @@ class ListingsPage {
             console.log('Categories loaded successfully');
         } catch (error) {
             console.error('Failed to load categories:', error);
-            window.toastService.error('Failed to load categories');
+            toastService.error('Failed to load categories');
         }
     }
 
@@ -256,12 +266,9 @@ class ListingsPage {
         this.hasMore = true;
         this.loadedListings.clear();
         
-        try {
-            await this.loadMoreListings();
-        } catch (error) {
-            console.error('Search failed:', error);
-            window.toastService.error('Failed to search listings');
-        }
+        // Apply filters and reload
+        this.filteredListings = this.filterListings(this.allListings);
+        await this.loadMoreListings();
     }
 
     clearFilters() {
@@ -282,10 +289,11 @@ class ListingsPage {
         // Update URL
         this.updateUrl();
         
-        // Reset pagination
+        // Reset pagination and filtered listings
         this.page = 1;
         this.hasMore = true;
         this.loadedListings.clear();
+        this.filteredListings = [...this.allListings];
         
         // Reload listings
         this.loadInitialListings();
@@ -294,7 +302,7 @@ class ListingsPage {
         this.updateActiveFilters();
         
         // Show success message
-        window.toastService.success('Filters have been reset');
+        toastService.success('Filters have been reset');
     }
 
     toggleView(view) {
@@ -317,41 +325,45 @@ class ListingsPage {
         this.setLoadingState(true);
         
         try {
-            console.log('Loading listings...');
-            const queryParams = new URLSearchParams();
-            
-            Object.entries(this.filters).forEach(([key, value]) => {
-                if (value) queryParams.append(key, value);
-            });
-            queryParams.append('page', this.page.toString());
-            
-            const url = `${this.API_BASE_URL}/listing/active${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
-            console.log('Fetching URL:', url);
-            
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Failed to fetch listings');
-            
-            const data = await response.json();
-            console.log('Received data:', data);
-            
-            if (this.page === 1) {
-                this.loadedListings.clear();
-                this.listingsGrid.innerHTML = '';
+            // Only fetch from API if we don't have the data yet
+            if (this.allListings.length === 0) {
+                console.log('Fetching listings from API...');
+                const queryParams = new URLSearchParams();
+                
+                const url = `${this.API_BASE_URL}/listing/active${queryParams.toString() ? '?' + queryParams.toString() : ''}`;
+                console.log('Fetching URL:', url);
+                
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Failed to fetch listings');
+                
+                const data = await response.json();
+                console.log('Received data:', data);
+                
+                this.allListings = data.listings || [];
             }
-            
-            if (data.listings?.length) {
-                const newListings = data.listings.filter(listing => !this.loadedListings.has(listing._id));
-                
-                if (newListings.length) {
-                    newListings.forEach(listing => this.loadedListings.add(listing._id));
-                    this.renderListings(newListings);
-                    this.page++;
-                    this.hasMore = newListings.length >= 10;
-                } else {
-                    this.hasMore = false;
+
+            // Apply filters
+            this.filteredListings = this.filterListings(this.allListings);
+
+            // Calculate pagination
+            const startIndex = (this.page - 1) * this.itemsPerPage;
+            const endIndex = startIndex + this.itemsPerPage;
+            const paginatedListings = this.filteredListings.slice(startIndex, endIndex);
+
+            // Update hasMore flag
+            this.hasMore = endIndex < this.filteredListings.length;
+
+            if (paginatedListings.length > 0) {
+                if (this.page === 1) {
+                    this.loadedListings.clear();
+                    this.listingsGrid.innerHTML = '';
                 }
-                
-                this.updateResultsCount(data.totalItems || this.loadedListings.size);
+
+                paginatedListings.forEach(listing => this.loadedListings.add(listing._id));
+                this.renderListings(paginatedListings);
+                this.page++;
+
+                this.updateResultsCount(this.filteredListings.length);
                 this.updateActiveFilters();
             } else {
                 if (this.page === 1) {
@@ -361,11 +373,26 @@ class ListingsPage {
             }
         } catch (error) {
             console.error('Failed to load listings:', error);
-            window.toastService.error('Failed to load listings');
+            toastService.error('Failed to load listings');
         } finally {
             this.setLoadingState(false);
             this.updateLoadMoreButton();
         }
+    }
+
+    filterListings(listings) {
+        return listings.filter(listing => {
+            const nameMatch = !this.filters.name || 
+                listing.listingName.toLowerCase().includes(this.filters.name.toLowerCase());
+            
+            const locationMatch = !this.filters.location || 
+                listing.location?.toLowerCase().includes(this.filters.location.toLowerCase());
+            
+            const categoryMatch = !this.filters.categoryId || 
+                listing.categoryId?._id === this.filters.categoryId;
+
+            return nameMatch && locationMatch && categoryMatch;
+        });
     }
 
     getLoadingCards(count) {
@@ -487,7 +514,7 @@ class ListingsPage {
         }
         
         this.loadMoreBtn.style.display = 'none';
-        window.toastService.info('No listings found matching your search criteria');
+        toastService.info('No listings found matching your search criteria');
     }
 
     setLoadingState(loading) {

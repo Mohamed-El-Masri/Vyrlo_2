@@ -189,5 +189,5 @@ class ToastService {
     }
 }
 
-// Initialize the service and make it globally available
-window.toastService = new ToastService(); 
+// Export a singleton instance
+export const toastService = new ToastService(); 

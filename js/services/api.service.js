@@ -1,3 +1,6 @@
+import { authService } from './auth.service.js';
+import { toastService } from './toast.service.js';
+
 /**
  * API Service for handling all API requests
  */
@@ -65,7 +68,7 @@ class ApiService {
             };
 
             // Add auth token if available
-            const token = window.authService?.getToken();
+            const token = authService?.getToken();
             if (token) {
                 config.headers['Authorization'] = `Bearer ${token}`;
             }
@@ -134,7 +137,7 @@ class ApiService {
             const response = await fetch(`${this.BASE_URL}${url}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${window.authService?.getToken()}`
+                    'Authorization': `Bearer ${authService?.getToken()}`
                 },
                 body: formData
             });
@@ -155,7 +158,7 @@ class ApiService {
         this.addErrorInterceptor(async (error) => {
             if (error.status === 401) {
                 // Clear auth state and redirect to login
-                window.authService?.clearAuthState();
+                authService?.clearAuthState();
                 window.location.href = '/pages/login.html';
             }
             return error;
@@ -164,7 +167,7 @@ class ApiService {
         // Add response error handler
         this.addErrorInterceptor(async (error) => {
             // Show error toast
-            window.toastService?.error(
+            toastService?.error(
                 error.message || 'An error occurred while processing your request'
             );
             return error;
@@ -208,9 +211,8 @@ class ApiService {
     }
 }
 
-// Create global instance
-window.apiService = new ApiService();
+// Export a singleton instance
+export const apiService = new ApiService();
 
 // Initialize default interceptors
-window.apiService.initializeDefaultInterceptors(); 
-window.ApiService = ApiService; 
+apiService.initializeDefaultInterceptors(); 

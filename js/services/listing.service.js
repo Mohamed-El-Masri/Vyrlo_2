@@ -197,5 +197,5 @@ class ListingService {
     }
 }
 
-// Create global instance
-window.listingService = new ListingService(); 
+// Export a singleton instance
+export const listingService = new ListingService(); 

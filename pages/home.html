@@ -29,42 +29,56 @@
             <div class="vr-container">
                 <div class="vr-hero__content">
                     <h1 class="vr-hero__title">Find Local Services Near You</h1>
-                    <p class="vr-hero__subtitle">Connect with trusted local businesses and service providers in your area</p>
+                    <!-- <p class="vr-hero__subtitle">Connect with trusted local businesses and service providers in your area</p> -->
                     
-                    <form class="vr-search-form" id="searchForm">
-                        <div class="vr-search-form__group">
+                    <form class="vr-search-form" id="searchForm" role="search" aria-label="Search for services">
+                        <div class="vr-search-form__container">
                             <div class="vr-search-form__input-wrapper">
-                                <i class="fas fa-search vr-search-form__icon"></i>
+                                <i class="fas fa-search vr-search-form__icon" aria-hidden="true"></i>
                                 <input 
                                     type="text" 
                                     class="vr-search-form__input" 
-                                    placeholder="What service are you looking for?"
                                     id="searchInput"
+                                    placeholder="What service are you looking for?"
+                                    aria-label="Search for services"
                                     autocomplete="off"
+                                    role="combobox"
+                                    aria-expanded="false"
+                                    aria-controls="searchSuggestions"
+                                    aria-autocomplete="list"
                                 >
-                                <div class="vr-search-form__suggestions" id="searchSuggestions"></div>
+                                <div class="vr-search-suggestions" 
+                                     id="searchSuggestions" 
+                                     role="listbox" 
+                                     aria-label="Search suggestions">
+                                </div>
                             </div>
                             <div class="vr-search-form__input-wrapper">
-                                <i class="fas fa-map-marker-alt vr-search-form__icon"></i>
+                                <i class="fas fa-map-marker-alt vr-search-form__icon" aria-hidden="true"></i>
                                 <input 
                                     type="text" 
                                     class="vr-search-form__input" 
-                                    placeholder="Location"
                                     id="locationInput"
+                                    placeholder="Enter your location"
+                                    aria-label="Enter location"
                                     autocomplete="off"
+                                    role="combobox"
+                                    aria-expanded="false"
+                                    aria-controls="locationSuggestions"
+                                    aria-autocomplete="list"
                                 >
-                                <div class="vr-search-form__suggestions" id="locationSuggestions"></div>
+                                <div class="vr-search-suggestions" 
+                                     id="locationSuggestions" 
+                                     role="listbox" 
+                                     aria-label="Location suggestions">
+                                </div>
                             </div>
-                            <button type="submit" class="vr-btn vr-btn--primary vr-search-form__button">
-                                <i class="fas fa-search"></i>
+                            <button type="submit" 
+                                    class="vr-search-form__button vr-btn vr-btn--primary" 
+                                    aria-label="Search">
                                 <span>Search</span>
+                                <i class="fas fa-search" aria-hidden="true"></i>
                             </button>
-                        </div>
-                        <div class="vr-search-form__popular">
-                            <span>Popular:</span>
-                            <a href="#" class="vr-search-form__tag">Restaurants</a>
-                            <a href="#" class="vr-search-form__tag">Dentists</a>
-                            <a href="#" class="vr-search-form__tag">Home Services</a>
                         </div>
                     </form>
                 </div>
@@ -79,12 +93,22 @@
                     <h2 class="vr-section__title" data-scroll-reveal="fade-up">Popular Categories</h2>
                     <p class="vr-section__description" data-scroll-reveal="fade-up">Discover a wide range of services tailored to meet your specific needs</p>
                 </div>
-                <div class="vr-categories__grid" id="categoriesGrid"></div>
-                <div class="vr-section__footer">
-                    <button class="vr-btn vr-btn--outline vr-btn--load-more" id="loadMoreCategories">
-                        <span>View More Categories</span>
-                        <i class="fas fa-chevron-down"></i>
+                <div class="vr-categories__slider">
+                    <div class="vr-categories__track" id="categoriesTrack">
+                        <!-- Categories will be dynamically inserted here -->
+                    </div>
+                    
+                    <!-- Navigation Buttons -->
+                    <button class="vr-categories__nav vr-categories__nav--prev" aria-label="Previous categories">
+                        <i class="fas fa-chevron-left"></i>
                     </button>
+                    <button class="vr-categories__nav vr-categories__nav--next" aria-label="Next categories">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+
+                    <!-- Gradient Edges -->
+                    <div class="vr-categories__gradient vr-categories__gradient--left"></div>
+                    <div class="vr-categories__gradient vr-categories__gradient--right"></div>
                 </div>
             </div>
         </section>
@@ -153,13 +177,14 @@
     <div class="vr-toast-container" id="toastContainer"></div>
 
     <!-- Core Services -->
-    <script src="/js/services/api.service.js"></script>
-    <script src="/js/services/toast.service.js"></script>
-    <script src="/js/core/utils.js"></script>
-    <script src="/js/core/componentLoader.js"></script>
-    <script src="/js/services/auth.service.js"></script>
+    <script src="/js/services/api.service.js" type="module"></script>
+    <script src="/js/services/toast.service.js" type="module"></script>
+    <script src="/js/core/utils.js" type="module"></script>
+    <script src="/js/core/componentLoader.js" type="module"></script>
+    <script src="/js/services/auth.service.js" type="module"></script>
+    <script src="/js/services/listing.service.js" type="module"></script>
     
     <!-- Page Script -->
-    <script src="/js/pages/home.js"></script>
+    <script src="/js/pages/home.js" type="module"></script>
 </body>
 </html>

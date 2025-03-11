@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Listing - Vyrlo</title>
     <link rel="stylesheet" href="../../css/main.css">
-    <link rel="stylesheet" href="../../css/feature-items.css">
-    <link rel="stylesheet" href="../../css/map-fallbacks.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
@@ -38,8 +36,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="../../js/services/toast-service.js"></script>
     <script src="../../js/services/auth-service.js"></script>
-    <script src="../../js/services/auth-helper.js"></script>
-    <script src="../../js/services/token-debug.js"></script>
     <script src="../../js/utils/component-loader.js"></script>
     <script src="../../js/components/listingWizard.js"></script>
     <script src="../../js/pages/profile/add-listing.js"></script>
@@ -50,16 +46,6 @@
             loadComponent('#footer-container', '../../components/footer.html');
             loadComponent('#sidebar-container', '../../components/profile/sidebar.html');
             loadComponent('#listingFormContainer', '../../components/profile/addListing.html');
-            
-            // Check authentication on load
-            setTimeout(() => {
-                const isAuthenticated = window.AuthHelper?.isAuthenticated();
-                console.log('User authenticated:', isAuthenticated);
-                
-                if (!isAuthenticated) {
-                    console.warn('User not authenticated. Will redirect to login page if trying to submit form.');
-                }
-            }, 1000);
         });
     </script>
 </body>

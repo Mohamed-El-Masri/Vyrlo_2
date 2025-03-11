@@ -568,17 +568,17 @@ class AuthService {
     }
 }
 
-// Create global instance
-window.authService = new AuthService();
+// Export a singleton instance
+export const authService = new AuthService();
 
-// Update header UI on page load and after any navigation
+// Update UI on page load and after any navigation
 document.addEventListener('DOMContentLoaded', () => {
-    window.authService.updateUI();
+    authService.notifyAuthStateChange();
 });
 
-// Optional: Update header when the page becomes visible again
+// Optional: Update when the page becomes visible again
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-        window.authService.updateUI();
+        authService.notifyAuthStateChange();
     }
 }); 

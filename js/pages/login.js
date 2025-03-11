@@ -1,9 +1,9 @@
+import { authService } from '../services/auth.service.js';
+import { toastService } from '../services/toast.service.js';
+import { componentLoader } from '../core/componentLoader.js';
+
 class LoginPage {
     constructor() {
-        this.authService = new AuthService();
-        this.toastService = new ToastService();
-        this.componentLoader = new ComponentLoader();
-        
         this.form = document.getElementById('loginForm');
         this.emailInput = document.getElementById('email');
         this.passwordInput = document.getElementById('password');
@@ -13,12 +13,17 @@ class LoginPage {
     }
 
     async init() {
-        // Load components
-        await this.componentLoader.loadHeader();
-        await this.componentLoader.loadFooter();
-        
-        // Add event listeners
-        this.setupEventListeners();
+        try {
+            // Use the componentLoader instance instead of static methods
+            await componentLoader.loadHeader();
+            await componentLoader.loadFooter();
+            
+            // Add event listeners
+            this.setupEventListeners();
+        } catch (error) {
+            console.error('Error initializing login page:', error);
+            toastService.error('Failed to initialize page. Please refresh.');
+        }
     }
 
     setupEventListeners() {
@@ -98,14 +103,14 @@ class LoginPage {
         this.setLoading(true);
 
         try {
-            const response = await this.authService.login(
+            const response = await authService.login(
                 this.emailInput.value,
                 this.passwordInput.value
             );
 
             if (response.token) {
                 // Show success message
-                this.toastService.success('Successfully logged in');
+                toastService.success('Successfully logged in');
 
                 // Redirect to home page after successful login
                 setTimeout(() => {
@@ -114,7 +119,7 @@ class LoginPage {
             }
         } catch (error) {
             console.error('Login error:', error);
-            this.toastService.error(error.message || 'Failed to login. Please try again.');
+            toastService.error(error.message || 'Failed to login. Please try again.');
         } finally {
             this.setLoading(false);
         }
@@ -122,8 +127,6 @@ class LoginPage {
 }
 
 // Initialize page when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new LoginPage());
-} else {
+document.addEventListener('DOMContentLoaded', () => {
     new LoginPage();
-} 
+}); 

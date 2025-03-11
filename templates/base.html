@@ -13,26 +13,39 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/images/favicon.png">
     
-    <!-- Critical CSS -->
-    <style>
-        /* Inject critical CSS here */
-        :root { --vr-header-height: 80px; }
-        .vr-main { padding-top: var(--vr-header-height); }
-    </style>
-    
     <!-- Font Awesome - Load asynchronously -->
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" 
           media="print" onload="this.media='all'">
     
-    <!-- Main CSS -->
-    <link rel="stylesheet" href="/css/main/style.css">
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="/css/main/variables.css">
+    <link rel="stylesheet" href="/css/main/reset.css">
+    <link rel="stylesheet" href="/css/main/utilities.css">
+    <link rel="stylesheet" href="/css/main/animations.css">
+    
+    <!-- Layout CSS -->
+    <link rel="stylesheet" href="/css/layout/container.css">
+    <link rel="stylesheet" href="/css/layout/grid.css">
+    <link rel="stylesheet" href="/css/layout/flex.css">
+    
+    <!-- Component CSS -->
+    <link rel="stylesheet" href="/css/components/header.css">
+    <link rel="stylesheet" href="/css/components/footer.css">
+    <link rel="stylesheet" href="/css/components/buttons.css">
+    <link rel="stylesheet" href="/css/components/forms.css">
+    <link rel="stylesheet" href="/css/components/cards.css">
+    <link rel="stylesheet" href="/css/components/modal.css">
+    <link rel="stylesheet" href="/css/components/toast.css">
+    <link rel="stylesheet" href="/css/components/avatar.css">
+    <link rel="stylesheet" href="/css/components/dropdown.css">
+    <link rel="stylesheet" href="/css/components/loaders.css">
     
     <!-- Page Specific CSS -->
     {{pageStyles}}
 </head>
 <body>
-    <!-- Header Placeholder -->
+    <!-- Header -->
     <div id="headerContainer"></div>
 
     <!-- Main Content -->
@@ -40,23 +53,22 @@
         {{content}}
     </main>
 
-    <!-- Footer Placeholder -->
+    <!-- Footer -->
     <div id="footerContainer"></div>
 
     <!-- Toast Container -->
     <div class="vr-toast-container" id="toastContainer"></div>
 
     <!-- Core Services (Order matters!) -->
-    <script src="/js/core/utils.js"></script>
-    <script src="/js/services/toast.service.js"></script>
-    <script src="/js/services/api.service.js"></script>
-    <script src="/js/services/auth.service.js"></script>
-    <script src="/js/services/listing.service.js"></script>
-    <script src="/js/core/modal.js"></script>
-    <script src="/js/core/componentLoader.js"></script>
-    
-    <!-- Main Application Script -->
-    <script src="/js/core/main.js"></script>
+    <script src="/js/core/utils.js" type="module"></script>
+    <script src="/js/services/toast.service.js" type="module"></script>
+    <script src="/js/services/api.service.js" type="module"></script>
+    <script src="/js/services/file-upload.service.js" type="module"></script>
+    <script src="/js/services/auth.service.js" type="module"></script>
+    <script src="/js/services/listing.service.js" type="module"></script>
+    <script src="/js/core/modal.js" type="module"></script>
+    <script src="/js/core/componentLoader.js" type="module"></script>
+    <script src="/js/core/main.js" type="module"></script>
     
     <!-- Page Specific JS -->
     {{pageScripts}}

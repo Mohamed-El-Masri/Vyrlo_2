@@ -1,312 +1,263 @@
-<div class="vr-profile__form vr-listing-wizard">
-    <!-- Enhanced Progress Section -->
-    <div class="vr-wizard-header">
-        <div class="vr-wizard-progress">
-            <div class="vr-progress-track">
-                <div class="vr-progress-steps">
-                    <div class="vr-step active completed" data-step="1">
-                        <div class="vr-step-icon">
-                            <i class="fas fa-info-circle"></i>
-                            <span class="vr-step-number">1</span>
-                        </div>
-                        <div class="vr-step-label">
-                            <span class="vr-step-title">Basic Info</span>
-                            <span class="vr-step-desc">Business details</span>
-                        </div>
-                    </div>
-                    <!-- ... other steps ... -->
+<!-- Listing Wizard Form -->
+<div class="vr-wizard">
+    <!-- Progress Bar -->
+    <div class="vr-progress">
+        <div class="vr-progress-steps">
+            <div class="vr-step active" data-step="1">
+                <div class="vr-step-icon">
+                    <i class="fas fa-info-circle"></i>
                 </div>
-                <div class="vr-progress-line">
-                    <div class="vr-progress-fill" style="width: 0%"></div>
-                </div>
+                <div class="vr-step-label">Basic Info</div>
             </div>
+            <div class="vr-step" data-step="2">
+                <div class="vr-step-icon">
+                    <i class="fas fa-address-card"></i>
+                </div>
+                <div class="vr-step-label">Contact</div>
+            </div>
+            <div class="vr-step" data-step="3">
+                <div class="vr-step-icon">
+                    <i class="fas fa-location-dot"></i>
+                </div>
+                <div class="vr-step-label">Location</div>
+            </div>
+            <div class="vr-step" data-step="4">
+                <div class="vr-step-icon">
+                    <i class="fas fa-images"></i>
+                </div>
+                <div class="vr-step-label">Media</div>
+            </div>
+            <div class="vr-step" data-step="5">
+                <div class="vr-step-icon">
+                    <i class="fas fa-list-check"></i>
+                </div>
+                <div class="vr-step-label">Features & Hours</div>
+            </div>
+        </div>
+        <div class="vr-progress-bar">
+            <div class="vr-progress-fill" style="width: 20%"></div>
         </div>
     </div>
 
-    <!-- Step Progress Bar Animation -->
-    <style>
-        @keyframes slide-in-right {
-            from { transform: translateX(30px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+    <!-- Form Container -->
+    <form id="listingWizardForm" class="vr-wizard-form">
+        <!-- Step 1: Basic Info -->
+        <div class="vr-wizard-step active" data-step="1">
+            <div class="vr-step-header">
+                <h3><i class="fas fa-info-circle"></i> Basic Information</h3>
+                <p>Tell us about your business</p>
+            </div>
+            
+            <div class="vr-form-group">
+                <label for="businessName">Business Name*</label>
+                <input type="text" id="businessName" name="businessName" class="vr-input" required>
+                <div class="vr-input-hint">Enter your business or company name</div>
+            </div>
 
-        @keyframes slide-in-left {
-            from { transform: translateX(-30px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
+            <div class="vr-form-group">
+                <label for="category">Business Category*</label>
+                <select id="category" name="category" class="vr-input" required>
+                    <option value="">Select a category</option>
+                    <!-- Categories will be loaded dynamically -->
+                </select>
+            </div>
 
-        .slide-in-right {
-            animation: slide-in-right 0.5s ease forwards;
-        }
+            <div class="vr-form-group">
+                <label for="description">Business Description*</label>
+                <textarea id="description" name="description" class="vr-input" rows="4" required></textarea>
+                <div class="vr-input-hint">Describe your business in detail (min. 100 characters)</div>
+                <div class="vr-char-counter">0/500</div>
+            </div>
 
-        .slide-in-left {
-            animation: slide-in-left 0.5s ease forwards;
-        }
-    </style>
-
-    <form id="listingWizardForm" class="vr-listing-form">
-        <!-- Add a loading indicator -->
-        <div id="formLoadingIndicator" class="vr-loading-indicator">
-            <i class="fas fa-spinner fa-spin"></i>
-            <span>Loading form...</span>
+            <div class="vr-form-group">
+                <label for="tags">Business Tags</label>
+                <div class="vr-tags-input">
+                    <div class="vr-tags-container"></div>
+                    <input type="text" id="tags" class="vr-input" placeholder="Type and press Enter to add tags">
+                </div>
+                <div class="vr-input-hint">Add relevant tags to help customers find your business</div>
+            </div>
         </div>
 
-        <!-- Step 1: Basic Information -->
-        <div class="vr-wizard-step" data-step="1">
-            <div class="vr-form-section">
-                <h6 class="vr-form-section-title">
-                    <i class="fa-solid fa-info-circle"></i> Basic Information
-                </h6>
-                <div class="row">
-                    <div class="col-12">
-                        <div class="vr-form-group">
-                            <label for="listingName">Listing Name*</label>
-                            <input type="text" id="listingName" name="listingName" class="vr-input" required>
-                        </div>
+        <!-- Step 2: Contact Information -->
+        <div class="vr-wizard-step" data-step="2">
+            <div class="vr-step-header">
+                <h3><i class="fas fa-address-card"></i> Contact Information</h3>
+                <p>How can customers reach you?</p>
+            </div>
+
+            <div class="vr-form-group">
+                <label for="phone">Business Phone*</label>
+                <div class="vr-input-group">
+                    <span class="vr-input-icon">
+                        <i class="fas fa-phone"></i>
+                    </span>
+                    <input type="tel" id="phone" name="phone" class="vr-input" required>
+                </div>
+            </div>
+
+            <div class="vr-form-group">
+                <label for="email">Business Email*</label>
+                <div class="vr-input-group">
+                    <span class="vr-input-icon">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" id="email" name="email" class="vr-input" required>
+                </div>
+            </div>
+
+            <div class="vr-form-group">
+                <label for="website">Website</label>
+                <div class="vr-input-group">
+                    <span class="vr-input-icon">
+                        <i class="fas fa-globe"></i>
+                    </span>
+                    <input type="url" id="website" name="website" class="vr-input" placeholder="https://">
+                </div>
+            </div>
+
+            <div class="vr-form-group">
+                <label>Social Media</label>
+                <div id="socialMediaContainer">
+                    <div class="vr-social-account">
+                        <select class="vr-input vr-social-platform">
+                            <option value="">Select Platform</option>
+                            <option value="facebook">Facebook</option>
+                            <option value="instagram">Instagram</option>
+                            <option value="twitter">Twitter</option>
+                            <option value="linkedin">LinkedIn</option>
+                        </select>
+                        <input type="url" class="vr-input vr-social-url" placeholder="Profile URL">
+                        <button type="button" class="vr-btn vr-btn--icon vr-remove-social">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
-                    <div class="col-12">
-                        <div class="vr-form-group">
-                            <label for="categoryId">Category*</label>
-                            <select id="categoryId" name="categoryId" class="vr-input" required>
-                                <option value="">Select Category</option>
-                            </select>
-                        </div>
+                </div>
+                <button type="button" id="addSocialAccount" class="vr-btn vr-btn--outline">
+                    <i class="fas fa-plus"></i> Add Social Media
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 3: Location -->
+        <div class="vr-wizard-step" data-step="3">
+            <div class="vr-step-header">
+                <h3><i class="fas fa-location-dot"></i> Business Location</h3>
+                <p>Where can customers find you?</p>
+            </div>
+
+            <div class="vr-form-group">
+                <label for="businessAddress">Business Address</label>
+                <div class="vr-input-group">
+                    <span class="vr-input-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </span>
+                    <input type="text" id="businessAddress" name="address" class="vr-input" placeholder="Enter your business address">
+                </div>
+            </div>
+
+            <div class="vr-map-container">
+                <div id="locationMap" class="vr-map"></div>
+                <div class="vr-map-overlay">
+                    <div class="vr-map-search">
+                        <!-- Mapbox Geocoder will be inserted here -->
                     </div>
-                    <div class="col-12">
-                        <div class="vr-form-group">
-                            <label for="description">Description*</label>
-                            <textarea id="description" name="description" class="vr-input" rows="4" required></textarea>
-                        </div>
-                    </div>
+                </div>
+            </div>
+
+            <div class="vr-form-row">
+                <div class="vr-form-group vr-form-group--half">
+                    <label for="latitude">Latitude</label>
+                    <input type="text" id="latitude" name="latitude" class="vr-input" readonly>
+                </div>
+                <div class="vr-form-group vr-form-group--half">
+                    <label for="longitude">Longitude</label>
+                    <input type="text" id="longitude" name="longitude" class="vr-input" readonly>
                 </div>
             </div>
         </div>
 
-        <!-- Step 2: Location -->
-        <div class="vr-wizard-step" data-step="2" style="display: none;">
-            <div class="vr-form-section">
-                <h6 class="vr-form-section-title">
-                    <i class="fa-solid fa-location-dot"></i> Location Details
-                </h6>
-                <div class="row">
-                    <div class="col-12">
-                        <div id="listingMap" class="vr-map-container"></div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="vr-form-group">
-                            <label for="location">Address*</label>
-                            <input type="text" id="location" name="location" class="vr-input" required>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="vr-form-group">
-                            <label for="latitude">Latitude*</label>
-                            <input type="text" id="latitude" name="latitude" class="vr-input" readonly>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="vr-form-group">
-                            <label for="longitude">Longitude*</label>
-                            <input type="text" id="longitude" name="longitude" class="vr-input" readonly>
-                        </div>
+        <!-- Step 4: Media -->
+        <div class="vr-wizard-step" data-step="4">
+            <div class="vr-step-header">
+                <h3><i class="fas fa-images"></i> Business Media</h3>
+                <p>Show your business to potential customers</p>
+            </div>
+
+            <div class="vr-form-group">
+                <label>Main Image*</label>
+                <div class="vr-dropzone" id="mainImageDropzone">
+                    <input type="file" id="mainImage" accept="image/*" class="vr-file-input" required>
+                    <img id="mainImagePreview" class="vr-image-preview" style="display: none;">
+                    <div id="mainImagePlaceholder" class="vr-dropzone-content">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag and drop your main image here or click to browse</p>
+                        <span>Recommended size: 1200x800px</span>
                     </div>
                 </div>
             </div>
+
+            <div class="vr-form-group">
+                <label>Gallery Images</label>
+                <div class="vr-dropzone" id="galleryDropzone">
+                    <input type="file" id="galleryImages" accept="image/*" multiple class="vr-file-input">
+                    <div class="vr-dropzone-content">
+                        <i class="fas fa-images"></i>
+                        <p>Drag and drop gallery images here or click to browse</p>
+                        <span>Add up to 10 images</span>
+                    </div>
+                </div>
+                <div id="galleryPreview" class="vr-gallery-preview"></div>
+            </div>
         </div>
 
-        <!-- Step 3: Features -->
-        <div class="vr-wizard-step" data-step="3" style="display: none;">
-            <div class="vr-form-section">
-                <div class="vr-features-header">
-                    <div class="vr-features-title">
-                        <h6 class="vr-form-section-title">
-                            <i class="fa-solid fa-list-check"></i> Category Features
-                        </h6>
-                        <p class="vr-features-category">
-                            Category: <span id="selectedCategoryName">-</span>
-                        </p>
-                    </div>
-                    <button type="button" class="vr-btn vr-btn--primary vr-btn--sm" id="addCustomFeature">
-                        <i class="fas fa-plus"></i> Add New Feature
-                    </button>
-                </div>
+        <!-- Step 5: Features & Hours -->
+        <div class="vr-wizard-step" data-step="5">
+            <div class="vr-step-header">
+                <h3><i class="fas fa-list-check"></i> Features & Hours</h3>
+                <p>Add features and business hours</p>
+            </div>
 
+            <div class="vr-form-section">
+                <h4>Business Features</h4>
                 <div class="vr-features-grid" id="featuresContainer">
-                    <!-- Features will be populated here -->
-                </div>
-
-                <!-- Features Dialog -->
-                <div class="vr-dialog" id="featureDialog" style="display: none;">
-                    <div class="vr-dialog__content">
-                        <h3>Add New Feature</h3>
-                        <div class="vr-form-group">
-                            <label for="newFeature">Feature Name</label>
-                            <input type="text" id="newFeature" class="vr-input" placeholder="Enter feature name">
-                        </div>
-                        <div class="vr-dialog__actions">
-                            <button type="button" class="vr-btn vr-btn--outline" data-action="cancel">Cancel</button>
-                            <button type="button" class="vr-btn vr-btn--primary" data-action="confirm">Add Feature</button>
-                        </div>
-                    </div>
+                    <!-- Features will be loaded dynamically -->
                 </div>
             </div>
-        </div>
 
-        <!-- Step 4: Business Hours -->
-        <div class="vr-wizard-step" data-step="4" style="display: none;">
             <div class="vr-form-section">
-                <div class="vr-hours-header">
-                    <h6 class="vr-form-section-title">
-                        <i class="fa-solid fa-clock"></i> Business Hours
-                    </h6>
-                    <div class="vr-hours-actions">
-                        <label class="vr-toggle">
-                            <input type="checkbox" id="is24Hours">
-                            <span class="vr-toggle-slider"></span>
-                            <span class="vr-toggle-label">Open 24/7</span>
-                        </label>
-                    </div>
+                <h4>Business Hours</h4>
+                <div class="vr-form-group">
+                    <label class="vr-checkbox">
+                        <input type="checkbox" id="is24Hours">
+                        <span class="vr-checkbox-label">Open 24/7</span>
+                    </label>
                 </div>
 
-                <div id="businessHoursContainer" class="vr-business-hours">
+                <div id="businessHoursContainer">
+                    <div class="vr-hours-header">
+                        <button type="button" id="copyHours" class="vr-btn vr-btn--outline vr-btn--sm">
+                            <i class="fas fa-copy"></i> Copy to All Days
+                        </button>
+                    </div>
+                    
                     <div class="vr-hours-grid">
-                        <!-- Days will be dynamically populated -->
-                    </div>
-                </div>
-
-                <div class="vr-hours-footer">
-                    <button type="button" class="vr-btn vr-btn--outline vr-btn--sm" id="copyHours">
-                        <i class="fas fa-copy"></i> Copy hours to all days
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 5: Media -->
-        <div class="vr-wizard-step" data-step="5" style="display: none;">
-            <div class="vr-form-section">
-                <div class="vr-media-header">
-                    <h6 class="vr-form-section-title">
-                        <i class="fa-solid fa-images"></i> Media Files
-                    </h6>
-                </div>
-
-                <!-- Main Image Upload -->
-                <div class="vr-media-main">
-                    <h6 class="vr-media-subtitle">Main Photo (Optional)</h6>
-                    <div class="vr-alert vr-alert--info">
-                        <div class="vr-alert__icon"><i class="fas fa-info-circle"></i></div>
-                        <div class="vr-alert__content">
-                            <div class="vr-alert__title">Image Upload Temporarily Disabled</div>
-                            <div class="vr-alert__message">
-                                Image uploads are currently simulated. Your listing will use placeholder images until the feature is fully enabled.
-                            </div>
-                        </div>
-                    </div>
-                    <div class="vr-media-main-upload" id="mainImageUpload">
-                        <input type="file" 
-                               id="mainImage" 
-                               name="mainImage" 
-                               accept="image/*" 
-                               class="vr-media-input"
-                               hidden>
-                        <div class="vr-media-placeholder">
-                            <i class="fas fa-cloud-upload-alt"></i>
-                            <span>Click or drag image here</span>
-                            <small>Maximum size: 5MB</small>
-                        </div>
-                        <div class="vr-media-preview" style="display: none;">
-                            <img src="" alt="Main photo preview" id="mainImagePreview">
-                            <button type="button" class="vr-media-remove" id="removeMainImage">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Gallery Upload -->
-                <div class="vr-media-gallery">
-                    <h6 class="vr-media-subtitle">Gallery Photos (Maximum 10)</h6>
-                    <div class="vr-media-grid">
-                        <div class="vr-media-upload" id="galleryUpload">
-                            <input type="file" 
-                                   id="galleryImages" 
-                                   name="gallery[]" 
-                                   accept="image/*" 
-                                   multiple 
-                                   class="vr-media-input"
-                                   hidden>
-                            <div class="vr-media-placeholder">
-                                <i class="fas fa-plus"></i>
-                                <span>Add Photos</span>
-                            </div>
-                        </div>
-                        <div id="galleryPreview" class="vr-media-preview-grid"></div>
-                    </div>
-                    <small class="vr-media-help">Preview only. Images will be saved as placeholders.</small>
-                </div>
-
-                <!-- Required Contact Information -->
-                <div class="vr-form-section">
-                    <h6 class="vr-form-section-title">
-                        <i class="fa-solid fa-address-card"></i> Contact Information
-                    </h6>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="vr-form-group">
-                                <label for="email">Email Address*</label>
-                                <input type="email" id="email" name="email" class="vr-input" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="vr-form-group">
-                                <label for="mobile">Mobile Number*</label>
-                                <input type="tel" id="mobile" name="mobile" class="vr-input" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="vr-form-group">
-                                <label for="taxNumber">Tax Number (Optional)</label>
-                                <input type="text" id="taxNumber" name="taxNumber" class="vr-input">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Video URL -->
-                <div class="vr-media-video">
-                    <h6 class="vr-media-subtitle">YouTube Video URL (Optional)</h6>
-                    <div class="vr-form-group">
-                        <div class="vr-input-group">
-                            <input type="url" 
-                                   id="videoUrl" 
-                                   name="videoUrl" 
-                                   class="vr-input" 
-                                   placeholder="Paste YouTube video URL here">
-                            <button type="button" 
-                                    class="vr-btn vr-btn--primary" 
-                                    id="previewVideoBtn">
-                                <i class="fas fa-eye"></i>
-                                Preview
-                            </button>
-                        </div>
-                        <div class="vr-video-preview" id="videoPreview"></div>
+                        <!-- Days will be generated dynamically -->
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ... Additional steps HTML ... -->
-
-        <div class="vr-wizard-actions">
-            <button type="button" class="vr-btn vr-btn--outline" id="prevStep" style="display: none;">
+        <!-- Form Navigation -->
+        <div class="vr-wizard-nav">
+            <button type="button" id="prevStep" class="vr-btn vr-btn--outline">
                 <i class="fas fa-arrow-left"></i> Previous
             </button>
-            <button type="button" class="vr-btn vr-btn--primary" id="nextStep">
+            <button type="button" id="nextStep" class="vr-btn vr-btn--primary">
                 Next <i class="fas fa-arrow-right"></i>
             </button>
-            <button type="submit" class="vr-btn vr-btn--success" id="submitListing" style="display: none;">
-                <i class="fas fa-check"></i> Create Listing
+            <button type="submit" id="submitListing" class="vr-btn vr-btn--success" style="display: none;">
+                <i class="fas fa-check"></i> Submit Listing
             </button>
         </div>
     </form>

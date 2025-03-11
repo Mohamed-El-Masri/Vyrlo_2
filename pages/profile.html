@@ -13,9 +13,6 @@
    <!-- Add listings -->
    <link rel="stylesheet" href="/css/components/listing-wizard.css">
    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <!-- Toast -->
-    <link rel="stylesheet" href="/css/components/toast.css">
-
     <!-- Page CSS -->
     <link rel="stylesheet" href="/css/pages/profile.css">
 </head>
@@ -71,26 +68,26 @@
                             </div>
                         </div>
                         <ul class="vr-profile-menu">
-                            <li class="profile-item" data-page="profile">
-                                <a href="/pages/profile.html">
+                            <li class="profile-item" data-section="profile">
+                                <a href="#profile">
                                     <i class="fa-regular fa-user"></i>
                                     My Profile
                                 </a>
                             </li>
-                            <li class="profile-item" data-page="addListing">
-                                <a href="#" onclick="loadAddListingComponent(); return false;">
+                            <li class="profile-item" data-section="addListing">
+                                <a href="#addListing">
                                     <i class="fa-solid fa-plus"></i>
                                     Add Listing
                                 </a>
                             </li>
-                            <li class="profile-item" data-page="userListings">
-                                <a href="/pages/userListings.html">
+                            <li class="profile-item" data-section="listings">
+                                <a href="#listings">
                                     <i class="fa-solid fa-list"></i>
                                     My Listings
                                 </a>
                             </li>
-                            <li class="profile-item" data-page="changePassword">
-                                <a href="/pages/change-password.html">
+                            <li class="profile-item" data-section="changePassword">
+                                <a href="#changePassword">
                                     <i class="fa-solid fa-lock"></i>
                                     Change Password
                                 </a>
@@ -107,6 +104,8 @@
 
                 <!-- Enhanced Content Area -->
                 <section class="col-md-8 col-lg-9 p-3">
+                    <!-- Profile Section -->
+                    <div id="profileContainer" class="vr-profile__section active">
                     <div class="dashboard block p-4 vr-profile__form vr-animate-scale-in">
                         <div class="vr-profile-header">
                             <h5><i class="fa-solid fa-user-gear"></i> My Account</h5>
@@ -214,14 +213,185 @@
                             </div>
                         </form>
                     </div>
-                    <div class="vr-profile__content">
-                        <!-- Profile content will be here -->
-                        <div id="addListingContainer"></div>
+                    </div>
+
+                    <!-- Listings Section -->
+                    <div id="listingsContainer" class="vr-profile__section">
+                        <!-- Listings will be loaded here -->
+                    </div>
+
+                    <!-- Add Listing Section -->
+                    <div id="addListingContainer" class="vr-profile__section" style="display: none;">
+                        <div class="lw-container">
+                            <!-- Progress Bar -->
+                            <div class="lw-progress">
+                                <div class="lw-progress-steps">
+                                    <div class="lw-step active">
+                                        <div class="lw-step-icon">
+                                            <i class="fa-solid fa-info-circle"></i>
+                                        </div>
+                                        <div class="lw-step-label">Basic Info</div>
+                                        <div class="lw-step-desc">Business details</div>
+                                    </div>
+                                    <div class="lw-step">
+                                        <div class="lw-step-icon">
+                                            <i class="fa-solid fa-location-dot"></i>
+                                        </div>
+                                        <div class="lw-step-label">Location</div>
+                                        <div class="lw-step-desc">Address & Map</div>
+                                    </div>
+                                    <div class="lw-step">
+                                        <div class="lw-step-icon">
+                                            <i class="fa-solid fa-list-check"></i>
+                                        </div>
+                                        <div class="lw-step-label">Features</div>
+                                        <div class="lw-step-desc">Business features</div>
+                                    </div>
+                                    <div class="lw-step">
+                                        <div class="lw-step-icon">
+                                            <i class="fa-regular fa-clock"></i>
+                                        </div>
+                                        <div class="lw-step-label">Hours</div>
+                                        <div class="lw-step-desc">Business hours</div>
+                                    </div>
+                                    <div class="lw-step">
+                                        <div class="lw-step-icon">
+                                            <i class="fa-solid fa-images"></i>
+                                        </div>
+                                        <div class="lw-step-label">Media</div>
+                                        <div class="lw-step-desc">Photos & videos</div>
+                                    </div>
+                                </div>
+                                <div class="lw-progress-line"></div>
+                                <div class="lw-progress-bar">
+                                    <div class="lw-progress-fill" style="width: 20%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Form Content -->
+                            <div class="lw-content">
+                                <!-- Step 1: Basic Info -->
+                                <div class="lw-step-content active" data-step="1">
+                                    <div class="lw-form-group">
+                                        <label for="businessName">Business Name</label>
+                                        <input type="text" id="businessName" class="lw-input" placeholder="Enter your business name">
+                                        <div class="lw-input-hint">This will be displayed as your listing title</div>
+                                    </div>
+
+                                    <div class="lw-form-group">
+                                        <label for="category">Business Category</label>
+                                        <select id="category" class="lw-input">
+                                            <option value="">Select a category</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="lw-form-group">
+                                        <label for="description">Business Description</label>
+                                        <textarea id="description" class="lw-input" rows="4" placeholder="Describe your business"></textarea>
+                                        <div class="lw-char-counter">0/500</div>
+                                    </div>
+
+                                    <div class="lw-form-group">
+                                        <label for="tags">Business Tags</label>
+                                        <div class="lw-tags-input">
+                                            <div class="lw-tags-container"></div>
+                                            <input type="text" id="tags" class="lw-input" placeholder="Add tags (press Enter)">
+                                        </div>
+                                        <div class="lw-input-hint">Add relevant tags to help customers find your business</div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 2: Location -->
+                                <div class="lw-step-content" data-step="2">
+                                    <div class="lw-form-group">
+                                        <label for="address">Business Address</label>
+                                        <div class="lw-input-group">
+                                            <i class="fa-solid fa-location-dot"></i>
+                                            <input type="text" id="address" class="lw-input" placeholder="Enter your business address">
+                                        </div>
+                                    </div>
+
+                                    <div class="lw-map-container">
+                                        <div id="map" class="lw-map"></div>
+                                        <div class="lw-map-search">
+                                            <input type="text" class="lw-input" placeholder="Search location">
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="lw-form-group">
+                                                <label for="latitude">Latitude</label>
+                                                <input type="text" id="latitude" class="lw-input" readonly>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="lw-form-group">
+                                                <label for="longitude">Longitude</label>
+                                                <input type="text" id="longitude" class="lw-input" readonly>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Step 3: Features -->
+                                <div class="lw-step-content" data-step="3">
+                                    <div class="lw-features-grid" id="featuresGrid">
+                                        <!-- Features will be loaded dynamically -->
+                                    </div>
+                                </div>
+
+                                <!-- Step 4: Hours -->
+                                <div class="lw-step-content" data-step="4">
+                                    <div class="lw-hours-grid" id="hoursGrid">
+                                        <!-- Business hours will be loaded dynamically -->
+                                    </div>
+                                </div>
+
+                                <!-- Step 5: Media -->
+                                <div class="lw-step-content" data-step="5">
+                                    <div class="lw-media-upload" id="mainImageUpload">
+                                        <div class="lw-media-placeholder">
+                                            <i class="fa-solid fa-image"></i>
+                                            <p>Drop your main image here or click to browse</p>
+                                            <span>Recommended size: 1200x800px</span>
+                                        </div>
+                                        <input type="file" class="lw-file-input" accept="image/*">
+                                    </div>
+
+                                    <div class="lw-media-preview" id="mainImagePreview" style="display: none;">
+                                        <img src="" alt="Main image preview">
+                                        <button class="lw-gallery-remove">
+                                            <i class="fa-solid fa-times"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="lw-gallery-grid" id="galleryGrid">
+                                        <!-- Gallery images will be loaded dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Form Navigation -->
+                            <div class="lw-actions">
+                                <button type="button" class="lw-btn lw-btn--secondary" id="prevStep">
+                                    <i class="fa-solid fa-arrow-left"></i> Previous
+                                </button>
+                                <button type="button" class="lw-btn lw-btn--primary" id="nextStep">
+                                    Next <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+
+                            <!-- Loading State -->
+                            <div class="lw-loading" style="display: none;">
+                                <i class="fa-solid fa-spinner"></i>
+                                <span>Loading...</span>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </div>
         </div>
-        <div id="addListingContainer"></div>
     </main>
 
     <!-- Footer Container -->
@@ -229,81 +399,20 @@
 
     <!-- Toast Container -->
     <div class="vr-toast-container" id="toastContainer"></div>
+
     <!-- Core Services -->
-    <script src="/js/services/api.service.js"></script>
-    <script src="/js/services/toast.service.js"></script>
-    <script src="/js/core/utils.js"></script>
-    <script src="/js/core/componentLoader.js"></script>
-    <script src="/js/services/auth.service.js"></script>
-    <script src="/js/pages/profile.js"></script>
+    <script src="/js/services/api.service.js" type="module"></script>
+    <script src="/js/services/toast.service.js" type="module"></script>
+    <script src="/js/core/utils.js" type="module"></script>
+    <script src="/js/core/componentLoader.js" type="module"></script>
+    <script src="/js/services/auth.service.js" type="module"></script>
+    <script src="/js/services/listing.service.js" type="module"></script>
 
-    <!-- listing wizard -->
-    
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script>
-        // Initialize listing wizard after content loads
-        document.addEventListener('DOMContentLoaded', () => {
-            // Listen for profile content changes
-            const observer = new MutationObserver((mutations) => {
-                mutations.forEach((mutation) => {
-                    if (mutation.addedNodes.length) {
-                        const wizardForm = document.getElementById('listingWizardForm');
-                        if (wizardForm && !window.listingWizard) {
-                            window.listingWizard = new ListingWizard();
-                        }
-                    }
-                });
-            });
+    <!-- Components -->
+    <script src="/js/components/profileNavigation.js" type="module"></script>
+    <script src="/js/components/listingWizard.js" type="module"></script>
 
-            // Observe profile content area
-            const profileContent = document.querySelector('.vr-profile-content');
-            if (profileContent) {
-                observer.observe(profileContent, { childList: true, subtree: true });
-            }
-        });
-
-        function loadAddListingComponent() {
-            // Remove active class from all items
-            document.querySelectorAll('.profile-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Add active class to Add Listing menu item
-            document.querySelector('[data-page="addListing"]').classList.add('active');
-            
-            // Hide other content
-            const mainContent = document.querySelector('.vr-profile__form:not(.vr-listing-wizard)');
-            if (mainContent) {
-                mainContent.style.display = 'none';
-            }
-            
-            // Load the component
-            fetch('/components/profile/addListing.html')
-                .then(response => response.text())
-                .then(html => {
-                    const container = document.getElementById('addListingContainer');
-                    container.innerHTML = html;
-                    container.style.display = 'block';
-                    
-                    // Initialize listing wizard
-                    if (typeof ListingWizard !== 'undefined') {
-                        window.listingWizard = new ListingWizard();
-                    }
-                    
-                    // Update page title
-                    const pageTitle = document.querySelector('.vr-profile-header h5');
-                    if (pageTitle) {
-                        pageTitle.innerHTML = '<i class="fa-solid fa-plus-circle"></i> Add New Listing';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading component:', error);
-                    window.toastService?.error('Failed to load Add Listing component');
-                });
-        }
-    </script>
-    <script src="/js/components/listingWizard.js"></script>
-    <script src="/js/pages/profile/add-listing.js"></script>
-   
+    <!-- Page Script -->
+    <script src="/js/pages/profile.js" type="module"></script>
 </body>
 </html>
