@@ -176,5 +176,9 @@ class ToastService {
     }
 }
 
+<<<<<<< HEAD
 // Export singleton instance
+=======
+// Export a singleton instance
+>>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
 export const toastService = new ToastService(); 

@@ -17,6 +17,17 @@ class HomePage {
         this.selectedIndex = -1;
         this.currentSuggestions = [];
         
+        // Search Configuration
+        this.minSearchLength = 2;
+        this.searchDebounceTime = 300;
+        this.maxSuggestions = {
+            listings: 4,
+            categories: 3,
+            locations: 5
+        };
+        this.selectedIndex = -1;
+        this.currentSuggestions = [];
+        
         this.categoryPage = 1;
         this.listingPage = 1;
         this.isLoadingCategories = false;

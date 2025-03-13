@@ -46,7 +46,11 @@ class LoginPage {
             this.setupEventListeners();
         } catch (error) {
             console.error('Error initializing login page:', error);
+<<<<<<< HEAD
             this.showToast('error', 'Failed to initialize page');
+=======
+            toastService.error('Failed to initialize page. Please refresh.');
+>>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
         }
     }
 
@@ -132,6 +136,7 @@ class LoginPage {
         }
 
         try {
+<<<<<<< HEAD
             this.setLoading(true);
 
             const response = await fetch(`${this.apiBaseUrl}/signin`, {
@@ -145,6 +150,16 @@ class LoginPage {
                     password: this.passwordInput.value
                 })
             });
+=======
+            const response = await authService.login(
+                this.emailInput.value,
+                this.passwordInput.value
+            );
+
+            if (response.token) {
+                // Show success message
+                toastService.success('Successfully logged in');
+>>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
 
             const data = await response.json();
 
@@ -173,6 +188,7 @@ class LoginPage {
 
         } catch (error) {
             console.error('Login error:', error);
+<<<<<<< HEAD
             let errorMessage = 'Failed to login';
             
             if (error.message.includes('credentials')) {
@@ -183,6 +199,9 @@ class LoginPage {
             
             // Show error toast
             this.showToast('error', errorMessage);
+=======
+            toastService.error(error.message || 'Failed to login. Please try again.');
+>>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
         } finally {
             this.setLoading(false);
         }
