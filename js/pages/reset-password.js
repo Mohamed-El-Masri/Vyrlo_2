@@ -1,8 +1,6 @@
 class ResetPasswordPage {
     constructor() {
-        this.authService = new AuthService();
-        this.toastService = new ToastService();
-        this.componentLoader = new ComponentLoader();
+        // Initialize properties
         this.form = document.getElementById('resetPasswordForm');
         this.otpInput = document.getElementById('otp');
         this.passwordInput = document.getElementById('password');
@@ -10,10 +8,13 @@ class ResetPasswordPage {
         this.submitButton = this.form.querySelector('.vr-auth__submit');
         this.passwordToggles = document.querySelectorAll('.vr-password-toggle');
         
+        // Initialize API URL
+        this.apiBaseUrl = 'https://www.vyrlo.com:8080';
+        
         // Get email from session storage
         this.email = sessionStorage.getItem('reset_email');
         if (!this.email) {
-            window.location.href = 'forgot-password.html';
+            window.location.href = '/pages/forgot-password.html';
             return;
         }
         
@@ -21,11 +22,16 @@ class ResetPasswordPage {
     }
 
     async init() {
-        // Load components
-        await this.componentLoader.loadHeader();
-        await this.componentLoader.loadFooter();
+        try {
+            this.setupEventListeners();
+        } catch (error) {
+            console.error('Error initializing page:', error);
+            this.showToast('error', 'Failed to initialize page');
+        }
+    }
 
-        // Add event listeners
+    setupEventListeners() {
+        // Form submit
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
         
         // Clear errors on input
@@ -55,36 +61,28 @@ class ResetPasswordPage {
         }
     }
 
-    clearError(input) {
-        input.classList.remove('error');
-    }
-
-    showError(input, message) {
-        input.classList.add('error');
-        const errorText = input.parentElement.querySelector('.vr-error-text');
-        if (errorText) {
-            errorText.textContent = message;
-        }
-    }
-
     validateForm() {
         let isValid = true;
+        
+        // Reset all errors first
+        this.clearAllErrors();
 
         // Validate OTP
         if (!this.otpInput.value.trim()) {
-            this.showError(this.otpInput, 'OTP code is required');
+            this.showError(this.otpInput, 'OTP is required');
             isValid = false;
-        } else if (this.otpInput.value.length !== 6) {
+        } else if (!/^\d{6}$/.test(this.otpInput.value.trim())) {
             this.showError(this.otpInput, 'OTP must be 6 digits');
             isValid = false;
         }
 
         // Validate password
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
         if (!this.passwordInput.value) {
             this.showError(this.passwordInput, 'New password is required');
             isValid = false;
-        } else if (this.passwordInput.value.length < 8) {
-            this.showError(this.passwordInput, 'Password must be at least 8 characters');
+        } else if (!passwordRegex.test(this.passwordInput.value)) {
+            this.showError(this.passwordInput, 'Password must be at least 8 characters with letters and numbers');
             isValid = false;
         }
 
@@ -100,16 +98,6 @@ class ResetPasswordPage {
         return isValid;
     }
 
-    setLoading(loading) {
-        if (loading) {
-            this.submitButton.classList.add('loading');
-            this.submitButton.disabled = true;
-        } else {
-            this.submitButton.classList.remove('loading');
-            this.submitButton.disabled = false;
-        }
-    }
-
     async handleSubmit(e) {
         e.preventDefault();
 
@@ -119,35 +107,110 @@ class ResetPasswordPage {
 
         try {
             this.setLoading(true);
-            
-            // Reset password with OTP
-            await ApiService.post('/forgetpass/reset', {
-                email: this.email,
-                newPassword: this.passwordInput.value,
-                otp: this.otpInput.value
+
+            const response = await fetch(`${this.apiBaseUrl}/forgetpass/reset`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: this.email,
+                    newPassword: this.passwordInput.value,
+                    otp: this.otpInput.value
+                })
             });
-            
-            this.toastService.success('Password has been reset successfully! Redirecting to login...');
-            
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to reset password');
+            }
+
             // Clear stored email
             sessionStorage.removeItem('reset_email');
-            
-            // Redirect to login page after 2 seconds
+
+            // Show success message
+            this.showToast('success', 'Password reset successful! Redirecting to login...');
+
+            // Redirect to login page
             setTimeout(() => {
-                window.location.href = 'login.html';
+                window.location.href = '/pages/login.html';
             }, 2000);
-            
+
         } catch (error) {
-            this.toastService.error(error.message || 'Failed to reset password');
+            this.showToast('error', error.message || 'Failed to reset password');
         } finally {
             this.setLoading(false);
         }
     }
+
+    setLoading(loading) {
+        const spinner = this.submitButton.querySelector('.vr-spinner');
+        const text = this.submitButton.querySelector('span');
+        
+        if (loading) {
+            this.submitButton.disabled = true;
+            spinner.style.display = 'block';
+            text.style.opacity = '0';
+        } else {
+            this.submitButton.disabled = false;
+            spinner.style.display = 'none';
+            text.style.opacity = '1';
+        }
+    }
+
+    showError(input, message) {
+        const formGroup = input.closest('.vr-form-group');
+        const errorElement = formGroup.querySelector('.vr-error-message');
+        
+        input.classList.add('error');
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
+        }
+    }
+
+    clearError(input) {
+        const formGroup = input.closest('.vr-form-group');
+        const errorElement = formGroup.querySelector('.vr-error-message');
+        
+        input.classList.remove('error');
+        if (errorElement) {
+            errorElement.textContent = '';
+            errorElement.classList.remove('show');
+        }
+    }
+
+    clearAllErrors() {
+        const inputs = [this.otpInput, this.passwordInput, this.confirmPasswordInput];
+        inputs.forEach(input => this.clearError(input));
+    }
+
+    showToast(type, message) {
+        if (window.toastService) {
+            window.toastService[type](message);
+        } else {
+            alert(message); // Fallback if toast service is not available
+        }
+    }
 }
 
-// Initialize page when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new ResetPasswordPage());
-} else {
-    new ResetPasswordPage();
-} 
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds with 100ms interval
+    
+    const initializePage = () => {
+        if (window.toastService) {
+            new ResetPasswordPage();
+        } else if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(initializePage, 100);
+        } else {
+            console.error('Services failed to load');
+            alert('Failed to initialize page. Please refresh.');
+        }
+    };
+
+    initializePage();
+}); 

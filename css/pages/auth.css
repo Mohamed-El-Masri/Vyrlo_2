@@ -70,9 +70,8 @@
 }
 
 .vr-form-group {
-    display: flex;
-    flex-direction: column;
-    gap: var(--vr-spacing-xs);
+    margin-bottom: 1.5rem;
+    position: relative;
 }
 
 .vr-label {
@@ -83,57 +82,70 @@
 
 .vr-input-group {
     position: relative;
+    margin-bottom: 0.25rem;
 }
 
 .vr-input {
     width: 100%;
-    padding: var(--vr-spacing-sm) var(--vr-spacing-md);
-    padding-left: calc(var(--vr-spacing-md) + 24px);
-    border: 1px solid var(--vr-gray-200);
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 1px solid var(--vr-gray-300);
     border-radius: var(--vr-radius-md);
-    background: var(--vr-gray-50);
-    color: var(--vr-gray-900);
-    font-size: var(--vr-text-base);
-    transition: all var(--vr-transition-fast);
-}
-
-.vr-input:hover {
-    border-color: var(--vr-gray-300);
-}
-
-.vr-input:focus {
-    border-color: var(--vr-primary);
-    background: var(--vr-light);
-    box-shadow: 0 0 0 4px var(--vr-primary-light);
+    transition: all 0.3s ease;
 }
 
 .vr-input.error {
     border-color: var(--vr-error);
-    background: var(--vr-error-light);
+    background-color: var(--vr-error-light);
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
 }
 
+.vr-error-message {
+    color: var(--vr-error);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.vr-error-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.vr-error-message i {
+    font-size: 1rem;
+}
+
+@keyframes shake {
+    10%, 90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+    20%, 80% {
+        transform: translate3d(2px, 0, 0);
+    }
+    30%, 50%, 70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+    40%, 60% {
+        transform: translate3d(4px, 0, 0);
+    }
+}
+
+/* Input icons styling */
 .vr-input-group__addon {
     position: absolute;
-    left: var(--vr-spacing-md);
+    left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: var(--vr-gray-400);
-    pointer-events: none;
-}
-
-.vr-error-text {
-    display: none;
-    color: var(--vr-error);
-    font-size: var(--vr-text-sm);
-    margin-top: var(--vr-spacing-xs);
+    color: var(--vr-gray-500);
 }
 
 .vr-input.error + .vr-input-group__addon {
     color: var(--vr-error);
-}
-
-.vr-input.error ~ .vr-error-text {
-    display: block;
 }
 
 .vr-auth__options {
@@ -408,8 +420,6 @@
     color: var(--danger-color) !important;
 }
 
-
-
 .vr-input{
     padding-left: 78px !important;
 }
@@ -430,4 +440,18 @@
     .vr-dropdown {
         width: 180px;
     }
+}
+
+/* Toast styling for error messages */
+.vr-toast.vr-toast--error {
+    background-color: var(--vr-error-light);
+    border-left: 4px solid var(--vr-error);
+    color: var(--vr-error-dark);
+    font-weight: 500;
+    padding: 1rem 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.vr-toast.vr-toast--error i {
+    color: var(--vr-error);
 } 

@@ -1,59 +1,89 @@
 class ForgotPasswordPage {
     constructor() {
-        this.authService = new AuthService();
-        this.toastService = new ToastService();
-        this.componentLoader = new ComponentLoader();
-        
+        // Initialize properties
         this.form = document.getElementById('forgotPasswordForm');
         this.emailInput = document.getElementById('email');
         this.submitButton = this.form.querySelector('.vr-auth__submit');
+        
+        // Initialize API URL
+        this.apiBaseUrl = 'https://www.vyrlo.com:8080';
         
         this.init();
     }
 
     async init() {
-        // Load components
-        await this.componentLoader.loadHeader();
-        await this.componentLoader.loadFooter();
-
-        // Add event listeners
-        if (this.form) {
-            this.form.addEventListener('submit', this.handleSubmit.bind(this));
-        }
-        if (this.emailInput) {
-            this.emailInput.addEventListener('input', () => this.clearError(this.emailInput));
+        try {
+            this.setupEventListeners();
+        } catch (error) {
+            console.error('Error initializing page:', error);
+            this.showToast('error', 'Failed to initialize page');
         }
     }
 
-    clearError(input) {
-        input.classList.remove('error');
-        const errorText = input.parentElement.querySelector('.vr-error-text');
-        if (errorText) {
-            errorText.textContent = '';
-        }
+    setupEventListeners() {
+        this.form.addEventListener('submit', (e) => this.handleSubmit(e));
+        this.emailInput.addEventListener('input', () => this.clearError(this.emailInput));
     }
 
-    showError(input, message) {
-        input.classList.add('error');
-        const errorText = input.parentElement.querySelector('.vr-error-text');
-        if (errorText) {
-            errorText.textContent = message;
-        }
-    }
-
-    validateForm() {
-        let isValid = true;
+    validateEmail() {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+        
         if (!this.emailInput.value.trim()) {
-            this.showError(this.emailInput, 'Email address is required');
-            isValid = false;
-        } else if (!emailRegex.test(this.emailInput.value)) {
-            this.showError(this.emailInput, 'Please enter a valid email address');
-            isValid = false;
+            this.showError(this.emailInput, 'Email is required');
+            return false;
+        }
+        
+        if (!emailRegex.test(this.emailInput.value)) {
+            this.showError(this.emailInput, 'Please enter a valid email');
+            return false;
+        }
+        
+        return true;
+    }
+
+    async handleSubmit(e) {
+        e.preventDefault();
+
+        if (!this.validateEmail()) {
+            return;
         }
 
-        return isValid;
+        try {
+            this.setLoading(true);
+
+            // Call API to send OTP
+            const response = await fetch(`${this.apiBaseUrl}/send-otp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: this.emailInput.value.trim()
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Failed to send OTP');
+            }
+
+            // Store email for reset password page
+            sessionStorage.setItem('reset_email', this.emailInput.value.trim());
+
+            // Show success message
+            this.showToast('success', 'OTP sent to your email');
+
+            // Redirect to reset password page
+            setTimeout(() => {
+                window.location.href = '/pages/reset-password.html';
+            }, 2000);
+
+        } catch (error) {
+            this.showToast('error', error.message || 'Failed to send reset instructions');
+        } finally {
+            this.setLoading(false);
+        }
     }
 
     setLoading(loading) {
@@ -71,40 +101,53 @@ class ForgotPasswordPage {
         }
     }
 
-    async handleSubmit(e) {
-        e.preventDefault();
-
-        if (!this.validateForm()) {
-            return;
+    showError(input, message) {
+        const formGroup = input.closest('.vr-form-group');
+        const errorElement = formGroup.querySelector('.vr-error-message');
+        
+        input.classList.add('error');
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.classList.add('show');
         }
+    }
 
-        try {
-            this.setLoading(true);
-            
-            // Request OTP
-            await this.authService.forgotPassword(this.emailInput.value.trim());
-            
-            this.toastService.success('OTP has been sent to your email address');
-            
-            // Store email in session storage for reset page
-            sessionStorage.setItem('reset_email', this.emailInput.value.trim());
-            
-            // Redirect to reset password page
-            setTimeout(() => {
-                window.location.href = 'reset-password.html';
-            }, 1500);
-            
-        } catch (error) {
-            this.toastService.error(error.message || 'Failed to send reset instructions');
-        } finally {
-            this.setLoading(false);
+    clearError(input) {
+        const formGroup = input.closest('.vr-form-group');
+        const errorElement = formGroup.querySelector('.vr-error-message');
+        
+        input.classList.remove('error');
+        if (errorElement) {
+            errorElement.textContent = '';
+            errorElement.classList.remove('show');
+        }
+    }
+
+    showToast(type, message) {
+        if (window.toastService) {
+            window.toastService[type](message);
+        } else {
+            alert(message); // Fallback if toast service is not available
         }
     }
 }
 
-// Initialize page when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new ForgotPasswordPage());
-} else {
-    new ForgotPasswordPage();
-} 
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds with 100ms interval
+    
+    const initializePage = () => {
+        if (window.toastService) {
+            new ForgotPasswordPage();
+        } else if (attempts < maxAttempts) {
+            attempts++;
+            setTimeout(initializePage, 100);
+        } else {
+            console.error('Services failed to load');
+            alert('Failed to initialize page. Please refresh.');
+        }
+    };
+
+    initializePage();
+}); 

@@ -1,11 +1,13 @@
 .vr-toast-container {
   position: fixed;
-  z-index: var(--vr-z-tooltip);
+  top: 1rem;
+  right: 1rem;
+  z-index: 9999;
   display: flex;
   flex-direction: column;
-  gap: var(--vr-spacing-sm);
-  pointer-events: none;
-  padding: var(--vr-spacing-md);
+  gap: 0.75rem;
+  max-width: 400px;
+  width: calc(100% - 2rem);
 }
 
 /* Container Positions */
@@ -30,100 +32,127 @@
 }
 
 .vr-toast {
-  position: relative;
-  min-width: 300px;
-  max-width: 500px;
-  padding: var(--vr-spacing-md);
-  border-radius: var(--vr-radius-md);
-  background: var(--vr-light);
-  box-shadow: var(--vr-shadow-lg);
   display: flex;
   align-items: flex-start;
-  gap: var(--vr-spacing-sm);
-  pointer-events: auto;
-  transform: translateX(120%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 1.25rem;
+  border-radius: var(--vr-radius-lg);
+  background: var(--vr-toast-bg);
+  box-shadow: var(--vr-toast-shadow);
+  border: 1px solid var(--vr-toast-border-color);
+  min-width: 320px;
+  max-width: 480px;
+  position: relative;
   overflow: hidden;
+  transform: translateX(var(--vr-toast-slide-distance));
+  opacity: 0;
+  transition: all var(--vr-toast-transition);
 }
 
 .vr-toast--visible {
   transform: translateX(0);
+  opacity: 1;
 }
 
+.vr-toast--hiding {
+  transform: translateX(var(--vr-toast-slide-distance));
+  opacity: 0;
+}
+
+/* تحسين الأيقونات */
 .vr-toast__icon {
-  flex-shrink: 0;
   width: 24px;
   height: 24px;
+  border-radius: 50%;
+  margin-right: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--vr-text-lg);
+  flex-shrink: 0;
+  position: relative;
 }
 
+.vr-toast__icon::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0.15;
+  background: currentColor;
+}
+
+.vr-toast__icon svg {
+  width: 14px;
+  height: 14px;
+  color: currentColor;
+  position: relative;
+  z-index: 1;
+}
+
+/* تحسين المحتوى */
 .vr-toast__content {
   flex: 1;
-  min-width: 0;
+  margin-right: 1rem;
 }
 
 .vr-toast__title {
   font-weight: var(--vr-font-semibold);
   font-size: var(--vr-text-sm);
-  margin-bottom: 2px;
+  margin-bottom: 0.25rem;
+  color: var(--vr-toast-text-dark);
 }
 
 .vr-toast__message {
-  color: var(--vr-gray-700);
   font-size: var(--vr-text-sm);
-  line-height: var(--vr-leading-normal);
-  margin-right: var(--vr-spacing-lg);
+  color: var(--vr-toast-text-light);
+  line-height: 1.5;
 }
 
 .vr-toast__close {
-  position: absolute;
-  top: var(--vr-spacing-sm);
-  right: var(--vr-spacing-sm);
-  width: 20px;
-  height: 20px;
-  border: none;
   background: none;
-  color: var(--vr-gray-400);
+  border: none;
   cursor: pointer;
+  color: var(--vr-gray-500);
+  padding: 0;
+  width: 24px;
+  height: 24px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: color 0.2s ease;
-  padding: 0;
+  opacity: 0.6;
+  transition: all 0.2s ease;
 }
 
 .vr-toast__close:hover {
-  color: var(--vr-gray-600);
+  opacity: 1;
+  color: var(--vr-gray-700);
 }
 
+/* تحسين شريط التقدم */
 .vr-toast__progress {
   position: absolute;
   left: 0;
   bottom: 0;
   width: 100%;
   height: 3px;
-  background: rgba(255, 255, 255, 0.3);
-  transform-origin: left;
+  background: var(--vr-toast-progress-bg);
 }
 
 .vr-toast__progress::after {
   content: '';
   position: absolute;
-  top: 0;
   left: 0;
-  width: 100%;
+  top: 0;
   height: 100%;
-  transform: scaleX(0);
-  transform-origin: left;
+  width: 100%;
   background: currentColor;
-  animation: toast-progress var(--duration) linear;
+  opacity: var(--vr-toast-progress-opacity);
+  transform-origin: left;
+  animation: toastProgress linear forwards;
 }
 
-/* Toast Variants */
+/* تحسين الأنواع */
 .vr-toast--success {
+  background: var(--vr-toast-success-bg);
   border-left: 4px solid var(--vr-success);
 }
 
@@ -131,28 +160,27 @@
   color: var(--vr-success);
 }
 
+.vr-toast--success .vr-toast__title {
+  color: var(--vr-toast-success-text);
+}
+
+.vr-toast--success .vr-toast__progress::after {
+  background-color: var(--vr-success);
+}
+
 .vr-toast--error {
+  background: var(--vr-toast-error-bg);
   border-left: 4px solid var(--vr-error);
 }
 
-.vr-toast--error .vr-toast__icon {
-  color: var(--vr-error);
-}
-
 .vr-toast--warning {
+  background: var(--vr-toast-warning-bg);
   border-left: 4px solid var(--vr-warning);
 }
 
-.vr-toast--warning .vr-toast__icon {
-  color: var(--vr-warning);
-}
-
 .vr-toast--info {
+  background: var(--vr-toast-info-bg);
   border-left: 4px solid var(--vr-primary);
-}
-
-.vr-toast--info .vr-toast__icon {
-  color: var(--vr-primary);
 }
 
 /* Animations */
@@ -163,15 +191,162 @@
 /* Responsive Styles */
 @media (max-width: 576px) {
   .vr-toast-container {
-    left: 0;
-    right: 0;
-    padding: var(--vr-spacing-sm);
+    left: var(--vr-spacing-sm);
+    right: var(--vr-spacing-sm);
+    bottom: var(--vr-spacing-sm);
+    top: auto;
   }
 
   .vr-toast {
-    width: 100%;
     min-width: 0;
-    max-width: none;
-    margin: 0 var(--vr-spacing-sm);
+    width: 100%;
+    padding: var(--vr-spacing-md);
   }
+
+  .vr-toast--visible {
+    transform: translateY(0);
+  }
+
+  .vr-toast--hiding {
+    transform: translateY(100%);
+  }
+}
+
+/* تأثير البار المتحرك */
+.vr-toast::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.vr-toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background-color: currentColor;
+  animation: toast-timer linear forwards;
+}
+
+.vr-toast--success::after { 
+  background-color: var(--vr-success); 
+  animation-duration: 3s;
+}
+.vr-toast--error::after { 
+  background-color: var(--vr-error); 
+  animation-duration: 5s;
+}
+.vr-toast--warning::after { 
+  background-color: var(--vr-warning); 
+  animation-duration: 4s;
+}
+.vr-toast--info::after { 
+  background-color: var(--vr-primary); 
+  animation-duration: 3s;
+}
+
+@keyframes toast-timer {
+  0% { width: 100%; }
+  100% { width: 0; }
+}
+
+/* تحسين أنماط الأنواع المختلفة */
+.vr-toast--success .vr-toast__title { color: var(--vr-success-dark); }
+.vr-toast--error .vr-toast__title { color: var(--vr-error-dark); }
+.vr-toast--warning .vr-toast__title { color: var(--vr-warning-dark); }
+.vr-toast--info .vr-toast__title { color: var(--vr-primary-dark); }
+
+/* تحسين أزرار الإغلاق */
+.vr-toast__close {
+  color: var(--vr-gray-500);
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.vr-toast__close:hover {
+  opacity: 1;
+  color: var(--vr-gray-700);
+}
+
+/* تحسين الرسائل */
+.vr-toast__message {
+  color: var(--vr-gray-600);
+  font-size: var(--vr-text-sm);
+  line-height: 1.5;
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .vr-toast {
+    background: var(--vr-toast-bg-dark);
+    border-color: var(--vr-gray-700);
+  }
+
+  .vr-toast__title {
+    color: var(--vr-gray-100);
+  }
+
+  .vr-toast__message {
+    color: var(--vr-gray-300);
+  }
+
+  .vr-toast__close {
+    color: var(--vr-gray-400);
+  }
+
+  .vr-toast__close:hover {
+    color: var(--vr-gray-200);
+  }
+
+  .vr-toast__progress {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* RTL Support */
+[dir="rtl"] .vr-toast-container {
+  left: 1rem;
+  right: auto;
+}
+
+[dir="rtl"] .vr-toast {
+  transform: translateX(-100%);
+}
+
+[dir="rtl"] .vr-toast__icon {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+[dir="rtl"] .vr-toast__content {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+[dir="rtl"] .vr-toast--success,
+[dir="rtl"] .vr-toast--error,
+[dir="rtl"] .vr-toast--warning,
+[dir="rtl"] .vr-toast--info {
+  border-left: none;
+  border-right: 4px solid;
+}
+
+.vr-toast:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--vr-toast-hover-shadow);
+}
+
+.vr-toast:hover .vr-toast__progress::after {
+  animation-play-state: paused;
+}
+
+.vr-toast__close:focus-visible {
+  outline: 2px solid var(--vr-primary);
+  outline-offset: 2px;
+  border-radius: 50%;
 }

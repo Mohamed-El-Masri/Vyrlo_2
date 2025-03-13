@@ -1,13 +1,20 @@
+import { authService } from './auth.service.js';
+import { toastService } from './toast.service.js';
+
 /**
  * API Service for handling all API requests
  */
 
 class ApiService {
     constructor() {
-        this.BASE_URL = 'https://virlo.vercel.app';
+        this.BASE_URL = 'https://www.vyrlo.com:8080';
         this.requestInterceptors = [];
         this.responseInterceptors = [];
         this.errorInterceptors = [];
+        this.defaultHeaders = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
 
         this.initializeDefaultInterceptors();
     }
@@ -52,80 +59,85 @@ class ApiService {
         throw currentError;
     }
 
-    async request(url, method, data = null) {
+    async request(url, options = {}) {
         try {
-            // Prepare request config
-            let config = {
-                method,
+            const defaultOptions = {
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'token': authService.getToken()
                 },
-                mode: 'cors',
-                credentials: 'omit'
             };
 
-            // Add auth token if available
-            const token = window.authService?.getToken();
-            if (token) {
-                config.headers['Authorization'] = `Bearer ${token}`;
-            }
-
-            // Add request body if present
-            if (data) {
-                config.body = JSON.stringify(data);
-            }
-
-            // Apply request interceptors
-            config = await this.applyRequestInterceptors(config);
-
-            // Make the request
-            const response = await fetch(`${this.BASE_URL}${url}`, config);
+            const fullUrl = `${this.BASE_URL}${url}`;
             
-            // Handle response
-            let responseData;
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                responseData = await response.json();
-            } else {
-                responseData = await response.text();
+            const finalOptions = {
+                ...defaultOptions,
+                ...options,
+                headers: {
+                    ...defaultOptions.headers,
+                    ...options.headers
+                }
+            };
+
+            if (options.body instanceof FormData) {
+                delete finalOptions.headers['Content-Type'];
             }
 
-            // Apply response interceptors
-            responseData = await this.applyResponseInterceptors(responseData);
+            const response = await fetch(fullUrl, finalOptions);
 
-            // Handle error responses
+            if (response.status === 401) {
+                authService.clearAuthState();
+                window.location.href = '/pages/login.html';
+                throw new Error('Unauthorized');
+            }
+
+            if (response.status === 403) {
+                throw new Error('Forbidden');
+            }
+
             if (!response.ok) {
-                const error = new Error(responseData.message || 'API request failed');
-                error.status = response.status;
-                error.data = responseData;
-                throw error;
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Request failed');
             }
 
-            return responseData;
+            return await response.json();
         } catch (error) {
-            // Apply error interceptors
-            return this.applyErrorInterceptors(error);
+            console.error('API Error:', error);
+            
+            if (error.name === 'TypeError' && error.message === 'Failed to fetch') {
+                toastService.error('Network error. Please check your connection.');
+            } else {
+                toastService.error(error.message || 'An error occurred');
+            }
+            
+            throw error;
         }
     }
 
-    async get(url, params = {}) {
-        const queryString = new URLSearchParams(params).toString();
-        return this.request(`${url}${queryString ? `?${queryString}` : ''}`, 'GET');
+    async get(url, options = {}) {
+        return this.request(url, { ...options, method: 'GET' });
     }
 
-    async post(url, data) {
-        return this.request(url, 'POST', data);
+    async post(url, data, options = {}) {
+        return this.request(url, {
+            ...options,
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
     }
 
-    async put(url, data) {
-        return this.request(url, 'PUT', data);
+    async put(url, data, options = {}) {
+        return this.request(url, {
+            ...options,
+            method: 'PUT',
+            body: JSON.stringify(data)
+        });
     }
 
-    async delete(url) {
-        return this.request(url, 'DELETE');
+    async delete(url, options = {}) {
+        return this.request(url, { ...options, method: 'DELETE' });
     }
 
-    // Helper methods for common operations
     async uploadFile(url, file, onProgress) {
         const formData = new FormData();
         formData.append('file', file);
@@ -134,9 +146,10 @@ class ApiService {
             const response = await fetch(`${this.BASE_URL}${url}`, {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${window.authService?.getToken()}`
+                    'Authorization': `Bearer ${localStorage.getItem('vr_token')}`
                 },
-                body: formData
+                body: formData,
+                mode: 'cors'
             });
 
             if (!response.ok) {
@@ -145,38 +158,32 @@ class ApiService {
 
             return await response.json();
         } catch (error) {
-            return this.applyErrorInterceptors(error);
+            toastService.error('Failed to upload file');
+            throw error;
         }
     }
 
-    // Initialize default interceptors
     initializeDefaultInterceptors() {
-        // Add auth error interceptor
         this.addErrorInterceptor(async (error) => {
             if (error.status === 401) {
-                // Clear auth state and redirect to login
-                window.authService?.clearAuthState();
+                authService.clearAuthState();
                 window.location.href = '/pages/login.html';
             }
             return error;
         });
 
-        // Add response error handler
         this.addErrorInterceptor(async (error) => {
-            // Show error toast
-            window.toastService?.error(
+            toastService.error(
                 error.message || 'An error occurred while processing your request'
             );
             return error;
         });
     }
 
-    // Categories
     async getCategories() {
         return this.get('/categories');
     }
 
-    // Listings
     async getListings(params = {}) {
         const queryString = new URLSearchParams(params).toString();
         return this.get(`/listings${queryString ? `?${queryString}` : ''}`);
@@ -198,7 +205,6 @@ class ApiService {
         return this.delete(`/listings/${id}`);
     }
 
-    // Profile
     async getProfile(userId) {
         return this.get(`/profile/${userId}`);
     }
@@ -208,9 +214,6 @@ class ApiService {
     }
 }
 
-// Create global instance
-window.apiService = new ApiService();
+export const apiService = new ApiService();
 
-// Initialize default interceptors
-window.apiService.initializeDefaultInterceptors(); 
-window.ApiService = ApiService; 
+apiService.initializeDefaultInterceptors(); 

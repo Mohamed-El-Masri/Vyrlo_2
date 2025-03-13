@@ -1,6 +1,6 @@
 class ListingDetailsPage {
     constructor() {
-        this.API_BASE_URL = 'https://virlo.vercel.app';
+        this.API_BASE_URL = 'https://www.vyrlo.com:8080';
         this.listing = null;
         this.reviews = [];
         this.reviewsPage = 1;

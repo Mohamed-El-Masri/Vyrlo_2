@@ -1,5 +1,5 @@
 ## 1. Technical Questions
-- **API Version**: Using `https://virlo.vercel.app` REST API as shown in paths.js
+- **API Version**: Using `https://www.vyrlo.com:8080` REST API as shown in paths.js
 - **Language**: Using vanilla JavaScript without TypeScript as specified in project-doc.txt
 - **External Libraries**:
   - Bootstrap 5

@@ -124,6 +124,71 @@
   --vr-tracking-normal: 0;
   --vr-tracking-wide: 0.025em;
   --vr-tracking-wider: 0.05em;
+
+  /* Toast Specific Variables */
+  --vr-toast-bg: var(--vr-light);
+  --vr-toast-bg-dark: var(--vr-gray-800);
+  
+  /* Toast Type-Specific Colors */
+  --vr-toast-success-bg: rgba(40, 182, 44, 0.15);
+  --vr-toast-error-bg: rgba(220, 53, 69, 0.15);
+  --vr-toast-warning-bg: rgba(255, 193, 7, 0.15);
+  --vr-toast-info-bg: rgba(13, 202, 240, 0.15);
+  
+  /* Toast Progress Colors */
+  --vr-toast-progress-bg: rgba(0, 0, 0, 0.05);
+  --vr-toast-progress-opacity: 0.2;
+  
+  /* Toast Shadows & Borders */
+  --vr-toast-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --vr-toast-hover-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  --vr-toast-border-color: var(--vr-gray-100);
+
+  /* Toast Timing */
+  --vr-toast-duration-short: 3000ms;
+  --vr-toast-duration-normal: 4000ms;
+  --vr-toast-duration-long: 5000ms;
+  
+  /* Toast Animation */
+  --vr-toast-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --vr-toast-slide-distance: 120%;
+  
+  /* Toast Text Colors */
+  --vr-toast-success-text: var(--vr-success-dark);
+  --vr-toast-error-text: var(--vr-error-dark);
+  --vr-toast-warning-text: var(--vr-warning-dark);
+  --vr-toast-info-text: var(--vr-primary-dark);
+  
+  /* Toast Border Colors with Opacity */
+  --vr-toast-success-border: rgba(82, 183, 136, 0.2);
+  --vr-toast-error-border: rgba(231, 111, 81, 0.2);
+  --vr-toast-warning-border: rgba(244, 162, 97, 0.2);
+  --vr-toast-info-border: rgba(42, 157, 143, 0.2);
+  
+  /* Toast Progress Bar Colors */
+  --vr-toast-success-progress: var(--vr-success);
+  --vr-toast-error-progress: var(--vr-error);
+  --vr-toast-warning-progress: var(--vr-warning);
+  --vr-toast-info-progress: var(--vr-primary);
+  
+  /* Toast Icon Colors */
+  --vr-toast-success-icon: var(--vr-success);
+  --vr-toast-error-icon: var(--vr-error);
+  --vr-toast-warning-icon: var(--vr-warning);
+  --vr-toast-info-icon: var(--vr-primary);
+
+  /* Profile Specific Colors */
+  --vr-profile-header-bg: linear-gradient(135deg, var(--vr-primary) 0%, var(--vr-primary-dark) 100%);
+  --vr-profile-card-shadow: 0 15px 35px rgba(50, 50, 93, 0.1), 0 5px 15px rgba(0, 0, 0, 0.07);
+  --vr-profile-hover-shadow: 0 20px 40px rgba(50, 50, 93, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
+  
+  /* Avatar Specific */
+  --vr-avatar-border: 4px solid var(--vr-light);
+  --vr-avatar-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+  --vr-avatar-hover-shadow: 0 0 0 6px rgba(255, 255, 255, 0.3);
+  
+  /* Menu Item Transitions */
+  --vr-menu-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Base Typography Styles */

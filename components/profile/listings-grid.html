@@ -1,0 +1,72 @@
+<div class="vr-listings-section">
+    <!-- رأس القسم مع زر الإضافة -->
+    <div class="vr-section__header">
+        <div class="vr-section__title">
+            <h2><i class="fas fa-list"></i> My Listings</h2>
+            <span class="vr-badge vr-badge--primary" id="totalListings">0</span>
+        </div>
+        <a href="/pages/profile.html#addListing" class="vr-btn vr-btn--primary">
+            <i class="fas fa-plus"></i> Create New Listing
+        </a>
+    </div>
+
+    <!-- شريط التصفية -->
+    <div class="vr-listings-filter">
+        <div class="vr-filter-tabs">
+            <button class="vr-filter-tab active" data-filter="all">
+                <i class="fas fa-th-large"></i>
+                <span>All</span>
+                <span class="vr-badge" id="allCount">0</span>
+            </button>
+            <button class="vr-filter-tab" data-filter="active">
+                <i class="fas fa-check-circle"></i>
+                <span>Active</span>
+                <span class="vr-badge" id="activeCount">0</span>
+            </button>
+            <button class="vr-filter-tab" data-filter="featured">
+                <i class="fas fa-star"></i>
+                <span>Featured</span>
+                <span class="vr-badge" id="featuredCount">0</span>
+            </button>
+            <button class="vr-filter-tab" data-filter="inactive">
+                <i class="fas fa-pause-circle"></i>
+                <span>Inactive</span>
+                <span class="vr-badge" id="inactiveCount">0</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- شبكة القوائم -->
+    <div class="vr-listings-grid">
+        <!-- سيتم إضافة البطاقات ديناميكياً -->
+    </div>
+
+    <!-- حالة عدم وجود قوائم -->
+    <div class="vr-listings-empty" style="display: none;">
+        <img src="/images/illustrations/empty-listings.svg" alt="No listings">
+        <h3>No Listings Found</h3>
+        <p>You haven't created any listings yet. Get started by creating your first listing.</p>
+        <a href="/pages/profile.html#addListing" class="vr-btn vr-btn--primary">
+            <i class="fas fa-plus"></i> Create Listing
+        </a>
+    </div>
+
+    <!-- حالة التحميل -->
+    <div class="vr-loading-state" style="display: none;">
+        <div class="vr-spinner"></div>
+        <p>Loading your listings...</p>
+    </div>
+</div>
+
+<!-- Pagination -->
+<div class="vr-pagination" style="display: none;">
+    <button class="vr-pagination__prev" disabled>
+        <i class="fas fa-chevron-left"></i>
+    </button>
+    <div class="vr-pagination__pages">
+        <!-- Pages will be generated dynamically -->
+    </div>
+    <button class="vr-pagination__next">
+        <i class="fas fa-chevron-right"></i>
+    </button>
+</div> 

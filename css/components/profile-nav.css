@@ -1,0 +1,92 @@
+/* ملف خاص بالقائمة الجانبية */
+.vr-profile__nav {
+    background: linear-gradient(to bottom, var(--vr-light), var(--vr-gray-50));
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-md);
+    position: sticky;
+    top: calc(var(--vr-header-height) + var(--vr-spacing-md));
+    transition: all var(--vr-menu-transition);
+    overflow: hidden;
+    border: 1px solid var(--vr-gray-200);
+    max-height: calc(100vh - var(--vr-header-height) - var(--vr-spacing-md) * 2);
+    display: flex;
+    flex-direction: column;
+}
+
+.vr-profile__user {
+    padding: var(--vr-spacing-xl);
+    text-align: center;
+    border-bottom: 1px solid var(--vr-gray-100);
+}
+
+.vr-profile__menu {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--vr-spacing-md) 0;
+    scrollbar-width: thin;
+    scrollbar-color: var(--vr-gray-300) transparent;
+}
+
+.vr-profile__menu::-webkit-scrollbar {
+    width: 4px;
+}
+
+.vr-profile__menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vr-profile__menu::-webkit-scrollbar-thumb {
+    background: var(--vr-gray-300);
+    border-radius: 4px;
+}
+
+.vr-profile__menu-item {
+    padding: var(--vr-spacing-sm) var(--vr-spacing-lg);
+    margin: 0 var(--vr-spacing-md) var(--vr-spacing-xs);
+    border-radius: var(--vr-radius-md);
+    color: var(--vr-gray-700);
+    transition: all var(--vr-transition-fast);
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-sm);
+}
+
+.vr-profile__menu-item:hover {
+    background: var(--vr-primary-bg);
+    color: var(--vr-primary);
+}
+
+.vr-profile__menu-item.active {
+    background: var(--vr-primary);
+    color: var(--vr-light);
+}
+
+.vr-profile__menu-item i {
+    width: 20px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .vr-profile__nav {
+        position: sticky;
+        top: var(--vr-header-height);
+        z-index: 10;
+        margin-bottom: var(--vr-spacing-lg);
+    }
+
+    .vr-profile__menu {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: var(--vr-spacing-sm);
+        gap: var(--vr-spacing-sm);
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .vr-profile__menu-item {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        margin: 0;
+    }
+} 

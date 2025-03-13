@@ -1,5 +1,5 @@
 5.	Categories : 
-a.	Add Category for admins only ( post ) : :  https://virlo.vercel.app /categories
+a.	Add Category for admins only ( post ) : :  https://www.vyrlo.com:8080 /categories
 Request : 
 {
     "categoryName":"test1",
@@ -7,8 +7,8 @@ Request :
     "iconTwo":"",
     "amenities":["s","d"]
 }
-b.	Update Category for admins only ( PUT ) : https://virlo.vercel.app /categories/{id}
-c.	Get All Categories (GET) : https://virlo.vercel.app/categories
+b.	Update Category for admins only ( PUT ) : https://www.vyrlo.com:8080 /categories/{id}
+c.	Get All Categories (GET) : https://www.vyrlo.com:8080/categories
 Response : 
 [
     {
@@ -246,7 +246,7 @@ Response :
         ]
     }
 ]
-d.	Get specific Category ( GET ) : https://virlo.vercel.app /categories/67ae1e66c57141f547bc1f4a
+d.	Get specific Category ( GET ) : https://www.vyrlo.com:8080 /categories/67ae1e66c57141f547bc1f4a
 Response : 
 {
     "_id": "67ae1e66c57141f547bc1f4a",
@@ -266,12 +266,12 @@ Response :
         "Reservation system through website/app"
     ]
 }
-e.	Remove Category ( DELETE ) for admin dashboard only : https://virlo.vercel.app /categories/{id}
+e.	Remove Category ( DELETE ) for admin dashboard only : https://www.vyrlo.com:8080 /categories/{id}
 6.	Listing APIS 
 a.	Get listing by pagination and filteration back-end logic (GET) : 
-i.	https://virlo.vercel.app/listing/?lastValue=1
-ii.	https://virlo.vercel.app/listing/?lastValue=1&name=My&location=New York
-iii.	https://virlo.vercel.app/listing/?lastValue=1&name=My&location=New York&categoryId=67ae1e66c57141f547bc1f47
+i.	https://www.vyrlo.com:8080/listing/?lastValue=1
+ii.	https://www.vyrlo.com:8080/listing/?lastValue=1&name=My&location=New York
+iii.	https://www.vyrlo.com:8080/listing/?lastValue=1&name=My&location=New York&categoryId=67ae1e66c57141f547bc1f47
 Params : 
 o	lasValue = 1 to get 4 items , lastValue=2 to get 5 items , lastValue=3 to get 6 items and so on
 o	name:
@@ -461,7 +461,7 @@ response Example :
     "lastValue": 4,
     "totalItems": 2
 }
-b.	Get listing by id (GET) : https://virlo.vercel.app /listing/67aa20487229217d95baff5f
+b.	Get listing by id (GET) : https://www.vyrlo.com:8080 /listing/67aa20487229217d95baff5f
 Response :
 i.	If not exist : 200 OK
 {
@@ -557,7 +557,7 @@ ii.	If Exist : 200 OK
     "updatedAt": "2025-02-13T16:36:38.006Z",
     "postActiveDue": "2025-02-18T17:24:48.102Z"
 }
-c.	Get user Listing (GET ) : https://virlo.vercel.app/listing/user
+c.	Get user Listing (GET ) : https://www.vyrlo.com:8080/listing/user
 Header : Token ( eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibW9tZW4iLCJlbWFpbCI6Im1vbWVuc2FsZWgyNDY4QGdtYWlsLmNvbSIsInVzZXJJZCI6IjY3YTg5OWY1MTkwOWJjNjBjY2RjMjZhNyIsImlhdCI6MTczOTIwMTU0OX0.ZECKy5Bag0hPSphNaJlsI5zshlIx11l9FNu0RmbXg_g ) 
 
 response : [
@@ -1600,7 +1600,7 @@ response : [
     }
 ]
 
-d.	Remove listing ( DELETE ) : https://virlo.vercel.app/listing/67aa20487229217d95baff5f
+d.	Remove listing ( DELETE ) : https://www.vyrlo.com:8080/listing/67aa20487229217d95baff5f
 Response : 
 404Not Found
 {
@@ -1613,7 +1613,7 @@ Or
 {
     "message": "Listing deleted successfully"
 }
-e.	Update listing ( PUT ) : https://virlo.vercel.app/listing/67ab4ed8604bcdce6743470b
+e.	Update listing ( PUT ) : https://www.vyrlo.com:8080/listing/67ab4ed8604bcdce6743470b
 Header : Token 
 
 Request : 
@@ -1738,7 +1738,7 @@ Or
     "updatedAt": "2025-02-21T03:20:55.110Z"
 }
 
-f.	Add new listing (post) : https://virlo.vercel.app/listing
+f.	Add new listing (post) : https://www.vyrlo.com:8080/listing
 Header : token 
 {  
     "_id": "67ab7fdae9fc1bcda8726b40",  
@@ -1872,9 +1872,9 @@ Or
 }
 
 g.	Get active listing with search and filteration back-end logic (GET) : 
-i.	https://virlo.vercel.app/listing/active  (to get all active listings)
-ii.	https://virlo.vercel.app/listing/active/?name=My&location=New
-iii.	https://virlo.vercel.app/listing/active/name=My&location=New&categoryId=67ae1e66c57141f547bc1f47
+i.	https://www.vyrlo.com:8080/listing/active  (to get all active listings)
+ii.	https://www.vyrlo.com:8080/listing/active/?name=My&location=New
+iii.	https://www.vyrlo.com:8080/listing/active/name=My&location=New&categoryId=67ae1e66c57141f547bc1f47
 Params : 
 o	name:
 o location  :

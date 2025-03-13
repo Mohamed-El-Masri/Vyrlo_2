@@ -3,12 +3,14 @@
  */
 class AuthService {
     constructor() {
-        this.API_BASE_URL = 'https://virlo.vercel.app';
+        this.API_BASE_URL = 'https://www.vyrlo.com:8080';
+        this.tokenKey = 'vr_token';
+        this.userKey = 'vr_user';
+        this.profileKey = 'vr_profile';
         
-        // Initialize state
-        this.token = null;
-        this.user = null;
-        this.profile = null;
+        this.token = localStorage.getItem(this.tokenKey);
+        this.user = this.getStoredUser();
+        this.profile = this.getStoredProfile();
         this.uiUpdateCallbacks = new Set();
 
         // Try to restore state from storage
@@ -17,12 +19,20 @@ class AuthService {
 
     restoreState() {
         try {
-            this.token = localStorage.getItem('vr_token');
-            const storedUser = localStorage.getItem('vr_user');
-            const storedProfile = localStorage.getItem('vr_profile');
+            this.token = localStorage.getItem(this.tokenKey);
+            const storedUser = localStorage.getItem(this.userKey);
+            const storedProfile = localStorage.getItem(this.profileKey);
 
-            if (this.token) {
-                // Get user data from token
+            if (storedUser) {
+                this.user = JSON.parse(storedUser);
+            }
+
+            if (storedProfile) {
+                this.profile = JSON.parse(storedProfile);
+            }
+
+            // إذا وجد توكن ولكن لا يوجد مستخدم، نحاول استخراج البيانات من التوكن
+            if (this.token && !this.user) {
                 const decoded = this.parseJwt(this.token);
                 if (decoded) {
                     this.user = {
@@ -30,19 +40,8 @@ class AuthService {
                         name: decoded.name,
                         email: decoded.email
                     };
-                    localStorage.setItem('vr_user', JSON.stringify(this.user));
+                    this.setUser(this.user);
                 }
-
-                if (storedProfile) {
-                    this.profile = JSON.parse(storedProfile);
-                }
-
-                // Fetch profile if we have user ID
-                if (this.user?.id) {
-                    this.fetchAndStoreProfile(this.user.id);
-                }
-            } else {
-                this.clearAuthState();
             }
         } catch (error) {
             console.error('Error restoring auth state:', error);
@@ -113,37 +112,21 @@ class AuthService {
             const response = await fetch(`${this.API_BASE_URL}/signin`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
                 },
+                credentials: 'include',
                 body: JSON.stringify({ email, password })
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                throw new Error(data.message || 'Login failed');
+                const error = await response.json();
+                throw new Error(error.message || 'Invalid credentials');
             }
 
-            // Save token
-            this.setToken(data.token);
-
-            // Get user data from token
-            const decoded = this.parseJwt(data.token);
-            if (decoded) {
-                const user = {
-                    id: decoded.userId,
-                    name: decoded.name,
-                    email: decoded.email
-                };
-            this.setUser(user);
-            
-                // Fetch profile
-                await this.fetchAndStoreProfile(user.id);
-            }
-            
-            // Notify UI of state change
-            this.notifyAuthStateChange();
-            
+            const data = await response.json();
+            this.setAuth(data.token, this.user);
             return data;
         } catch (error) {
             console.error('Login error:', error);
@@ -385,27 +368,31 @@ class AuthService {
         this.user = null;
         this.profile = null;
         
-        localStorage.removeItem('vr_token');
-        localStorage.removeItem('vr_user');
-        localStorage.removeItem('vr_profile');
+        localStorage.removeItem(this.tokenKey);
+        localStorage.removeItem(this.userKey);
+        localStorage.removeItem(this.profileKey);
     }
 
-    setToken(token) {
+    setAuth(token, user) {
         this.token = token;
-        localStorage.setItem('vr_token', token);
+        localStorage.setItem(this.tokenKey, token);
+        localStorage.setItem(this.userKey, JSON.stringify(user));
     }
 
     setUser(user) {
         this.user = user;
-        localStorage.setItem('vr_user', JSON.stringify(user));
+        localStorage.setItem(this.userKey, JSON.stringify(user));
     }
 
     setProfile(profile) {
         this.profile = profile;
-        localStorage.setItem('vr_profile', JSON.stringify(profile));
+        localStorage.setItem(this.profileKey, JSON.stringify(profile));
     }
 
     getToken() {
+        if (!this.token) {
+            this.token = localStorage.getItem(this.tokenKey);
+        }
         return this.token;
     }
 
@@ -414,15 +401,53 @@ class AuthService {
     }
 
     getProfile() {
-        return this.profile;
+        if (this.profile) return this.profile;
+        
+        try {
+            const storedProfile = localStorage.getItem(this.profileKey);
+            if (storedProfile) {
+                this.profile = JSON.parse(storedProfile);
+                return this.profile;
+            }
+        } catch (error) {
+            console.error('Error retrieving profile from localStorage:', error);
+        }
+        
+        return null;
     }
 
     isAuthenticated() {
-        return this.token !== null;
+        return !!this.getToken();
     }
 
     getUserId() {
-        return this.user?.id;
+        // 1. محاولة الحصول على ID من بيانات المستخدم المخزنة
+        const storedUser = this.getStoredUser();
+        if (storedUser?.id) {
+            return storedUser.id;
+        }
+
+        // 2. محاولة الحصول على ID من البروفايل المخزن
+        const storedProfile = this.getStoredProfile();
+        if (storedProfile?.userId) {
+            return storedProfile.userId;
+        }
+
+        // 3. محاولة استخراج ID من التوكن
+        if (this.token) {
+            try {
+                const decoded = this.parseJwt(this.token);
+                if (decoded?.userId) {
+                    // تخزين ID في localStorage لاستخدامه لاحقاً
+                    this.setUser({ id: decoded.userId });
+                    return decoded.userId;
+                }
+            } catch (error) {
+                console.error('Error parsing token:', error);
+            }
+        }
+
+        return null;
     }
 
     updateUI() {
@@ -566,19 +591,48 @@ class AuthService {
             });
         }
     }
+
+    getStoredUser() {
+        try {
+            const userStr = localStorage.getItem(this.userKey);
+            return userStr ? JSON.parse(userStr) : null;
+        } catch (error) {
+            console.error('Error parsing stored user:', error);
+            return null;
+        }
+    }
+
+    getStoredProfile() {
+        try {
+            const profileStr = localStorage.getItem(this.profileKey);
+            return profileStr ? JSON.parse(profileStr) : null;
+        } catch (error) {
+            console.error('Error parsing stored profile:', error);
+            return null;
+        }
+    }
+
+    /**
+     * تعزيز إدارة بروفايل المستخدم
+     */
+    setUserProfile(profileData) {
+        this.profile = profileData;
+        localStorage.setItem(this.profileKey, JSON.stringify(profileData));
+        this.notifyAuthStateChange();
+    }
 }
 
-// Create global instance
-window.authService = new AuthService();
+// Export a singleton instance
+export const authService = new AuthService();
 
-// Update header UI on page load and after any navigation
+// Update UI on page load and after any navigation
 document.addEventListener('DOMContentLoaded', () => {
-    window.authService.updateUI();
+    authService.notifyAuthStateChange();
 });
 
-// Optional: Update header when the page becomes visible again
+// Optional: Update when the page becomes visible again
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
-        window.authService.updateUI();
+        authService.notifyAuthStateChange();
     }
 }); 

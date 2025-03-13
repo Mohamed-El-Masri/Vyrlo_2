@@ -1,12 +1,266 @@
 /* Profile Page Enhanced Styles */
 .vr-profile {
-    padding: var(--vr-spacing-md);
-    background-color: var(--vr-light);
-    border-radius: var(--vr-radius-md);
-    box-shadow: var(--vr-shadow-lg);
-    transition: transform var(--vr-transition-normal), box-shadow var(--vr-transition-normal);
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: var(--vr-spacing-xl);
+    padding: var(--vr-spacing-xl) 0;
+    min-height: calc(100vh - var(--vr-header-height) - var(--vr-footer-height));
+    max-width: var(--vr-container-width);
+    margin: 0 auto;
     position: relative;
+}
+
+/* Navigation Styles */
+.vr-profile__nav {
+    background: linear-gradient(to bottom, var(--vr-light), var(--vr-gray-50));
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-md);
+    position: sticky;
+    top: calc(var(--vr-header-height) + var(--vr-spacing-md));
+    transition: all var(--vr-menu-transition);
     overflow: hidden;
+    border: 1px solid var(--vr-gray-200);
+    max-height: calc(100vh - var(--vr-header-height) - var(--vr-spacing-md) * 2);
+    display: flex;
+    flex-direction: column;
+}
+
+.vr-profile__nav:hover {
+    box-shadow: var(--vr-shadow-md);
+}
+
+.vr-profile__user {
+    padding: var(--vr-spacing-xl);
+    text-align: center;
+    border-bottom: 1px solid var(--vr-gray-100);
+}
+
+.vr-profile-avatar {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto var(--vr-spacing-lg);
+    border-radius: 50%;
+    background: var(--vr-gray-50);
+    overflow: hidden;
+    border: 3px solid var(--vr-light);
+    box-shadow: var(--vr-shadow-lg);
+    transition: all var(--vr-transition-normal);
+}
+
+.vr-profile-avatar:hover {
+    transform: translateY(-5px);
+}
+
+.vr-profile-avatar__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.vr-profile-avatar__upload {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.6) 50%,
+        rgba(0, 0, 0, 0.4) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--vr-light);
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.vr-profile-avatar:hover .vr-profile-avatar__upload {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.vr-profile-avatar__upload-content {
+    text-align: center;
+}
+
+.vr-profile-avatar__upload-content i {
+    font-size: 24px;
+    margin-bottom: var(--vr-spacing-sm);
+}
+
+.vr-profile-avatar__upload-content span {
+    font-size: var(--vr-text-sm);
+    font-weight: var(--vr-font-medium);
+}
+
+.vr-profile__user-info {
+    margin-top: var(--vr-spacing-md);
+}
+
+.vr-profile__user-info h3 {
+    font-size: var(--vr-text-lg);
+    font-weight: var(--vr-font-semibold);
+    color: var(--vr-gray-900);
+    margin-bottom: var(--vr-spacing-xs);
+}
+
+.vr-profile__user-info p {
+    color: var(--vr-gray-600);
+    font-size: var(--vr-text-sm);
+}
+
+.vr-profile__menu {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--vr-spacing-md) 0;
+}
+
+.vr-profile__menu::-webkit-scrollbar {
+    width: 4px;
+}
+
+.vr-profile__menu::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.vr-profile__menu::-webkit-scrollbar-thumb {
+    background: var(--vr-gray-300);
+    border-radius: 4px;
+}
+
+.vr-profile__menu li {
+    padding: 0;
+    margin: 0 var(--vr-spacing-md) var(--vr-spacing-xs);
+    position: relative;
+    border-radius: var(--vr-radius-md);
+    transition: all var(--vr-transition-fast);
+}
+
+.vr-profile__menu li.active {
+    background-color: var(--vr-primary);
+}
+
+.vr-profile__menu .profile-item.active a,
+.vr-profile__menu .profile-item.active button,
+.vr-profile__menu .profile-item.active i {
+    color: var(--vr-light);
+}
+
+/* Logout Button */
+.vr-profile__nav .vr-btn--outline {
+    margin: var(--vr-spacing-md);
+    color: var(--vr-error);
+    border-color: var(--vr-error-light);
+}
+
+.vr-profile__nav .vr-btn--outline:hover {
+    background: var(--vr-error-light);
+    border-color: var(--vr-error);
+}
+
+/* Content Styles */
+.vr-profile__content {
+    background: var(--vr-light);
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-md);
+    min-height: 600px;
+    transition: all var(--vr-menu-transition);
+    border: 1px solid var(--vr-gray-200);
+    overflow: hidden;
+}
+
+.vr-profile__section {
+    display: none;
+    background: var(--vr-light);
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-md);
+    padding: var(--vr-spacing-xl);
+    animation: fadeIn 0.3s ease;
+    opacity: 1;
+}
+
+.vr-profile__section.active {
+    display: block;
+}
+
+.vr-section__header {
+    margin-bottom: var(--vr-spacing-xl);
+    padding-bottom: var(--vr-spacing-md);
+    border-bottom: 2px solid var(--vr-gray-100);
+}
+
+.vr-section__header h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-md);
+    color: var(--vr-gray-900);
+    font-size: var(--vr-text-2xl);
+}
+
+.vr-section__header h2 i {
+    color: var(--vr-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .vr-profile {
+        padding: var(--vr-spacing-lg);
+    }
+}
+
+@media (max-width: 992px) {
+    .vr-profile {
+        grid-template-columns: 240px 1fr;
+        gap: var(--vr-spacing-lg);
+    }
+
+    .vr-profile__menu {
+        padding: var(--vr-spacing-sm) 0;
+    }
+}
+
+@media (max-width: 768px) {
+    .vr-profile {
+        grid-template-columns: 1fr;
+    }
+
+    .vr-profile__nav {
+        position: sticky;
+        top: var(--vr-header-height);
+        z-index: 10;
+        margin-bottom: var(--vr-spacing-lg);
+    }
+
+    .vr-profile__menu {
+        display: flex;
+        overflow-x: auto;
+        padding: var(--vr-spacing-sm);
+        gap: var(--vr-spacing-sm);
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .vr-profile__menu::-webkit-scrollbar {
+        display: none;
+    }
+
+    .vr-profile__menu li {
+        margin: 0;
+        flex: 0 0 auto;
+        min-width: max-content;
+    }
+
+    .vr-profile__menu .profile-item {
+        white-space: nowrap;
+        padding: var(--vr-spacing-sm) var(--vr-spacing-lg);
+    }
 }
 
 .vr-profile:hover {
@@ -195,12 +449,12 @@
 }
 
 .vr-profile-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: var(--vr-spacing-lg);
-    padding-bottom: var(--vr-spacing-sm);
+    background: var(--vr-primary-bg);
+    padding: var(--vr-spacing-xl) var(--vr-spacing-lg);
     border-bottom: 1px solid var(--vr-gray-200);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
 }
 
 .vr-profile-header h5 {
@@ -278,51 +532,56 @@
 }
 
 .vr-form-group label {
-    display: block;
-    margin-bottom: var(--vr-spacing-xs);
-    font-weight: var(--vr-font-medium);
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-sm);
     color: var(--vr-gray-700);
-    font-size: 0.9rem;
+    margin-bottom: var(--vr-spacing-sm);
+    font-weight: var(--vr-font-medium);
+}
+
+.vr-form-group label i {
+    color: var(--vr-primary);
+    font-size: 1.1em;
 }
 
 .vr-input {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--vr-gray-300);
-    border-radius: var(--vr-radius-sm);
-    background-color: var(--vr-gray-50);
-    color: var (--vr-gray-800);
+    padding: var(--vr-spacing-md) var(--vr-spacing-lg);
+    border: 2px solid var(--vr-gray-200);
+    border-radius: var(--vr-radius-md);
+    font-size: var(--vr-text-base);
     transition: all var(--vr-transition-fast);
-    font-size: 0.95rem;
+    background: var(--vr-light);
 }
 
-.vr-input-icon {
-    position: relative;
-}
-
-.vr-input-icon i {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: var(--vr-gray-500);
-}
-
-.vr-input-icon input {
-    padding-left: 35px;
+.vr-input:hover {
+    border-color: var(--vr-gray-300);
 }
 
 .vr-input:focus {
     border-color: var(--vr-primary);
-    box-shadow: 0 0 0 3px rgba(42, 157, 143, 0.1);
-    background-color: var(--vr-light);
+    box-shadow: 0 0 0 3px var(--vr-primary-bg);
+    outline: none;
 }
 
-.vr-input[readonly] {
-    background-color: var(--vr-gray-100);
-    color: var(--vr-gray-600);
-    cursor: not-allowed;
-    border-color: var(--vr-gray-200);
+.vr-input::placeholder {
+    color: var(--vr-gray-400);
+}
+
+.vr-input-icon {
+    position: absolute;
+    left: var(--vr-spacing-md);
+    color: var(--vr-gray-500);
+    transition: color var(--vr-transition-fast);
+}
+
+.vr-input-group .vr-input {
+    padding-left: calc(var(--vr-spacing-lg) * 2);
+}
+
+.vr-input-group .vr-input:focus + .vr-input-icon {
+    color: var(--vr-primary);
 }
 
 .error-message {
@@ -338,28 +597,16 @@ textarea.vr-input {
 }
 
 .vr-form-actions {
+    margin-top: var(--vr-spacing-xl);
+    padding-top: var(--vr-spacing-lg);
+    border-top: 2px solid var(--vr-gray-100);
     display: flex;
     justify-content: flex-end;
-    margin-top: var(--vr-spacing-lg);
-    padding-top: var(--vr-spacing-md);
-    border-top: 1px solid var(--vr-gray-200);
 }
 
 .vr-btn {
-    padding: 10px 16px;
-    border-radius: var(--vr-radius-sm);
-    font-weight: var(--vr-font-medium);
-    cursor: pointer;
-    transition: all var(--vr-transition-normal);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    font-size: 0.95rem;
-}
-
-.vr-btn i {
-    margin-right: 6px;
+    padding: var(--vr-spacing-md) var(--vr-spacing-xl);
+    font-size: var(--vr-text-lg);
 }
 
 .vr-btn--primary {
@@ -1044,3 +1291,685 @@ footer {
 }
 
 /* ...rest of existing styles... */
+
+/* Avatar styles specific to profile */
+.vr-profile-avatar {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto var(--vr-spacing-md);
+    border-radius: 50%;
+    background: var(--vr-gray-50);
+    overflow: hidden;
+    border: var(--vr-avatar-border);
+    box-shadow: var(--vr-shadow-sm);
+    transition: all var(--vr-transition-normal);
+}
+
+.vr-profile-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: var(--vr-shadow-md);
+}
+
+.vr-profile-avatar__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.vr-profile-avatar__upload {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.4) 50%,
+        transparent 100%
+    );
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: var(--vr-spacing-sm);
+    color: var(--vr-light);
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.vr-profile-avatar:hover .vr-profile-avatar__upload {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.vr-profile-avatar__input {
+    display: none;
+}
+
+/* Profile Header with Gradient */
+.vr-profile__header {
+    background: var(--vr-primary-bg);
+    padding: var(--vr-spacing-xl) var(--vr-spacing-lg);
+    border-bottom: 1px solid var(--vr-gray-200);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+.vr-profile__header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+    animation: rotate 20s linear infinite;
+}
+
+/* Animations */
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* تحسينات لعرض صفحة الملف الشخصي */
+
+/* تأكد من أن الأقسام تظهر بشكل صحيح */
+.vr-profile__section {
+    display: none; /* كل الأقسام مخفية افتراضيًا */
+    background: var(--vr-light);
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-md);
+    padding: var(--vr-spacing-xl);
+    animation: fadeIn 0.3s ease;
+    opacity: 1; /* تأكد من أن الشفافية 100% */
+}
+
+/* تنشيط القسم المختار */
+.vr-profile__section.active {
+    display: block;
+}
+
+/* تحسين شكل عناصر القائمة */
+.vr-profile__menu li {
+    cursor: pointer;
+    padding: var(--vr-spacing-md) var(--vr-spacing-lg);
+    border-radius: var(--vr-radius-md);
+    transition: all var(--vr-transition-normal);
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-md);
+    font-weight: var(--vr-font-medium);
+    color: var(--vr-gray-700); /* لون واضح للنص */
+}
+
+.vr-profile__menu li:hover {
+    background: var(--vr-primary-bg);
+    color: var(--vr-primary);
+}
+
+.vr-profile__menu li.active {
+    background: var(--vr-primary);
+    color: var(--vr-light);
+}
+
+/* تحسين عرض بطاقات القوائم */
+.vr-listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: var(--vr-spacing-lg);
+    margin-top: var(--vr-spacing-lg);
+}
+
+/* تأكد من أن العناصر الفارغة تظهر بشكل صحيح */
+.vr-listings-empty {
+    text-align: center;
+    padding: var(--vr-spacing-xl);
+    background: var(--vr-gray-50);
+    border-radius: var(--vr-radius-lg);
+    margin-top: var(--vr-spacing-xl);
+}
+
+/* تصحيح حالة التحميل */
+.vr-loading-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    z-index: 10;
+    border-radius: var(--vr-radius-lg);
+}
+
+/* تحسين حالات التحميل */
+.vr-section-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    backdrop-filter: blur(2px);
+}
+
+.vr-section-loading .vr-spinner {
+    width: 40px;
+    height: 40px;
+    border-width: 3px;
+    margin-bottom: var(--vr-spacing-md);
+}
+
+.vr-section-loading p {
+    color: var(--vr-gray-700);
+    font-weight: var(--vr-font-medium);
+}
+
+/* تحسين مظهر النماذج */
+.vr-profile__section .vr-form-group {
+    margin-bottom: var(--vr-spacing-lg);
+}
+
+.vr-profile__section .vr-input {
+    border-color: var(--vr-gray-300);
+    transition: all var(--vr-transition-fast);
+}
+
+.vr-profile__section .vr-input:focus {
+    border-color: var(--vr-primary);
+    box-shadow: 0 0 0 3px var(--vr-primary-bg);
+}
+
+.vr-profile__section .vr-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: var(--vr-spacing-lg);
+    border-top: 1px solid var(--vr-gray-200);
+}
+
+/* تحسين شكل النموذج */
+.vr-form {
+    background: var(--vr-light);
+    padding: var(--vr-spacing-xl);
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-sm);
+}
+
+.vr-form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--vr-spacing-lg);
+    margin-bottom: var(--vr-spacing-lg);
+}
+
+.vr-form-group {
+    position: relative;
+}
+
+.vr-form-group label {
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-sm);
+    color: var(--vr-gray-700);
+    margin-bottom: var(--vr-spacing-sm);
+    font-weight: var(--vr-font-medium);
+}
+
+.vr-form-group label i {
+    color: var(--vr-primary);
+    font-size: 1.1em;
+}
+
+/* تحسين شكل المدخلات */
+.vr-input {
+    width: 100%;
+    padding: var(--vr-spacing-md) var(--vr-spacing-lg);
+    border: 2px solid var(--vr-gray-200);
+    border-radius: var(--vr-radius-md);
+    font-size: var(--vr-text-base);
+    transition: all var(--vr-transition-fast);
+    background: var(--vr-light);
+}
+
+.vr-input:hover {
+    border-color: var(--vr-gray-300);
+}
+
+.vr-input:focus {
+    border-color: var(--vr-primary);
+    box-shadow: 0 0 0 3px var(--vr-primary-bg);
+    outline: none;
+}
+
+.vr-input::placeholder {
+    color: var(--vr-gray-400);
+}
+
+/* تحسين مجموعة المدخلات مع الأيقونات */
+.vr-input-group {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.vr-input-icon {
+    position: absolute;
+    left: var(--vr-spacing-md);
+    color: var(--vr-gray-500);
+    transition: color var(--vr-transition-fast);
+}
+
+.vr-input-group .vr-input {
+    padding-left: calc(var(--vr-spacing-lg) * 2);
+}
+
+.vr-input-group .vr-input:focus + .vr-input-icon {
+    color: var(--vr-primary);
+}
+
+/* تحسين صورة البروفايل */
+.vr-profile-avatar {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto var(--vr-spacing-lg);
+    border-radius: 50%;
+    background: var(--vr-gray-50);
+    overflow: hidden;
+    border: 3px solid var(--vr-light);
+    box-shadow: var(--vr-shadow-lg);
+    transition: all var(--vr-transition-normal);
+}
+
+.vr-profile-avatar:hover {
+    transform: translateY(-5px);
+}
+
+.vr-profile-avatar__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.vr-profile-avatar__upload {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.6) 50%,
+        rgba(0, 0, 0, 0.4) 100%
+    );
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--vr-light);
+    opacity: 0;
+    transform: translateY(100%);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.vr-profile-avatar:hover .vr-profile-avatar__upload {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.vr-profile-avatar__upload-content {
+    text-align: center;
+}
+
+.vr-profile-avatar__upload-content i {
+    font-size: 24px;
+    margin-bottom: var(--vr-spacing-sm);
+}
+
+.vr-profile-avatar__upload-content span {
+    font-size: var(--vr-text-sm);
+    font-weight: var(--vr-font-medium);
+}
+
+/* تحسين رأس القسم */
+.vr-section__header {
+    margin-bottom: var(--vr-spacing-xl);
+    padding-bottom: var(--vr-spacing-md);
+    border-bottom: 2px solid var(--vr-gray-100);
+}
+
+.vr-section__header h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-md);
+    color: var(--vr-gray-900);
+    font-size: var(--vr-text-2xl);
+}
+
+.vr-section__header h2 i {
+    color: var(--vr-primary);
+}
+
+/* تحسين أزرار الإجراءات */
+.vr-form-actions {
+    margin-top: var(--vr-spacing-xl);
+    padding-top: var(--vr-spacing-lg);
+    border-top: 2px solid var(--vr-gray-100);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.vr-btn--lg {
+    padding: var(--vr-spacing-md) var(--vr-spacing-xl);
+    font-size: var(--vr-text-lg);
+}
+
+/* تحسين قسم القوائم */
+.vr-listings-section {
+    position: relative;
+    min-height: 400px;
+}
+
+/* رأس القسم مع زر الإضافة */
+.vr-section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--vr-spacing-xl);
+}
+
+.vr-section__title {
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-md);
+}
+
+.vr-section__title h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-sm);
+    margin: 0;
+}
+
+.vr-section__title .vr-badge {
+    font-size: var(--vr-text-lg);
+    padding: var(--vr-spacing-xs) var(--vr-spacing-sm);
+}
+
+/* شريط التصفية */
+.vr-listings-filter {
+    position: sticky;
+    top: calc(var(--vr-header-height) + 70px);
+    background: var(--vr-light);
+    z-index: 9;
+    padding: var(--vr-spacing-md) 0;
+    border-bottom: 2px solid var(--vr-gray-100);
+    margin-bottom: var(--vr-spacing-xl);
+}
+
+.vr-filter-tabs {
+    display: flex;
+    gap: var(--vr-spacing-md);
+    overflow-x: auto;
+    padding-bottom: var(--vr-spacing-sm);
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.vr-filter-tab {
+    position: relative;
+    padding: var(--vr-spacing-sm) var(--vr-spacing-lg);
+    color: var(--vr-gray-600);
+    background: transparent;
+    border: none;
+    font-weight: var(--vr-font-medium);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-sm);
+}
+
+.vr-filter-tab::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--vr-primary);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.vr-filter-tab:hover::after,
+.vr-filter-tab.active::after {
+    transform: scaleX(1);
+}
+
+.vr-filter-tab.active {
+    color: var(--vr-primary);
+}
+
+/* شبكة القوائم */
+.vr-listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--vr-spacing-lg);
+    padding: var(--vr-spacing-md);
+}
+
+/* حالة عدم وجود قوائم */
+.vr-listings-empty {
+    text-align: center;
+    padding: var(--vr-spacing-xxl) var(--vr-spacing-xl);
+    background: var(--vr-gray-50);
+    border-radius: var(--vr-radius-lg);
+}
+
+.vr-listings-empty img {
+    width: 200px;
+    margin-bottom: var(--vr-spacing-xl);
+    opacity: 0.7;
+}
+
+.vr-listings-empty h3 {
+    color: var(--vr-gray-900);
+    margin-bottom: var(--vr-spacing-md);
+}
+
+.vr-listings-empty p {
+    color: var(--vr-gray-600);
+    margin-bottom: var(--vr-spacing-xl);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* تحسين أزرار الإجراءات */
+.vr-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--vr-spacing-sm);
+    padding: var(--vr-spacing-sm) var(--vr-spacing-lg);
+    border-radius: var(--vr-radius-md);
+    font-weight: var(--vr-font-medium);
+    transition: all var(--vr-transition-fast);
+    border: none;
+    cursor: pointer;
+}
+
+.vr-btn--primary {
+    background: var(--vr-primary);
+    color: var(--vr-light);
+}
+
+.vr-btn--primary:hover {
+    background: var(--vr-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: var(--vr-shadow-md);
+}
+
+/* تحسين حالة التحميل */
+.vr-loading-state {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(4px);
+    border-radius: var(--vr-radius-lg);
+}
+
+.vr-loading-state .vr-spinner {
+    margin-bottom: var(--vr-spacing-md);
+}
+
+.vr-loading-state p {
+    color: var(--vr-gray-700);
+    font-weight: var(--vr-font-medium);
+}
+
+/* تحسين بطاقات القوائم */
+.vr-listing-card {
+    position: relative;
+    background: var(--vr-light);
+    border-radius: var(--vr-radius-lg);
+    box-shadow: var(--vr-shadow-sm);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border: 1px solid var(--vr-gray-200);
+}
+
+/* تمييز البطاقات حسب النوع */
+.vr-listing-card--active {
+    border-left: 4px solid var(--vr-success);
+}
+
+.vr-listing-card--featured {
+    border-left: 4px solid var(--vr-warning);
+}
+
+.vr-listing-card--inactive {
+    border-left: 4px solid var(--vr-gray-400);
+    opacity: 0.8;
+}
+
+.vr-listing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--vr-shadow-md);
+}
+
+.vr-listing-card__image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.vr-listing-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.vr-listing-card:hover .vr-listing-card__image img {
+    transform: scale(1.1);
+}
+
+.vr-listing-card__status {
+    position: absolute;
+    top: var(--vr-spacing-sm);
+    right: var(--vr-spacing-sm);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: var(--vr-text-sm);
+    font-weight: var(--vr-font-medium);
+    z-index: 1;
+}
+
+.vr-listing-card--active .vr-listing-card__status {
+    background: var(--vr-success-light);
+    color: var(--vr-success-dark);
+}
+
+.vr-listing-card--featured .vr-listing-card__status {
+    background: var(--vr-warning-light);
+    color: var(--vr-warning-dark);
+}
+
+.vr-listing-card--inactive .vr-listing-card__status {
+    background: var(--vr-gray-100);
+    color: var(--vr-gray-700);
+}
+
+.vr-listing-card__content {
+    padding: var(--vr-spacing-lg);
+}
+
+.vr-listing-card__title {
+    font-size: var(--vr-text-lg);
+    font-weight: var(--vr-font-semibold);
+    color: var(--vr-gray-900);
+    margin-bottom: var(--vr-spacing-sm);
+}
+
+.vr-listing-card__description {
+    color: var(--vr-gray-600);
+    margin-bottom: var(--vr-spacing-md);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.vr-listing-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--vr-spacing-md);
+    margin-top: var(--vr-spacing-md);
+    padding-top: var(--vr-spacing-md);
+    border-top: 1px solid var(--vr-gray-100);
+}
+
+.vr-listing-card__actions {
+    padding: var(--vr-spacing-md);
+    background: var(--vr-gray-50);
+    display: flex;
+    gap: var(--vr-spacing-sm);
+    justify-content: flex-end;
+}
+
+@media (max-width: 576px) {
+    .vr-listings-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .vr-filter-tabs {
+        padding-bottom: 0;
+    }
+
+    .vr-filter-tab {
+        padding: var(--vr-spacing-sm);
+        font-size: var(--vr-text-sm);
+    }
+
+    .vr-listing-card__actions {
+        flex-direction: column;
+    }
+
+    .vr-listing-card__actions .vr-btn {
+        width: 100%;
+    }
+}

@@ -1,4 +1,6 @@
-class ComponentLoader {
+import { authService } from '../services/auth.service.js';
+
+export class ComponentLoader {
     constructor() {
         this.cache = new Map();
         this.preloadQueue = new Set();
@@ -27,12 +29,10 @@ class ComponentLoader {
             await this.loadFooter();
             
             // Initialize auth state
-            if (window.authService) {
+            this.updateHeaderAuth();
+            authService.onAuthStateChange(() => {
                 this.updateHeaderAuth();
-                window.authService.onAuthStateChange(() => {
-                    this.updateHeaderAuth();
-                });
-            }
+            });
         } catch (error) {
             console.error('Error initializing components:', error);
         }
@@ -119,8 +119,6 @@ class ComponentLoader {
     }
 
     updateHeaderAuth() {
-        if (!window.authService) return;
-
         const guestView = document.getElementById('guestView');
         const userView = document.getElementById('userView');
         const profileName = document.getElementById('profileName');
@@ -129,9 +127,9 @@ class ComponentLoader {
         const headerAvatar = document.getElementById('headerAvatar');
         const dropdownAvatar = document.getElementById('dropdownAvatar');
 
-        const isAuthenticated = window.authService.isAuthenticated();
-        const user = window.authService.getUser();
-        const profile = window.authService.getProfile();
+        const isAuthenticated = authService.isAuthenticated();
+        const user = authService.getUser();
+        const profile = authService.getProfile();
 
         if (isAuthenticated && user) {
             if (guestView) guestView.style.display = 'none';
@@ -184,8 +182,8 @@ class ComponentLoader {
 
         // Setup logout
         const logoutBtn = newDropdown.querySelector('#logoutBtn');
-        if (logoutBtn && window.authService) {
-            logoutBtn.addEventListener('click', () => window.authService.logout());
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => authService.logout());
         }
     }
 
@@ -257,5 +255,5 @@ class ComponentLoader {
     }
 }
 
-// Create global instance
-window.componentLoader = new ComponentLoader();
+// Create a singleton instance
+export const componentLoader = new ComponentLoader();

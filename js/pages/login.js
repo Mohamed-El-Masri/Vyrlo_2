@@ -1,24 +1,53 @@
+import { authService } from '../services/auth.service.js';
+import { toastService } from '../services/toast.service.js';
+import { componentLoader } from '../core/componentLoader.js';
+
 class LoginPage {
     constructor() {
-        this.authService = new AuthService();
-        this.toastService = new ToastService();
-        this.componentLoader = new ComponentLoader();
-        
         this.form = document.getElementById('loginForm');
         this.emailInput = document.getElementById('email');
         this.passwordInput = document.getElementById('password');
         this.submitButton = this.form.querySelector('.vr-auth__submit');
         
-        this.init();
+        this.apiBaseUrl = 'https://www.vyrlo.com:8080';
+        
+        // Wait for toast service to be available
+        this.waitForToastService().then(() => {
+            this.init();
+        });
+    }
+
+    async waitForToastService(attempts = 0) {
+        const maxAttempts = 50; // 5 seconds maximum wait time
+        const waitTime = 100; // 100ms between attempts
+
+        return new Promise((resolve) => {
+            const check = () => {
+                if (window.toastService) {
+                    resolve();
+                } else if (attempts < maxAttempts) {
+                    setTimeout(() => check(), waitTime);
+                } else {
+                    console.error('Toast service not available');
+                    resolve(); // Continue anyway
+                }
+            };
+            check();
+        });
     }
 
     async init() {
-        // Load components
-        await this.componentLoader.loadHeader();
-        await this.componentLoader.loadFooter();
-        
-        // Add event listeners
-        this.setupEventListeners();
+        try {
+            // Use the componentLoader instance instead of static methods
+            await componentLoader.loadHeader();
+            await componentLoader.loadFooter();
+            
+            // Add event listeners
+            this.setupEventListeners();
+        } catch (error) {
+            console.error('Error initializing login page:', error);
+            this.showToast('error', 'Failed to initialize page');
+        }
     }
 
     setupEventListeners() {
@@ -39,17 +68,24 @@ class LoginPage {
 
     clearError(input) {
         input.classList.remove('error');
-        const errorText = input.parentElement.querySelector('.vr-error-text');
-        if (errorText) {
-            errorText.textContent = '';
+        const formGroup = input.closest('.vr-form-group');
+        const errorMessage = formGroup.querySelector('.vr-error-message');
+        if (errorMessage) {
+            errorMessage.classList.remove('show');
         }
+    }
+
+    clearAllErrors() {
+        [this.emailInput, this.passwordInput].forEach(input => this.clearError(input));
     }
 
     showError(input, message) {
         input.classList.add('error');
-        const errorText = input.parentElement.querySelector('.vr-error-text');
-        if (errorText) {
-            errorText.textContent = message;
+        const formGroup = input.closest('.vr-form-group');
+        const errorMessage = formGroup.querySelector('.vr-error-message');
+        if (errorMessage) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('show');
         }
     }
 
@@ -95,35 +131,74 @@ class LoginPage {
             return;
         }
 
-        this.setLoading(true);
-
         try {
-            const response = await this.authService.login(
-                this.emailInput.value,
-                this.passwordInput.value
-            );
+            this.setLoading(true);
 
-            if (response.token) {
-                // Show success message
-                this.toastService.success('Successfully logged in');
+            const response = await fetch(`${this.apiBaseUrl}/signin`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: this.emailInput.value,
+                    password: this.passwordInput.value
+                })
+            });
 
-                // Redirect to home page after successful login
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1000);
+            const data = await response.json();
+
+            if (!response.ok) {
+                if (response.status === 500) {
+                    this.showError(this.emailInput, 'Invalid email or password');
+                    this.showError(this.passwordInput, 'Invalid email or password');
+                    throw new Error('Invalid credentials');
+                }
+                throw new Error(data.message || 'Login failed');
             }
+
+            // Store token
+            localStorage.setItem('vr_token', data.token);
+
+            // Show success toast
+            this.showToast('success', 'Login successful! Redirecting...');
+
+            // Clear any previous errors
+            this.clearAllErrors();
+
+            // Redirect to home page
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500); // Give time for the success toast to be seen
+
         } catch (error) {
             console.error('Login error:', error);
-            this.toastService.error(error.message || 'Failed to login. Please try again.');
+            let errorMessage = 'Failed to login';
+            
+            if (error.message.includes('credentials')) {
+                errorMessage = 'Invalid email or password';
+            } else if (error.message.includes('network')) {
+                errorMessage = 'Network error. Please check your connection';
+            }
+            
+            // Show error toast
+            this.showToast('error', errorMessage);
         } finally {
             this.setLoading(false);
+        }
+    }
+
+    showToast(type, message) {
+        if (window.toastService) {
+            window.toastService[type](message, {
+                duration: type === 'error' ? 5000 : 3000, // Show errors longer
+                position: 'top-right'
+            });
         }
     }
 }
 
 // Initialize page when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => new LoginPage());
-} else {
+document.addEventListener('DOMContentLoaded', () => {
     new LoginPage();
-} 
+}); 

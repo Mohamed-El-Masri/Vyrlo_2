@@ -1,0 +1,35 @@
+/* Import all CSS files */
+@import url('components/alerts.css');
+@import url('components/avatar.css');
+@import url('components/buttons.css');
+@import url('components/cards.css');
+@import url('components/dropdown.css');
+@import url('components/footer.css');
+@import url('components/forms.css');
+@import url('components/header.css');
+@import url('components/listing-form.css');
+@import url('components/loaders.css');
+@import url('components/modal.css');
+@import url('components/navbar.css');
+@import url('components/toast.css');
+@import url('components/validation.css');
+
+/* Layout */
+@import url('layout/container.css');
+@import url('layout/flex.css');
+@import url('layout/grid.css');
+
+/* Main */
+@import url('main/animations.css');
+@import url('main/reset.css');
+@import url('main/style.css');
+@import url('main/utilities.css');
+@import url('main/variables.css');
+
+/* Pages */
+
+@import url('pages/profile.css');
+
+/* Add fonts locally */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap'); 

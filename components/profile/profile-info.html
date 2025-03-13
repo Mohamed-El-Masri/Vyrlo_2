@@ -1,0 +1,136 @@
+<div class="vr-profile__section">
+    <!-- Profile Header with Avatar -->
+    <div class="vr-profile__header">
+        <div class="vr-profile-avatar">
+            <img src="/images/defaults/default-avatar.png" 
+                 alt="Profile" 
+                 id="userAvatar" 
+                 class="vr-profile-avatar__img">
+            <label class="vr-profile-avatar__upload" role="button" tabindex="0">
+                <input type="file" 
+                       id="avatarUpload" 
+                       class="vr-profile-avatar__input" 
+                       accept="image/*">
+                <div class="vr-profile-avatar__upload-content">
+                    <i class="fas fa-camera"></i>
+                    <span>Change Photo</span>
+                </div>
+            </label>
+        </div>
+        <div class="vr-profile__user-info">
+            <h3 id="userName">Loading...</h3>
+            <p id="userEmail">Loading...</p>
+        </div>
+    </div>
+</div>
+
+<div class="vr-section__header">
+    <h2><i class="fas fa-user-edit"></i> Profile Information</h2>
+</div>
+
+<form id="profileForm" class="vr-form">
+    <div class="vr-form-row">
+        <div class="vr-form-group">
+            <label for="title">
+                <i class="fas fa-briefcase"></i>
+                Title/Position*
+            </label>
+            <input type="text" 
+                   id="title" 
+                   name="title" 
+                   class="vr-input" 
+                   placeholder="Enter your job title"
+                   required>
+        </div>
+        <div class="vr-form-group">
+            <label for="phoneNumber">
+                <i class="fas fa-phone"></i>
+                Phone Number*
+            </label>
+            <div class="vr-input-group">
+                <span class="vr-input-icon">
+                    <i class="fas fa-phone"></i>
+                </span>
+                <input type="tel" 
+                       id="phoneNumber" 
+                       name="phoneNumber" 
+                       class="vr-input" 
+                       placeholder="Enter your phone number"
+                       required>
+            </div>
+        </div>
+    </div>
+
+    <div class="vr-form-row">
+        <div class="vr-form-group">
+            <label for="address">
+                <i class="fas fa-map-marker-alt"></i>
+                Address
+            </label>
+            <div class="vr-input-group">
+                <span class="vr-input-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </span>
+                <input type="text" 
+                       id="address" 
+                       name="address" 
+                       class="vr-input" 
+                       placeholder="Enter your address">
+            </div>
+        </div>
+        <div class="vr-form-group">
+            <label for="city">
+                <i class="fas fa-city"></i>
+                City
+            </label>
+            <input type="text" 
+                   id="city" 
+                   name="city" 
+                   class="vr-input" 
+                   placeholder="Enter your city">
+        </div>
+    </div>
+
+    <div class="vr-form-row">
+        <div class="vr-form-group">
+            <label for="state">
+                <i class="fas fa-map"></i>
+                State
+            </label>
+            <input type="text" 
+                   id="state" 
+                   name="state" 
+                   class="vr-input" 
+                   placeholder="Enter your state">
+        </div>
+        <div class="vr-form-group">
+            <label for="zipCode">
+                <i class="fas fa-mail-bulk"></i>
+                Zip Code
+            </label>
+            <input type="text" 
+                   id="zipCode" 
+                   name="zipCode" 
+                   class="vr-input" 
+                   placeholder="Enter your zip code">
+        </div>
+    </div>
+
+    <div class="vr-form-group">
+        <label for="about">
+            <i class="fas fa-info-circle"></i>
+            About
+        </label>
+        <textarea id="about" 
+                  name="about" 
+                  class="vr-input" 
+                  rows="4" 
+                  placeholder="Tell us about yourself"></textarea>
+    </div>
+
+    <div class="vr-form-actions">
+        <button type="submit" class="vr-btn vr-btn--primary vr-btn--lg">
+            <i class="fas fa-save"></i> Save Changes
+        </button>
+    </div>
+</form> 

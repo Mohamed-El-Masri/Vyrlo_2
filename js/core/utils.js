@@ -3,7 +3,7 @@
  * 
  */
 
-class Utils {
+export class Utils {
     /**
      * Format date to locale string
      */
@@ -221,5 +221,5 @@ class Utils {
     }
 }
 
-// Make Utils available globally
-window.Utils = Utils; 
+// Export a singleton instance
+export const utils = new Utils(); 

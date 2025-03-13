@@ -1,6 +1,10 @@
+import { apiService } from './api.service.js';
+import { toastService } from './toast.service.js';
+import { authService } from './auth.service.js';
+
 class ListingService {
     constructor() {
-        this.baseUrl = 'https://virlo.vercel.app';
+        this.baseUrl = 'https://www.vyrlo.com:8080';
         this.cache = new Map();
         this.pendingRequests = new Map();
     }
@@ -93,28 +97,80 @@ class ListingService {
      */
     async getUserListings() {
         try {
-            const response = await window.ApiService.get(`${this.baseUrl}/listing/user`);
-            return response;
+            console.log('==== REQUEST START: GET USER LISTINGS ====');
+            
+            // 1. الحصول على التوكن
+            const token = authService.getToken();
+            console.log('Token being used:', token);
+            
+            // 2. بناء URL وهيدرز
+            const url = `${this.baseUrl}/listing/user`;  // بدون شرطة في النهاية
+            console.log('Request URL:', url);
+            
+            const headers = { 'token': token };
+            console.log('Request Headers:', headers);
+            
+            // 3. إرسال الطلب
+            console.log('Sending request with method: GET');
+            const requestDetails = {
+                method: 'GET',
+                headers: headers
+            };
+            
+            const response = await fetch(url, requestDetails);
+            
+            // 4. تسجيل نتيجة الاستجابة
+            console.log('Response status:', response.status);
+            console.log('Response OK:', response.ok);
+            
+            // 5. في حالة الخطأ
+            if (!response.ok) {
+                let errorBody = '';
+                try {
+                    errorBody = await response.text();
+                    console.error('Error Response Body:', errorBody);
+                } catch (e) {
+                    console.error('Could not read error response body');
+                }
+                throw new Error(`Failed to fetch listings: ${response.status} ${response.statusText}`);
+            }
+            
+            // 6. معالجة البيانات
+            const data = await response.json();
+            console.log('Response Data Type:', Array.isArray(data) ? 'Array' : typeof data);
+            console.log('Response Data Length:', Array.isArray(data) ? data.length : 'N/A');
+            
+            const result = {
+                listings: Array.isArray(data) ? data : [],
+                total: Array.isArray(data) ? data.length : 0,
+                page: 1,
+                pages: 1
+            };
+            
+            console.log('==== REQUEST END: SUCCESS ====');
+            return result;
+            
         } catch (error) {
-            console.error('Error fetching user listings:', error);
-            window.toastService.error('Failed to fetch your listings');
+            console.error('==== REQUEST END: ERROR ====');
+            console.error('Error Type:', error.name);
+            console.error('Error Message:', error.message);
             throw error;
         }
     }
 
     /**
      * Create new listing
-     * @param {Object} listingData - Listing data
+     * @param {Object} data - Listing data
      * @returns {Promise} - Response from API
      */
-    async createListing(listingData) {
+    async createListing(data) {
         try {
-            const response = await window.ApiService.post(`${this.baseUrl}/listing`, listingData);
-            window.toastService.success('Listing created successfully');
+            const response = await apiService.post('/listing', data);
+            toastService.success('Listing created successfully');
             return response;
         } catch (error) {
             console.error('Error creating listing:', error);
-            window.toastService.error('Failed to create listing');
+            toastService.error('Failed to create listing');
             throw error;
         }
     }
@@ -195,7 +251,66 @@ class ListingService {
 
         return currentMinutes >= fromMinutes && currentMinutes <= toMinutes;
     }
+
+    // Get Categories
+    async getCategories() {
+        try {
+            const response = await apiService.get('/categories');
+            return response.data || [];
+        } catch (error) {
+            console.error('Error loading categories:', error);
+            toastService.error('Failed to load categories');
+            throw error;
+        }
+    }
+
+    // Upload listing images
+    async uploadListingImages(files) {
+        try {
+            const uploadPromises = files.map(file => 
+                window.ApiService.uploadFile('/upload', file)
+            );
+            const results = await Promise.all(uploadPromises);
+            return results.map(result => result.url);
+        } catch (error) {
+            window.toastService.error('Failed to upload images');
+            throw error;
+        }
+    }
+
+    // Get listing by ID
+    async getListing(id) {
+        try {
+            return await window.ApiService.get(`/listings/${id}`);
+        } catch (error) {
+            window.toastService.error('Failed to load listing');
+            throw error;
+        }
+    }
+
+    // Update listing
+    async updateListing(id, data) {
+        try {
+            const response = await window.ApiService.put(`/listings/${id}`, data);
+            window.toastService.success('Listing updated successfully');
+            return response;
+        } catch (error) {
+            window.toastService.error('Failed to update listing');
+            throw error;
+        }
+    }
+
+    // Delete listing
+    async deleteListing(id) {
+        try {
+            await window.ApiService.delete(`/listings/${id}`);
+            window.toastService.success('Listing deleted successfully');
+        } catch (error) {
+            window.toastService.error('Failed to delete listing');
+            throw error;
+        }
+    }
 }
 
-// Create global instance
-window.listingService = new ListingService(); 
+// Export a singleton instance
+export const listingService = new ListingService(); 

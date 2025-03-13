@@ -4,65 +4,347 @@
  * Initializes and manages the add listing page.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('Add listing page loaded');
-    
-    // Check if auth service is available
-    if (!window.authService) {
-        console.error('Auth service not found! Creating temporary instance...');
-        window.authService = {
-            isAuthenticated: () => {
-                const token = localStorage.getItem('vr_token');
-                return !!token;
-            },
-            getCurrentUser: () => {
-                try {
-                    const userData = localStorage.getItem('vr_user');
-                    return userData ? JSON.parse(userData) : null;
-                } catch (e) {
-                    console.error('Error parsing user data:', e);
-                    return null;
-                }
+import { listingService } from '../../services/listing.service.js';
+import { toastService } from '../../services/toast.service.js';
+
+class AddListingPage {
+    constructor() {
+        this.form = document.getElementById('listingForm');
+        this.map = null;
+        this.marker = null;
+        this.selectedFeatures = new Set();
+        this.customFeatures = new Set();
+        this.init();
+    }
+
+    async init() {
+        try {
+            await this.loadCategories();
+            this.initializeMap();
+            this.setupEventListeners();
+            this.setupBusinessHours();
+        } catch (error) {
+            console.error('Error initializing add listing page:', error);
+            toastService.error('Failed to initialize page');
+        }
+    }
+
+    async loadCategories() {
+        try {
+            const categories = await listingService.getCategories();
+            this.updateCategorySelect(categories);
+            this.setupFeaturesGrid(categories);
+        } catch (error) {
+            console.error('Error loading categories:', error);
+            toastService.error('Failed to load categories');
+        }
+    }
+
+    updateCategorySelect(categories) {
+        const select = document.getElementById('category');
+        select.innerHTML = `
+            <option value="">Select Category</option>
+            ${categories.map(cat => `
+                <option value="${cat._id}">${cat.categoryName}</option>
+            `).join('')}
+        `;
+
+        // Update features when category changes
+        select.addEventListener('change', (e) => {
+            const category = categories.find(c => c._id === e.target.value);
+            if (category) {
+                this.updateFeatures(category.amenities);
             }
-        };
+        });
     }
-    
-    // Check if user is logged in
-    const isAuthenticated = window.authService.isAuthenticated();
-    console.log('Is user authenticated:', isAuthenticated);
-    
-    if (!isAuthenticated) {
-        window.toastService?.error('Please login to create a listing');
+
+    setupFeaturesGrid(categories) {
+        const container = document.getElementById('featuresContainer');
         
-        // Redirect to login page
-        setTimeout(() => {
-            window.location.href = '/pages/login.html?redirect=/pages/profile/add-listing.html';
-        }, 1000);
+        // Add event listener for custom features
+        const addCustomFeatureBtn = document.getElementById('addCustomFeature');
+        const customFeatureInput = document.getElementById('customFeature');
+
+        addCustomFeatureBtn.addEventListener('click', () => {
+            const feature = customFeatureInput.value.trim();
+            if (feature) {
+                this.addCustomFeature(feature);
+                customFeatureInput.value = '';
+            }
+        });
+    }
+
+    updateFeatures(features) {
+        const container = document.getElementById('featuresContainer');
+        container.innerHTML = features.map(feature => `
+            <div class="vr-feature-item" data-feature="${feature}">
+                <label class="vr-checkbox">
+                    <input type="checkbox" value="${feature}">
+                    <span>${feature}</span>
+                </label>
+            </div>
+        `).join('');
+
+        // Add event listeners to checkboxes
+        container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                if (e.target.checked) {
+                    this.selectedFeatures.add(e.target.value);
+                } else {
+                    this.selectedFeatures.delete(e.target.value);
+                }
+            });
+        });
+    }
+
+    addCustomFeature(feature) {
+        const container = document.getElementById('customFeaturesGrid');
+        const featureElement = document.createElement('div');
+        featureElement.className = 'vr-custom-feature';
+        featureElement.innerHTML = `
+            <span>${feature}</span>
+            <button type="button" class="vr-btn vr-btn--icon">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        featureElement.querySelector('button').addEventListener('click', () => {
+            this.customFeatures.delete(feature);
+            featureElement.remove();
+        });
+
+        container.appendChild(featureElement);
+        this.customFeatures.add(feature);
+    }
+
+    initializeMap() {
+        // التحقق من وجود حاوية الخريطة
+        const mapContainer = document.getElementById('mapContainer');
+        if (!mapContainer) return;
         
-        return;
+        // التحقق ما إذا كانت الخريطة مهيأة بالفعل
+        if (this.map) {
+            console.log('Map already initialized, updating only');
+            this.map.invalidateSize(); // تحديث حجم الخريطة فقط
+            return;
+        }
+        
+        try {
+            // إنشاء خريطة جديدة
+            this.map = L.map('mapContainer').setView([40.7128, -74.0060], 13);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(this.map);
+            
+            // إضافة سلوك النقر لتحديد مكان
+            this.map.on('click', (e) => {
+                if (this.marker) {
+                    this.map.removeLayer(this.marker);
+                }
+                
+                this.marker = L.marker(e.latlng).addTo(this.map);
+                document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
+                document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
+            });
+            
+            // تحديث الخريطة بعد إظهارها
+            setTimeout(() => {
+                this.map.invalidateSize();
+            }, 500);
+        } catch (error) {
+            console.error('Error initializing map:', error);
+        }
     }
-    
-    // Get current user
-    let currentUser = null;
-    try {
-        currentUser = window.authService.getCurrentUser();
-        console.log("Current user:", currentUser);
-    } catch (error) {
-        console.error("Error getting current user:", error);
+
+    updateLocation(latlng) {
+        this.marker.setLatLng(latlng).addTo(this.map);
+        this.map.setView(latlng, 15);
+        
+        document.getElementById('latitude').value = latlng.lat.toFixed(6);
+        document.getElementById('longitude').value = latlng.lng.toFixed(6);
+        
+        this.reverseGeocode(latlng);
     }
-    
-    if (currentUser) {
-        // Pre-fill email and contact details
-        const emailField = document.getElementById('email');
-        if (emailField && currentUser.email) {
-            emailField.value = currentUser.email;
+
+    async reverseGeocode(latlng) {
+        try {
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?lat=${latlng.lat}&lon=${latlng.lng}&format=json`
+            );
+            const data = await response.json();
+            
+            if (data.display_name) {
+                document.getElementById('address').value = data.display_name;
+            }
+        } catch (error) {
+            console.error('Error reverse geocoding:', error);
+        }
+    }
+
+    getCurrentLocation() {
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const latlng = {
+                        lat: position.coords.latitude,
+                        lng: position.coords.longitude
+                    };
+                    this.updateLocation(latlng);
+                },
+                (error) => {
+                    console.error('Geolocation error:', error);
+                    toastService.error('Could not get your location');
+                }
+            );
+        } else {
+            toastService.error('Geolocation is not supported by your browser');
+        }
+    }
+
+    setupBusinessHours() {
+        const container = document.getElementById('businessHoursContainer');
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        
+        container.innerHTML = days.map(day => `
+            <div class="vr-hours-row" data-day="${day}">
+                <div class="vr-hours-day">${day}</div>
+                <div class="vr-hours-inputs">
+                    <select class="vr-input vr-hours-status">
+                        <option value="open">Open</option>
+                        <option value="closed">Closed</option>
+                    </select>
+                    <input type="time" class="vr-input vr-hours-from" value="09:00">
+                    <input type="time" class="vr-input vr-hours-to" value="17:00">
+                </div>
+            </div>
+        `).join('');
+
+        // Handle 24/7 checkbox
+        document.getElementById('is24Hours').addEventListener('change', (e) => {
+            const inputs = container.querySelectorAll('input, select');
+            inputs.forEach(input => input.disabled = e.target.checked);
+        });
+    }
+
+    setupEventListeners() {
+        // Form submission
+        this.form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!this.validateForm()) {
+                return;
+            }
+
+            const formData = this.getFormData();
+            
+            try {
+                await listingService.createListing(formData);
+                toastService.success('Listing created successfully');
+                window.location.href = '/pages/profile.html?section=listings';
+            } catch (error) {
+                console.error('Error creating listing:', error);
+                toastService.error('Failed to create listing');
+            }
+        });
+
+        // Social media accounts
+        document.getElementById('addSocialAccount').addEventListener('click', () => {
+            this.addSocialMediaField();
+        });
+    }
+
+    validateForm() {
+        // Add your validation logic here
+        return true;
+    }
+
+    getFormData() {
+        const formData = new FormData(this.form);
+        const data = Object.fromEntries(formData.entries());
+
+        // Add features
+        data.amenitiesList = [
+            ...Array.from(this.selectedFeatures),
+            ...Array.from(this.customFeatures)
+        ];
+
+        // Add business hours
+        data.openingTimes = this.getBusinessHours();
+
+        // Add location
+        data.latitude = parseFloat(data.latitude);
+        data.longitude = parseFloat(data.longitude);
+
+        return data;
+    }
+
+    getBusinessHours() {
+        const hours = {};
+        const is24Hours = document.getElementById('is24Hours').checked;
+
+        if (is24Hours) {
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].forEach(day => {
+                hours[day] = {
+                    status: 'open',
+                    from: '00:00',
+                    to: '23:59'
+                };
+            });
+        } else {
+            document.querySelectorAll('.vr-hours-row').forEach(row => {
+                const day = row.dataset.day;
+                hours[day] = {
+                    status: row.querySelector('.vr-hours-status').value,
+                    from: row.querySelector('.vr-hours-from').value,
+                    to: row.querySelector('.vr-hours-to').value
+                };
+            });
         }
 
-        const mobileField = document.getElementById('mobile');
-        if (mobileField && currentUser.mobile) {
-            mobileField.value = currentUser.mobile;
-        }
-    } else {
-        console.warn("User data not found in local storage");
+        return hours;
     }
+
+    addSocialMediaField() {
+        const container = document.getElementById('listingSocialMediaContainer');
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = 'vr-social-account';
+        
+        fieldDiv.innerHTML = `
+            <select class="vr-input vr-social-platform" name="socialPlatform[]">
+                <option value="">Select Platform</option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="twitter">Twitter</option>
+                <option value="linkedin">LinkedIn</option>
+                <option value="youtube">YouTube</option>
+            </select>
+            <input type="url" class="vr-input" name="socialUrl[]" placeholder="Profile URL">
+            <button type="button" class="vr-btn vr-btn--icon vr-remove-social">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+
+        fieldDiv.querySelector('.vr-remove-social').addEventListener('click', () => {
+            fieldDiv.remove();
+        });
+
+        container.appendChild(fieldDiv);
+    }
+
+    cleanup() {
+        if (this.map) {
+            this.map.remove();
+            this.map = null;
+            this.marker = null;
+        }
+    }
+}
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', () => {
+    new AddListingPage();
 });
+
+// تصدير الكلاس
+export default AddListingPage;

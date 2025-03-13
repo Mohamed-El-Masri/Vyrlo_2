@@ -35,38 +35,65 @@ class ToastService {
         const settings = { ...this.defaultOptions, ...options };
         const toastId = this.generateId();
         
-        // Create toast element
-        const toast = this.createToast(message, settings, toastId);
+        const toast = this.createToast(message, settings);
         this.toasts.set(toastId, { element: toast, timer: null });
         
-        // Add to container
         this.container.appendChild(toast);
         
-        // Trigger animation
+        // Trigger animation in next frame
         requestAnimationFrame(() => {
             toast.classList.add('vr-toast--visible');
-            
             if (settings.showProgress) {
                 this.startProgress(toastId, settings.duration);
             }
         });
 
-        // Setup auto remove
         if (settings.duration > 0) {
-            const timer = setTimeout(() => {
-                this.remove(toastId);
-            }, settings.duration);
-            
+            const timer = setTimeout(() => this.remove(toastId), settings.duration);
             this.toasts.get(toastId).timer = timer;
         }
 
-        // Setup pause on hover
         if (settings.pauseOnHover) {
             toast.addEventListener('mouseenter', () => this.pause(toastId));
             toast.addEventListener('mouseleave', () => this.resume(toastId));
         }
 
+        toast.querySelector('.vr-toast__close').addEventListener('click', () => {
+            this.remove(toastId);
+        });
+
         return toastId;
+    }
+
+    createToast(message, settings) {
+        const toast = document.createElement('div');
+        toast.className = `vr-toast vr-toast--${settings.type}`;
+        
+        toast.innerHTML = `
+            <div class="vr-toast__icon">
+                ${this.getIconForType(settings.type)}
+            </div>
+            <div class="vr-toast__content">
+                ${settings.title ? `<div class="vr-toast__title">${settings.title}</div>` : ''}
+                <div class="vr-toast__message">${message}</div>
+            </div>
+            <button class="vr-toast__close" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+            ${settings.showProgress ? '<div class="vr-toast__progress"></div>' : ''}
+        `;
+
+        return toast;
+    }
+
+    getIconForType(type) {
+        const icons = {
+            success: '<i class="fas fa-check-circle"></i>',
+            error: '<i class="fas fa-times-circle"></i>',
+            warning: '<i class="fas fa-exclamation-circle"></i>',
+            info: '<i class="fas fa-info-circle"></i>'
+        };
+        return icons[type] || icons.info;
     }
 
     success(message, options = {}) {
@@ -74,11 +101,11 @@ class ToastService {
     }
 
     error(message, options = {}) {
-        return this.show(message, { ...options, type: 'error' });
+        return this.show(message, { ...options, type: 'error', duration: 5000 });
     }
 
     warning(message, options = {}) {
-        return this.show(message, { ...options, type: 'warning' });
+        return this.show(message, { ...options, type: 'warning', duration: 4000 });
     }
 
     info(message, options = {}) {
@@ -90,9 +117,8 @@ class ToastService {
         if (!toast) return;
 
         clearTimeout(toast.timer);
-        toast.element.classList.remove('vr-toast--visible');
+        toast.element.classList.add('vr-toast--hiding');
         
-        // Remove after animation
         setTimeout(() => {
             if (toast.element.parentNode === this.container) {
                 this.container.removeChild(toast.element);
@@ -130,45 +156,6 @@ class ToastService {
         }
     }
 
-    createToast(message, settings, toastId) {
-        const toast = document.createElement('div');
-        toast.className = `vr-toast vr-toast--${settings.type}`;
-        toast.setAttribute('role', 'alert');
-        toast.setAttribute('aria-live', 'polite');
-        
-        const icon = this.getIconForType(settings.type);
-        
-        toast.innerHTML = `
-            <div class="vr-toast__icon">
-                <i class="${icon}"></i>
-            </div>
-            <div class="vr-toast__content">
-                <div class="vr-toast__message">${message}</div>
-                ${settings.showProgress ? '<div class="vr-toast__progress"></div>' : ''}
-            </div>
-            <button class="vr-toast__close" aria-label="Close notification">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-
-        // Add close button handler
-        toast.querySelector('.vr-toast__close').addEventListener('click', () => {
-            this.remove(toastId);
-        });
-
-        return toast;
-    }
-
-    getIconForType(type) {
-        switch (type) {
-            case 'success': return 'fas fa-check-circle';
-            case 'error': return 'fas fa-times-circle';
-            case 'warning': return 'fas fa-exclamation-circle';
-            case 'info':
-            default: return 'fas fa-info-circle';
-        }
-    }
-
     startProgress(toastId, duration) {
         const toast = this.toasts.get(toastId);
         if (!toast) return;
@@ -189,5 +176,5 @@ class ToastService {
     }
 }
 
-// Initialize the service and make it globally available
-window.toastService = new ToastService(); 
+// Export singleton instance
+export const toastService = new ToastService(); 

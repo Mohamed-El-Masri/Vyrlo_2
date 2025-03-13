@@ -41,7 +41,7 @@
                                 <input type="text" id="name" name="name" class="vr-input" 
                                        placeholder="Enter your username" required>
                             </div>
-                            <span class="vr-error-text" id="nameError"></span>
+                            <div class="vr-error-message"></div>
                         </div>
 
                         <div class="vr-form-group">
@@ -53,7 +53,10 @@
                                 <input type="email" id="email" name="email" class="vr-input" 
                                        placeholder="Enter your email address" required>
                             </div>
-                            <span class="vr-error-text" id="emailError"></span>
+                            <div class="vr-error-message">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span></span>
+                            </div>
                         </div>
 
                         <div class="vr-form-group">
@@ -68,7 +71,7 @@
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
-                            <span class="vr-error-text" id="passwordError"></span>
+                            <div class="vr-error-message"></div>
                         </div>
 
                         <div class="vr-form-group">
@@ -83,7 +86,7 @@
                                     <i class="fas fa-eye"></i>
                                 </button>
                             </div>
-                            <span class="vr-error-text" id="confirmPasswordError"></span>
+                            <div class="vr-error-message"></div>
                         </div>
 
                         <button type="submit" class="vr-btn vr-btn--primary vr-auth__submit" id="registerButton">
@@ -111,14 +114,23 @@
     <!-- Toast Container -->
     <div class="vr-toast-container" id="toastContainer"></div>
 
-    <!-- Services -->
-    <script src="/js/services/api.service.js"></script>
-    <script src="/js/services/toast.service.js"></script>
-    <script src="/js/core/utils.js"></script>
-    <script src="/js/core/componentLoader.js"></script>
-    <script src="/js/services/auth.service.js"></script>
-    
+    <!-- Core Services - Order matters! -->
+    <script type="module">
+        // Import and initialize services
+        import { utils } from '/js/core/utils.js';
+        import { toastService } from '/js/services/toast.service.js';
+        import { apiService } from '/js/services/api.service.js';
+        
+        // Make services globally available
+        window.utils = utils;
+        window.toastService = toastService;
+        window.apiService = apiService;
+    </script>
+
+    <!-- Component Loader -->
+    <script src="/js/core/componentLoader.js" type="module"></script>
+
     <!-- Page Script -->
-    <script src="/js/pages/register.js"></script>
+    <script type="module" src="/js/pages/register.js"></script>
 </body>
 </html> 

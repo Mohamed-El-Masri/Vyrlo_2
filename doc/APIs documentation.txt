@@ -1,6 +1,6 @@
-Api base Url: 'https://virlo.vercel.app/ '
+Api base Url: 'https://www.vyrlo.com:8080/ '
 1.	Auth
-a.	Sign up : ‘'https://virlo.vercel.app/signup’
+a.	Sign up : 'https://www.vyrlo.com:8080/signup'
 Post : {
     "username":"momen",
     "email":"momensaleh2468@gmail.com",
@@ -19,7 +19,7 @@ Response :
     "statusCode": 500,
     "message": "Internal server error"
 }
-b.	Signin : ‘'https://virlo.vercel.app/signin’ – post 
+b.	Signin : 'https://www.vyrlo.com:8080/signin' – post 
 i.	201Created: {
     "message": "success",
     "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibW9tZW4iLCJlbWFpbCI6Im1vbWVuc2FsZWgyNDY4QGdtYWlsLmNvbSIsInVzZXJJZCI6IjY3YTg5OWY1MTkwOWJjNjBjY2RjMjZhNyIsImlhdCI6MTc0MDEwMzIwMX0.m9M3Je5XhXCSbLFWXukPE_7PIRdTKr8Fd049ct24AkM"
@@ -31,13 +31,13 @@ ii.	500Internal Server Error : when email or password is wrong
 }
 
 
-c.	‘'https://virlo.vercel.app/forgetpass/reset’ : post : 
+c.	'https://www.vyrlo.com:8080/forgetpass/reset' : post : 
 {
     "email":"momensaleh2468@gmail.com",
     "newPassword":"ma12345678",
     "otp":"827427"
 }
-d.	‘'https://virlo.vercel.app/send-otp’ : post
+d.	'https://www.vyrlo.com:8080/send-otp' : post
 {
     "email":"momensaleh2468@gmail.com"
 }
@@ -47,7 +47,7 @@ d.	‘'https://virlo.vercel.app/send-otp’ : post
 }
 
 
-e.	'https://virlo.vercel.app/change-pass’ : put 
+e.	'https://www.vyrlo.com:8080/change-pass' : put 
 {
     "oldPassword":"ma12345678",
     "newPassword":"m1234567"
@@ -57,8 +57,8 @@ e.	'https://virlo.vercel.app/change-pass’ : put
     "message": "Incorrect old password"
 }
 				Or response …. 
-f.	Edit profile : post ‘ 'https://virlo.vercel.app/profile/{UserId}’ for Example : 'https://virlo.vercel.app/profile/67a899f51909bc60ccdc26a7’
--	profilePic : type ‘ file ‘ 
+f.	Edit profile : post ' https://www.vyrlo.com:8080/profile/{UserId}' for Example : 'https://www.vyrlo.com:8080/profile/67a899f51909bc60ccdc26a7'
+-	profilePic : type ' file ' 
 -	title : type text 
 -	phoneNumber: type text
 -	address: type text
@@ -102,7 +102,7 @@ Or 400Bad Request: {
     "statusCode": 400,
     "message": "Invalid file type."
 }
-g.	get profile ( get ) : 'https://virlo.vercel.app/profile/{UserId}’ for Example : 'https://virlo.vercel.app/profile/67a899f51909bc60ccdc26a7’
+g.	get profile ( get ) : 'https://www.vyrlo.com:8080/profile/{UserId}' for Example : 'https://www.vyrlo.com:8080/profile/67a899f51909bc60ccdc26a7'
 response : 
 [
     {
@@ -146,7 +146,7 @@ response :
     }
 ]
 
-h.	forget password request (post): ‘'https://virlo.vercel.app/forgetpass/request’
+h.	forget password request (post): 'https://www.vyrlo.com:8080/forgetpass/request'
 request :
 {
     "email":"momensaleh2468@gmail.com"
@@ -154,7 +154,7 @@ request :
 			Response : {
     "message": "OTP sent to email"
 }
-2.	checkout (post) to user pay to can make his listings active and publish into the website  : ‘ 'https://virlo.vercel.app/profile/api/checkout’ :
+2.	checkout (post) to user pay to can make his listings active and publish into the website  : ' https://www.vyrlo.com:8080/profile/api/checkout' :
 {
     //token need in headers to get userId
   "transactionId": "test123",
@@ -163,7 +163,7 @@ request :
   "price": 20
 }
 3.	pricing 
-a.	get all ( GET ) : https://virlo.vercel.app/pricing
+a.	get all ( GET ) : https://www.vyrlo.com:8080/pricing
 response : 
 [
     {
@@ -175,13 +175,13 @@ response :
         "updatedAt": "2025-02-11T16:43:16.122Z"
     }
 ]
-b.	get by id ( GET ) : https://virlo.vercel.app/pricing/{id}
+b.	get by id ( GET ) : https://www.vyrlo.com:8080/pricing/{id}
 
-c.	delete by id ( Delete ) for admin dashbord only : : https://virlo.vercel.app/pricing/{id}
-d.	update pricing for admin dashbord only (PUT): https://virlo.vercel.app/pricing/{id}
-e.	add pricing for admin dashbord only  (post) : https://virlo.vercel.app/pricing
+c.	delete by id ( Delete ) for admin dashbord only : : https://www.vyrlo.com:8080/pricing/{id}
+d.	update pricing for admin dashbord only (PUT): https://www.vyrlo.com:8080/pricing/{id}
+e.	add pricing for admin dashbord only  (post) : https://www.vyrlo.com:8080/pricing
 4.	reviews in listing for users 
-a.	get review for any listing (GET) : https://virlo.vercel.app /api/reviews/67ab7fdae9fc0bcda8726b39?page=1&limit=2
+a.	get review for any listing (GET) : https://www.vyrlo.com:8080 /api/reviews/67ab7fdae9fc0bcda8726b39?page=1&limit=2
 
 params is 
 page and limit 
@@ -219,7 +219,7 @@ response :
     }
 }
 b.	Create Review (post) for users in listing details : 
-https://virlo.vercel.app /api/reviews/67ab7fdae9fc0bcda8726b39
+https://www.vyrlo.com:8080 /api/reviews/67ab7fdae9fc0bcda8726b39
 	Request : 
 	{
   "serviceRating": 5,
@@ -247,7 +247,7 @@ Response :
         "updatedAt": "2025-02-21T02:43:20.178Z"
     }
 }
-c.	Update review ( PATCH ) : https://virlo.vercel.app /api/reviews/64a000000000000000000002
+c.	Update review ( PATCH ) : https://www.vyrlo.com:8080 /api/reviews/64a000000000000000000002
 Request : 
 {
   "serviceRating": 5,
@@ -277,10 +277,10 @@ Response :
     }
 }
 
-d.	Delete review ( DELETE ) for admin and review writer :  https://virlo.vercel.app / api/reviews/64a000000000000000000010
+d.	Delete review ( DELETE ) for admin and review writer :  https://www.vyrlo.com:8080 / api/reviews/64a000000000000000000010
 
 5.	Categories : 
-a.	Add Category for admins only ( post ) : :  https://virlo.vercel.app /categories
+a.	Add Category for admins only ( post ) : :  https://www.vyrlo.com:8080 /categories
 Request : 
 {
     "categoryName":"test1",
@@ -288,8 +288,8 @@ Request :
     "iconTwo":"",
     "amenities":["s","d"]
 }
-b.	Update Category for admins only ( PUT ) : https://virlo.vercel.app /categories/{id}
-c.	Get All Categories (GET) : https://virlo.vercel.app/categories
+b.	Update Category for admins only ( PUT ) : https://www.vyrlo.com:8080 /categories/{id}
+c.	Get All Categories (GET) : https://www.vyrlo.com:8080/categories
 Response : 
 [
     {
@@ -337,7 +337,7 @@ Response :
             "Flexible evening and weekend hours",
             "Sedation options for anxious patients",
             "In-office dental plan for uninsured patients",
-            "Children’s play area with toys/games",
+            "Children's play area with toys/games",
             "Digital X-rays for faster results",
             "Emergency dental services",
             "Teeth whitening services",
@@ -356,9 +356,9 @@ Response :
             "Takeout and delivery options via app",
             "Happy hour drink and food specials",
             "Themed nights (e.g., trivia, live music)",
-            "Kids’ menu with healthy options",
+            "Kids' menu with healthy options",
             "Private dining rooms for events",
-            "Cooking classes or chef’s table events",
+            "Cooking classes or chef's table events",
             "Nutritional information available on menus",
             "Seasonal menu changes based on local produce",
             "Reservation system through website/app"
@@ -486,7 +486,7 @@ Response :
             "Monthly in-store events (tastings, demos)",
             "Free parking for customers",
             "Prepared meals and deli services",
-            "Family-friendly discounts on kids’ products",
+            "Family-friendly discounts on kids' products",
             "Bulk purchasing discounts for large families"
         ]
     },
@@ -527,7 +527,7 @@ Response :
         ]
     }
 ]
-d.	Get specific Category ( GET ) : https://virlo.vercel.app /categories/67ae1e66c57141f547bc1f4a
+d.	Get specific Category ( GET ) : https://www.vyrlo.com:8080 /categories/67ae1e66c57141f547bc1f4a
 Response : 
 {
     "_id": "67ae1e66c57141f547bc1f4a",
@@ -539,20 +539,20 @@ Response :
         "Takeout and delivery options via app",
         "Happy hour drink and food specials",
         "Themed nights (e.g., trivia, live music)",
-        "Kids’ menu with healthy options",
+        "Kids' menu with healthy options",
         "Private dining rooms for events",
-        "Cooking classes or chef’s table events",
+        "Cooking classes or chef's table events",
         "Nutritional information available on menus",
         "Seasonal menu changes based on local produce",
         "Reservation system through website/app"
     ]
 }
-e.	Remove Category ( DELETE ) for admin dashboard only : https://virlo.vercel.app /categories/{id}
+e.	Remove Category ( DELETE ) for admin dashboard only : https://www.vyrlo.com:8080 /categories/{id}
 6.	Listing APIS 
 a.	Get listing by pagination and filteration back-end logic (GET) : 
-i.	https://virlo.vercel.app/listing/?lastValue=1
-ii.	https://virlo.vercel.app/listing/?lastValue=1&name=My&location=New York
-iii.	https://virlo.vercel.app/listing/?lastValue=1&name=My&location=New York&categoryId=67ae1e66c57141f547bc1f47
+i.	https://www.vyrlo.com:8080/listing/?lastValue=1
+ii.	https://www.vyrlo.com:8080/listing/?lastValue=1&name=My&location=New York
+iii.	https://www.vyrlo.com:8080/listing/?lastValue=1&name=My&location=New York&categoryId=67ae1e66c57141f547bc1f47
 Params : 
 o	lasValue = 1 to get 4 items , lastValue=2 to get 5 items , lastValue=3 to get 6 items and so on
 o	name:
@@ -742,7 +742,7 @@ response Example :
     "lastValue": 4,
     "totalItems": 2
 }
-b.	Get listing by id (GET) : https://virlo.vercel.app /listing/67aa20487229217d95baff5f
+b.	Get listing by id (GET) : https://www.vyrlo.com:8080 /listing/67aa20487229217d95baff5f
 Response :
 i.	If not exist : 200 OK
 {
@@ -838,7 +838,7 @@ ii.	If Exist : 200 OK
     "updatedAt": "2025-02-13T16:36:38.006Z",
     "postActiveDue": "2025-02-18T17:24:48.102Z"
 }
-c.	Get user Listing (GET ) : https://virlo.vercel.app/listing/user
+c.	Get user Listing (GET ) : https://www.vyrlo.com:8080/listing/user
 Header : Token ( eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoibW9tZW4iLCJlbWFpbCI6Im1vbWVuc2FsZWgyNDY4QGdtYWlsLmNvbSIsInVzZXJJZCI6IjY3YTg5OWY1MTkwOWJjNjBjY2RjMjZhNyIsImlhdCI6MTczOTIwMTU0OX0.ZECKy5Bag0hPSphNaJlsI5zshlIx11l9FNu0RmbXg_g ) 
 
 response : [
@@ -1483,7 +1483,7 @@ response : [
                 "Monthly in-store events (tastings, demos)",
                 "Free parking for customers",
                 "Prepared meals and deli services",
-                "Family-friendly discounts on kids’ products",
+                "Family-friendly discounts on kids' products",
                 "Bulk purchasing discounts for large families"
             ]
         },
@@ -1647,7 +1647,7 @@ response : [
                 "Flexible evening and weekend hours",
                 "Sedation options for anxious patients",
                 "In-office dental plan for uninsured patients",
-                "Children’s play area with toys/games",
+                "Children's play area with toys/games",
                 "Digital X-rays for faster results",
                 "Emergency dental services",
                 "Teeth whitening services",
@@ -1881,7 +1881,7 @@ response : [
     }
 ]
 
-d.	Remove listing ( DELETE ) : https://virlo.vercel.app/listing/67aa20487229217d95baff5f
+d.	Remove listing ( DELETE ) : https://www.vyrlo.com:8080/listing/67aa20487229217d95baff5f
 Response : 
 404Not Found
 {
@@ -1894,7 +1894,7 @@ Or
 {
     "message": "Listing deleted successfully"
 }
-e.	Update listing ( PUT ) : https://virlo.vercel.app/listing/67ab4ed8604bcdce6743470b
+e.	Update listing ( PUT ) : https://www.vyrlo.com:8080/listing/67ab4ed8604bcdce6743470b
 Header : Token 
 
 Request : 
@@ -2019,7 +2019,7 @@ Or
     "updatedAt": "2025-02-21T03:20:55.110Z"
 }
 
-f.	Add new listing (post) : https://virlo.vercel.app/listing
+f.	Add new listing (post) : https://www.vyrlo.com:8080/listing
 Header : token 
 {  
     "_id": "67ab7fdae9fc1bcda8726b40",  
@@ -2150,5 +2150,55 @@ Or
     "_id": "87ab7fdae9fc1bcda8726b40",
     "createdAt": "2025-02-12T16:50:34.995Z",
     "updatedAt": "2025-02-12T16:50:34.995Z"
+}
+
+Profile API Endpoints:
+
+GET /profile/:userId
+- Headers: Authorization: Bearer {token}
+- Response: {
+    _id: string,
+    userId: {
+        _id: string,
+        username: string,
+        email: string
+    },
+    profilePic: string[],
+    title: string,
+    phoneNumber: string,
+    address: string,
+    city: string,
+    state: string,
+    zipCode: string,
+    about: string
+}
+
+POST /profile/:userId
+- Headers: Authorization: Bearer {token}
+- Body: FormData {
+    profilePic?: File,
+    title?: string,
+    phoneNumber?: string,
+    address?: string,
+    city?: string,
+    state?: string,
+    zipCode?: string,
+    about?: string
+}
+- Response: Updated profile object
+
+Listings API Endpoints:
+
+GET /listings/use
+- Headers: token: Bearer {token}
+- Query params: 
+  - page: number
+  - limit: number
+  - status: 'all' | 'active' | 'inactive' | 'featured'
+- Response: {
+    listings: Array<Listing>,
+    total: number,
+    page: number,
+    pages: number
 }
 
