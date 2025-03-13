@@ -644,11 +644,11 @@ class ProfilePage {
             <div class="vr-listing-card vr-listing-card--${status}">
                 <div class="vr-listing-card__image">
                     <img src="${listing.mainImage || listing.images?.[0] || '/images/defaults/default-listing.jpg'}" 
-                         alt="${listing.title}">
+                         alt="${listing.listingName}">
                     <span class="vr-listing-card__status">${statusText}</span>
                 </div>
                 <div class="vr-listing-card__content">
-                    <h3 class="vr-listing-card__title">${listing.title}</h3>
+                    <h3 class="vr-listing-card__title">${listing.listingName}</h3>
                     <p class="vr-listing-card__description">${listing.description || 'No description available'}</p>
                     <div class="vr-listing-card__meta">
                         <span>
