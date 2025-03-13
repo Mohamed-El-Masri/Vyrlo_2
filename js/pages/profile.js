@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { authService } from '../services/auth.service.js';
 import { toastService } from '../services/toast.service.js';
 import { listingService } from '../services/listing.service.js';
@@ -21,20 +20,6 @@ class ProfilePage {
             featured: [],
             inactive: []
         };
-=======
-import ListingWizard from '../components/listingWizard.js';
-import { listingService } from '../services/listing.service.js';
-import { toastService } from '../services/toast.service.js';
-import { apiService } from '../services/api.service.js';
-import { authService } from '../services/auth.service.js';
-
-class ProfilePage {
-    constructor() {
-        this.API_BASE_URL = 'https://virlo.vercel.app';
-        this.form = document.getElementById('editProfileForm');
-        this.currentSection = new URLSearchParams(window.location.search).get('section') || 'profile';
-        this.listingWizard = null;
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
         this.init();
     }
 
@@ -59,7 +44,6 @@ class ProfilePage {
 
     async init() {
         try {
-<<<<<<< HEAD
             const userId = authService.getUserId();
             console.log('تهيئة البروفايل للمستخدم:', userId);
 
@@ -78,24 +62,11 @@ class ProfilePage {
         } catch (error) {
             console.error('خطأ في تهيئة البروفايل:', error);
             toastService.error('فشل في تحميل البروفايل');
-=======
-            if (!authService.isAuthenticated()) {
-                window.location.href = '/pages/login.html';
-                return;
-            }
-            await this.loadUserProfile();
-            this.setupEventListeners();
-            this.loadSection(this.currentSection);
-        } catch (error) {
-            console.error('Initialization error:', error);
-            toastService.error('Failed to initialize profile page');
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
         }
     }
 
     async loadUserProfile(userId) {
         try {
-<<<<<<< HEAD
             this.showProfileSkeleton();
             
             await new Promise(resolve => requestAnimationFrame(resolve));
@@ -117,27 +88,6 @@ class ProfilePage {
             console.error('Error loading profile:', error);
             toastService.error('Failed to load profile data');
             this.hideProfileSkeleton();
-=======
-            const userId = authService.getUserId();
-            if (!userId) throw new Error('User ID not found');
-
-            const token = authService.getToken();
-            if (!token) throw new Error('Authentication token not found');
-
-            const response = await apiService.get(`/profile/${userId}`);
-            if (!response || !response[0]) {
-                throw new Error('Invalid profile data received');
-            }
-
-            this.updateProfileUI(response);
-        } catch (error) {
-            console.error('Error loading user profile:', error);
-            if (error.message.includes('Authentication')) {
-                window.location.href = '/pages/login.html';
-            } else {
-                toastService.error('Failed to load profile data');
-            }
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
         }
     }
 
@@ -206,31 +156,7 @@ class ProfilePage {
             requestAnimationFrame(() => {
                 element.style.opacity = '1';
             });
-<<<<<<< HEAD
         }, 300);
-=======
-
-            // Update location display
-            const location = this.formatLocation(profile.city, profile.state);
-            this.safeUpdateElement('profileLocation', location);
-
-            // Update avatar - handle empty array case
-            this.updateAvatar(profile.profilePic);
-
-            // Update social accounts
-            this.updateSocialAccounts(profile.socialAccounts);
-
-            // Remove or hide saved count since it's not needed
-            const savedCountElement = document.getElementById('favoritesCount');
-            if (savedCountElement) {
-                savedCountElement.parentElement.style.display = 'none';
-            }
-
-        } catch (error) {
-            console.error('Error updating UI:', error);
-            toastService.error('Failed to update profile display');
-        }
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
     }
 
     /**
@@ -439,58 +365,6 @@ class ProfilePage {
                 this.loadAddListingComponent();
             }
         }
-
-        // Add section navigation handlers
-        document.querySelectorAll('[data-section]').forEach(element => {
-            element.addEventListener('click', (e) => {
-                e.preventDefault();
-                const section = e.currentTarget.dataset.section;
-                this.loadSection(section);
-            });
-        });
-    }
-
-    loadSection(section) {
-        // Remove active class from all menu items
-        document.querySelectorAll('.profile-item').forEach(item => {
-            item.classList.remove('active');
-        });
-
-        // Add active class to selected menu item
-        const menuItem = document.querySelector(`.profile-item[data-section="${section}"]`);
-        if (menuItem) {
-            menuItem.classList.add('active');
-        }
-
-        // Hide all sections first
-        document.querySelectorAll('.vr-profile__section').forEach(div => {
-            div.style.display = 'none';
-        });
-
-        // Show selected section
-        const sectionElement = document.getElementById(`${section}Container`);
-        if (sectionElement) {
-            sectionElement.style.display = 'block';
-        }
-
-        // Load section-specific content
-        switch(section) {
-            case 'addListing':
-                this.loadAddListingComponent();
-                break;
-            case 'listings':
-                this.loadUserListings();
-                break;
-            case 'profile':
-            default:
-                // Profile section is loaded by default
-                break;
-        }
-
-        // Update URL without reloading
-        const url = new URL(window.location);
-        url.searchParams.set('section', section);
-        window.history.pushState({}, '', url);
     }
 
     /**
@@ -723,7 +597,6 @@ class ProfilePage {
     async loadAddListingComponent() {
         try {
             const container = document.getElementById('addListingContainer');
-<<<<<<< HEAD
             if (!container) return;
 
             // تحميل القالب
@@ -745,69 +618,6 @@ class ProfilePage {
         }
     }
 
-=======
-            if (!container) {
-                throw new Error('Add listing container not found');
-            }
-
-            // Show the container before initializing the wizard
-            container.style.display = 'block';
-
-            // Clean up existing instance if any
-            if (this.listingWizard) {
-                // Add cleanup method if needed
-                this.listingWizard = null;
-            }
-
-            // Clean up any existing map containers
-            document.querySelectorAll('.leaflet-container').forEach(container => {
-                container.remove();
-            });
-
-            // Initialize new wizard
-            this.listingWizard = new ListingWizard('addListingContainer', {
-                onSubmit: async (formData) => {
-                    try {
-                        await listingService.createListing(formData);
-                        toastService.success('Listing created successfully');
-                        this.loadSection('listings');
-                    } catch (error) {
-                        console.error('Error creating listing:', error);
-                        toastService.error('Failed to create listing');
-                    }
-                },
-                onCancel: () => {
-                    this.loadSection('listings');
-                }
-            });
-
-        } catch (error) {
-            console.error('Error loading add listing component:', error);
-            toastService.error('Failed to load add listing form');
-        }
-    }
-
-    async loadUserListings() {
-        try {
-            const container = document.getElementById('listingsContainer');
-            if (!container) return;
-
-            const listings = await listingService.getUserListings();
-            
-            if (!listings || listings.length === 0) {
-                container.innerHTML = this.getEmptyListingsTemplate();
-                return;
-            }
-
-            container.innerHTML = this.getListingsTemplate(listings);
-
-        } catch (error) {
-            console.error('Error loading user listings:', error);
-            toastService.error('Failed to load your listings');
-        }
-    }
-
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
     getEmptyListingsTemplate() {
         return `
             <div class="vr-empty-state">
@@ -820,49 +630,6 @@ class ProfilePage {
                 </button>
             </div>
         `;
-<<<<<<< HEAD
-=======
-    }
-
-    getListingsTemplate(listings) {
-        return `
-            <div class="vr-listings-header">
-                <h2>My Listings</h2>
-                <button class="vr-btn vr-btn--primary" onclick="profilePage.loadSection('addListing')">
-                    <i class="fas fa-plus"></i>
-                    Add New Listing
-                </button>
-            </div>
-            <div class="vr-listings-grid">
-                ${listings.map(listing => this.getListingCardTemplate(listing)).join('')}
-            </div>
-        `;
-    }
-
-    getListingCardTemplate(listing) {
-        return `
-            <div class="vr-listing-card">
-                <div class="vr-listing-card__image">
-                    <img src="${listing.images[0] || '/images/defaults/listing-placeholder.jpg'}" 
-                         alt="${listing.title}">
-                </div>
-                <div class="vr-listing-card__content">
-                    <h3>${listing.title}</h3>
-                    <p>${listing.description.substring(0, 100)}...</p>
-                </div>
-                <div class="vr-listing-card__actions">
-                    <button class="vr-btn vr-btn--primary" onclick="profilePage.editListing('${listing.id}')">
-                        <i class="fas fa-edit"></i>
-                        Edit
-                    </button>
-                    <button class="vr-btn vr-btn--danger" onclick="profilePage.deleteListing('${listing.id}')">
-                        <i class="fas fa-trash"></i>
-                        Delete
-                    </button>
-                </div>
-            </div>
-        `;
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
     }
 
     createListingCard(listing) {
@@ -906,34 +673,11 @@ class ProfilePage {
         `;
     }
 
-<<<<<<< HEAD
     // تحميل الصفحة من هاش URL
     loadPageFromHash() {
         let hash = window.location.hash.substring(1);
         if (!hash) {
             hash = 'profile'; // الصفحة الافتراضية
-=======
-        try {
-            const formData = new FormData();
-            formData.append('profilePic', file);
-
-            const response = await fetch(`${this.API_BASE_URL}/profile/upload/${this.getUserId()}`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.getToken()}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) throw new Error('Failed to upload profile picture');
-
-            const result = await response.json();
-            document.getElementById('profileAvatar').src = result.imageUrl;
-            toastService.success('Profile picture updated successfully');
-        } catch (error) {
-            console.error('Error uploading avatar:', error);
-            toastService.error('Failed to upload profile picture');
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
         }
         this.loadSection(hash);
     }
@@ -965,7 +709,6 @@ class ProfilePage {
             this.hideListingsSkeleton();
             this.filterListings(status);
             
-<<<<<<< HEAD
         } catch (error) {
             console.error('Error loading listings:', error);
             toastService.error('Failed to load listings');
@@ -1036,152 +779,6 @@ class ProfilePage {
             await this.loadUserProfile(userId);
         } catch (error) {
             console.error('خطأ في تحميل بيانات المستخدم:', error);
-=======
-            toastService.success('Profile updated successfully');
-            await this.loadUserProfile(); // Refresh profile data
-        } catch (error) {
-            console.error('Error updating profile:', error);
-            toastService.error('Failed to update profile');
-        }
-    }
-
-    handleLogout() {
-        authService.logout();
-    }
-
-    getUserId() {
-        return authService.getUserId();
-    }
-
-    getToken() {
-        return authService.getToken();
-    }
-
-    loadScript(src, type = 'js') {
-        return new Promise((resolve, reject) => {
-            if (type === 'js') {
-                const script = document.createElement('script');
-                script.src = src;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.body.appendChild(script);
-            } else if (type === 'css') {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                link.href = src;
-                link.onload = resolve;
-                link.onerror = reject;
-                document.head.appendChild(link);
-            }
-        });
-    }
-
-    handleListingSubmit = async (data) => {
-        try {
-            // Show loading state
-            toastService.info('Submitting your listing...');
-
-            // Validate required fields
-            if (!this.validateListingData(data)) {
-                throw new Error('Please fill in all required fields');
-            }
-
-            // Upload images first
-            const imageUrls = await this.uploadListingImages(data);
-            
-            // Prepare listing data
-            const listingData = {
-                ...data,
-                ...imageUrls,
-                userId: this.getUserId()
-            };
-
-            // Create listing
-            const listing = await listingService.createListing(listingData);
-            
-            // Show success message
-            toastService.success('Listing created successfully');
-            
-            // Navigate to listings section
-            this.loadSection('listings');
-            
-            // Refresh listings grid
-            await this.loadUserListings();
-
-        } catch (error) {
-            console.error('Error creating listing:', error);
-            toastService.error(error.message || 'Failed to create listing');
-        }
-    }
-
-    validateListingData(data) {
-        const required = ['businessName', 'category', 'description', 'phone', 'email'];
-        const missing = required.filter(field => !data[field]);
-        
-        if (missing.length > 0) {
-            toastService.error(`Missing required fields: ${missing.join(', ')}`);
-            return false;
-        }
-
-        if (data.description.length < 100) {
-            toastService.error('Description must be at least 100 characters');
-            return false;
-        }
-
-        return true;
-    }
-
-    async uploadListingImages(data) {
-        const imageUrls = {
-            mainImageUrl: null,
-            galleryUrls: []
-        };
-
-        try {
-            // Upload main image
-            if (data.mainImage) {
-                const mainImageUrl = await this.uploadImage(data.mainImage);
-                imageUrls.mainImageUrl = mainImageUrl;
-            }
-
-            // Upload gallery images
-            if (data.galleryImages && data.galleryImages.length > 0) {
-                const uploadPromises = data.galleryImages.map(file => this.uploadImage(file));
-                imageUrls.galleryUrls = await Promise.all(uploadPromises);
-            }
-
-        } catch (error) {
-            console.error('Error uploading images:', error);
-            throw new Error('Failed to upload images');
-        }
-
-        return imageUrls;
-    }
-
-    async uploadImage(file) {
-        try {
-            const formData = new FormData();
-            formData.append('image', file);
-
-            const response = await fetch(`${this.API_BASE_URL}/files/upload`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.getToken()}`
-                },
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to upload image');
-            }
-
-            const data = await response.json();
-            return data.url;
-
-        } catch (error) {
-            console.error('Image upload error:', error);
-            throw error;
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
         }
     }
 
@@ -1330,13 +927,6 @@ class ProfilePage {
     }
 }
 
-<<<<<<< HEAD
 // Initialize
 const profilePage = new ProfilePage();
 export default profilePage;
-=======
-// Initialize the profile page when DOM is ready
-document.addEventListener('DOMContentLoaded', () => {
-        new ProfilePage();
-});
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b

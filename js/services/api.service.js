@@ -68,26 +68,7 @@ class ApiService {
                 },
             };
 
-<<<<<<< HEAD
             const fullUrl = `${this.BASE_URL}${url}`;
-=======
-            // Add auth token if available
-            const token = authService?.getToken();
-            if (token) {
-                config.headers['Authorization'] = `Bearer ${token}`;
-            }
-
-            // Add request body if present
-            if (data) {
-                config.body = JSON.stringify(data);
-            }
-
-            // Apply request interceptors
-            config = await this.applyRequestInterceptors(config);
-
-            // Make the request
-            const response = await fetch(`${this.BASE_URL}${url}`, config);
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
             
             const finalOptions = {
                 ...defaultOptions,
@@ -165,11 +146,7 @@ class ApiService {
             const response = await fetch(`${this.BASE_URL}${url}`, {
                 method: 'POST',
                 headers: {
-<<<<<<< HEAD
                     'Authorization': `Bearer ${localStorage.getItem('vr_token')}`
-=======
-                    'Authorization': `Bearer ${authService?.getToken()}`
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
                 },
                 body: formData,
                 mode: 'cors'
@@ -189,24 +166,14 @@ class ApiService {
     initializeDefaultInterceptors() {
         this.addErrorInterceptor(async (error) => {
             if (error.status === 401) {
-<<<<<<< HEAD
                 authService.clearAuthState();
-=======
-                // Clear auth state and redirect to login
-                authService?.clearAuthState();
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
                 window.location.href = '/pages/login.html';
             }
             return error;
         });
 
         this.addErrorInterceptor(async (error) => {
-<<<<<<< HEAD
             toastService.error(
-=======
-            // Show error toast
-            toastService?.error(
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
                 error.message || 'An error occurred while processing your request'
             );
             return error;
@@ -247,13 +214,6 @@ class ApiService {
     }
 }
 
-<<<<<<< HEAD
 export const apiService = new ApiService();
 
-=======
-// Export a singleton instance
-export const apiService = new ApiService();
-
-// Initialize default interceptors
->>>>>>> 17a7816a8bd55cc63d106a03db097bc21290641b
 apiService.initializeDefaultInterceptors(); 
