@@ -74,14 +74,18 @@
   animation: button-loading 0.6s linear infinite;
 }
 
-/* Upgrade button */
+/* Upgrade button - تحسينات جديدة */
 .vr-btn--upgrade {
-    background: linear-gradient(135deg, #FFA500, #FF6347);
+    background: linear-gradient(135deg, #f59e0b, #ff5722); /* تدرج أكثر إشراقاً */
     color: white;
     border: none;
     position: relative;
     overflow: hidden;
     transition: all 0.3s ease;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
 
 .vr-btn--upgrade::before {
@@ -99,8 +103,9 @@
 }
 
 .vr-btn--upgrade:hover {
-    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
-    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(245, 158, 11, 0.4);
+    transform: translateY(-3px);
+    background: linear-gradient(135deg, #f97316, #ff4500); /* تدرج أكثر دفئًا عند التحويم */
 }
 
 .vr-btn--upgrade:hover::before {
@@ -109,12 +114,49 @@
 
 .vr-btn--upgrade:active {
     transform: translateY(0);
+    box-shadow: 0 3px 5px rgba(245, 158, 11, 0.4);
 }
 
 .vr-btn--upgrade i {
     margin-right: 6px;
     position: relative;
     z-index: 2;
-    color: #FFD700;
+    color: #FFD700; /* لون ذهبي للأيقونة */
     text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+    animation: starPulse 2s infinite;
+}
+
+@keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); text-shadow: 0 0 8px rgba(255, 215, 0, 0.8); }
+    100% { transform: scale(1); }
+}
+
+/* بادج "مجاني" للزر */
+.vr-btn__badge {
+    font-size: 0.65rem;
+    background-color: white;
+    color: #10b981; /* لون أخضر */
+    padding: 0.15rem 0.4rem;
+    border-radius: 10px;
+    margin-left: 5px;
+    font-weight: bold;
+    animation: pulse-white 2s infinite;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    vertical-align: top;
+    position: relative;
+    top: -1px;
+}
+
+@keyframes pulse-white {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+    }
 }

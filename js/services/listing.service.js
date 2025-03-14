@@ -239,37 +239,70 @@ async deleteListing(id) {
 }
 
 /**
- * Update listing status (activate or upgrade to featured)
- * @param {string} id - Listing ID
- * @param {Object} statusData - Status update data
- * @returns {Promise} - Response from API
+ * تصحيح عنوان الـ API وطريقة تحديث حالة القائمة
+ * @param {string} id - معرّف القائمة
+ * @param {Object} statusData - بيانات التحديث (isActive, freeTrialStart, freeTrialEnd)
+ * @returns {Promise} - استجابة من API
  */
 async updateListingStatus(id, statusData) {
     try {
-        console.log('Updating listing status:', id, statusData);
-        
+        // استخدام token من خدمة المصادقة
         const token = authService.getToken();
-        const url = `${this.baseUrl}/listing/${id}/status`;
         
-        const response = await fetch(url, {
+        console.log('Updating listing status:', { id, statusData });
+        
+        // تصحيح عنوان URL وإرسال البيانات المطلوبة فقط
+        const url = `${this.baseUrl}/listing/${id}`;
+        
+        // إرسال البيانات الأساسية فقط: isActive
+        const updateData = {
+            isActive: statusData.isActive
+        };
+        
+        // إضافة معلومات الفترة التجريبية المجانية إلى التعليقات في حال احتاجها الخادم مستقبلاً
+        if (statusData.freeTrialStart) {
+            updateData._freeTrialStart = statusData.freeTrialStart;
+        }
+        
+        if (statusData.freeTrialEnd) {
+            updateData._freeTrialEnd = statusData.freeTrialEnd;
+        }
+        
+        console.log('Sending update with data:', updateData);
+        
+        const options = {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'token': token
             },
-            body: JSON.stringify(statusData)
-        });
+            body: JSON.stringify(updateData)
+        };
         
+        // إرسال الطلب إلى API
+        const response = await fetch(url, options);
+        
+        // التحقق من استجابة الخادم
         if (!response.ok) {
-            const errorData = await response.text();
-            console.error('Status update failed:', errorData);
-            throw new Error('Failed to update listing status');
+            const errorText = await response.text();
+            console.error(`Update failed with status ${response.status}:`, errorText);
+            throw new Error(`Failed to update status: ${response.status}`);
         }
         
-        // Clear cache to ensure fresh data on next fetch
-        this.clearCache();
+        // معالجة استجابة الخادم
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            // بعض واجهات API قد لا ترجع JSON
+            data = { success: true, id };
+        }
         
-        return await response.json();
+        // تحديث الكاش
+        this.clearCache('active');
+        
+        toastService.success('Listing status updated successfully');
+        return data;
     } catch (error) {
         console.error('Error updating listing status:', error);
         toastService.error('Failed to update listing status');

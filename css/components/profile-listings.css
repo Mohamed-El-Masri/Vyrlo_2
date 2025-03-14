@@ -40,15 +40,18 @@
 }
 
 .vr-listings-stat__value {
-    font-size: 1.75rem;
+    font-size: 2rem;
     font-weight: 700;
-    color: var(--vr-gray-800);
+    color: var(--vr-primary-dark);
+    transition: all 0.3s ease;
+    display: inline-block;
 }
 
 /* Quick Stats */
 .vr-listings-quick-stats {
     display: flex;
-    gap: 1.5rem;
+    gap: 2rem;
+    flex-wrap: wrap;
 }
 
 .vr-listings-quick-stat {
@@ -56,11 +59,18 @@
     align-items: center;
     gap: 0.5rem;
     color: var(--vr-gray-700);
-    font-size: 0.95rem;
+    font-size: 1rem;
 }
 
 .vr-listings-quick-stat i {
-    font-size: 1rem;
+    font-size: 1.25rem;
+    width: 24px;
+    text-align: center;
+}
+
+.vr-listings-quick-stat span {
+    font-weight: 700;
+    transition: all 0.3s ease;
 }
 
 /* Status Icon Colors */
@@ -157,9 +167,9 @@
 
 /* Listings Grid */
 .vr-listings-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
     transition: opacity 0.3s ease;
 }
 
@@ -268,4 +278,42 @@
     .vr-listings-empty p {
         color: var(--vr-gray-400);
     }
+}
+
+/* تحسين تأثيرات تحديث العدادات */
+.vr-count-update {
+    animation: countUpdate 0.8s ease;
+}
+
+.vr-badge.vr-count-update {
+    animation: badgeUpdate 0.8s ease;
+}
+
+.vr-listings-stat__value.vr-count-update {
+    animation: valueUpdate 0.8s ease;
+}
+
+@keyframes countUpdate {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.25); color: var(--vr-primary); }
+    100% { transform: scale(1); }
+}
+
+@keyframes badgeUpdate {
+    0% { transform: scale(1); }
+    50% { 
+        transform: scale(1.25); 
+        background-color: var(--vr-primary); 
+        color: white;
+    }
+    100% { transform: scale(1); }
+}
+
+@keyframes valueUpdate {
+    0% { transform: scale(1); }
+    50% { 
+        transform: scale(1.25); 
+        color: var(--vr-primary-dark);
+    }
+    100% { transform: scale(1); }
 }

@@ -20,73 +20,38 @@ class ProfilePage {
             featured: [],
             inactive: []
         };
+        
+        // تهيئة الصفحة
         this.init();
-
-       
     }
+
     async deleteListing(id) {
         try {
-            // Show professional confirmation modal instead of using alert
             const confirmed = await this.showConfirmationModal(
                 'Confirm Deletion', 
                 'Are you sure you want to delete this listing? This action cannot be undone.'
             );
             
-            if (!confirmed) {
-                return;
-            }
+            if (!confirmed) return;
                 
             // تغيير حالة الزر إلى وضع التحميل
-            const button = document.querySelector(`.vr-btn--danger[onclick="profilePage.deleteListing('${id}')"]`);
+            const button = document.querySelector(`[data-action="delete-listing"][data-id="${id}"]`);
             if (button) {
                 button.innerHTML = '<div class="vr-spinner vr-spinner--sm"></div> Deleting...';
                 button.disabled = true;
             }
             
-            // استدعاء خدمة حذف الإعلان
+            // استدعاء خدمة حذف القائمة
             await listingService.deleteListing(id);
             
-            // إزالة البطاقة من العرض بتأثير بصري
-            const card = button?.closest('.vr-listing-card');
-            if (card) {
-                card.style.transition = 'all 0.3s ease';
-                card.style.opacity = '0';
-                card.style.transform = 'scale(0.95)';
-                
-                setTimeout(() => {
-                    card.remove();
-                    
-                    // تحديث عدادات الإعلانات
-                    this.listingsData.all = this.listingsData.all.filter(item => item._id !== id);
-                    this.listingsData.active = this.listingsData.active.filter(item => item._id !== id);
-                    this.listingsData.featured = this.listingsData.featured.filter(item => item._id !== id);
-                    this.listingsData.inactive = this.listingsData.inactive.filter(item => item._id !== id);
-                    
-                    this.updateListingCounts();
-                    
-                    // إظهار رسالة فارغة إذا لم يعد هناك إعلانات
-                    const grid = document.querySelector('.vr-listings-grid');
-                    const emptyState = document.querySelector('.vr-listings-empty');
-                    const activeTab = document.querySelector('.vr-tab.active');
-                    const activeType = activeTab?.dataset.type || 'all';
-                    
-                    if (this.listingsData[activeType].length === 0 && grid && emptyState) {
-                        grid.style.display = 'none';
-                        emptyState.style.display = 'block';
-                    }
-                    
-                }, 300);
-            } else {
-                // إعادة تحميل القوائم إذا لم نتمكن من إيجاد البطاقة
-                await this.loadListings();
-            }
+            // تحديث واجهة المستخدم بعد الحذف
+            this.updateUIAfterListingDeletion(id, button);
             
         } catch (error) {
             console.error('Error deleting listing:', error);
             toastService.error('Failed to delete listing');
             
-            // إعادة زر الحذف إلى حالته الأصلية
-            const button = document.querySelector(`.vr-btn--danger[onclick="profilePage.deleteListing('${id}')"]`);
+            const button = document.querySelector(`[data-action="delete-listing"][data-id="${id}"]`);
             if (button) {
                 button.innerHTML = '<i class="fas fa-trash"></i> Delete';
                 button.disabled = false;
@@ -251,28 +216,72 @@ class ProfilePage {
         return true;
     }
 
-    async init() {
-        try {
-            const userId = authService.getUserId();
-            console.log('تهيئة البروفايل للمستخدم:', userId);
-
-            // تحميل القوالب
-            this.loadTemplates()
-                .then(() => {
-                    // إعداد أحداث النقر
-            this.setupEventListeners();
-            
-                    // تحميل الصفحة من الهاش URL إذا كان موجود
-                    this.loadPageFromHash();
-
-                    // تحميل بيانات المستخدم
-                    this.loadUserData();
-                });
-        } catch (error) {
-            console.error('خطأ في تهيئة البروفايل:', error);
-            toastService.error('فشل في تحميل البروفايل');
-        }
+    /**
+ * إضافة طريقة لتحميل القوالب التي تم استدعاؤها في دالة init
+ */
+async loadTemplates() {
+    try {
+        // استخدام خدمة تحميل الـCSS المشتركة
+        await Promise.all([
+            this.loadCSS('/css/components/profile-listings.css'),
+            this.loadCSS('/css/components/listing-cards.css')
+        ]);
+        
+        // استخدام خدمة تحميل المكونات المركزية
+        const componentsToLoad = [
+            { id: 'profileContainer', path: '/components/profile/profile-info.html' },
+            { id: 'addListingContainer', path: '/components/profile/addListing.html' },
+            { id: 'listingsContainer', path: '/components/profile/listings-grid.html' }
+        ];
+        
+        // تحميل جميع المكونات بالتوازي
+        await Promise.all(componentsToLoad.map(component => 
+            fetch(component.path)
+                .then(response => {
+                    if (!response.ok) throw new Error(`Failed to load ${component.path}`);
+                    return response.text();
+                })
+                .then(html => {
+                    const container = document.getElementById(component.id);
+                    if (container) container.innerHTML = html;
+                })
+        ));
+        
+        console.log('All templates loaded successfully');
+        return true;
+    } catch (error) {
+        console.error('Error loading templates:', error);
+        toastService.error('Failed to load page components. Please try again.');
+        throw error;
     }
+}
+
+/**
+ * تصحيح دالة init لتستخدم async/await بشكل صحيح
+ */
+async init() {
+    try {
+        const userId = authService.getUserId();
+        console.log('تهيئة البروفايل للمستخدم:', userId);
+
+        // تحميل القوالب بشكل متزامن
+        await this.loadTemplates();
+        
+        // إعداد أحداث النقر بعد تحميل القوالب
+        this.setupEventListeners();
+        
+        // تحميل الصفحة من الهاش URL إذا كان موجود
+        this.loadPageFromHash();
+
+        // تحميل بيانات المستخدم
+        await this.loadUserData();
+        
+        console.log('تم تهيئة الصفحة بنجاح');
+    } catch (error) {
+        console.error('خطأ في تهيئة البروفايل:', error);
+        toastService.error('فشل في تحميل البروفايل');
+    }
+}
 
     async loadUserProfile(userId) {
         try {
@@ -301,53 +310,82 @@ class ProfilePage {
     }
 
     /**
-     * تصحيح تحديث واجهة المستخدم بناءً على هيكل البيانات الصحيح
-     */
-    updateProfileUI() {
-        if (!this.userData) return;
+ * إضافة دالة showProfileSkeleton و hideProfileSkeleton الناقصة
+ */
+showProfileSkeleton() {
+    const skeletonContainer = document.querySelector('.vr-profile-skeleton');
+    const profileContent = document.querySelector('.vr-profile-content');
+    
+    if (skeletonContainer) {
+        skeletonContainer.style.display = 'block';
+    }
+    
+    if (profileContent) {
+        profileContent.style.opacity = '0';
+    }
+}
+
+hideProfileSkeleton() {
+    const skeletonContainer = document.querySelector('.vr-profile-skeleton');
+    const profileContent = document.querySelector('.vr-profile-content');
+    
+    if (skeletonContainer) {
+        skeletonContainer.style.display = 'none';
+    }
+    
+    if (profileContent) {
+        profileContent.style.opacity = '1';
+    }
+}
+
+/**
+ * إضافة دالة updateProfileUI الناقصة
+ */
+updateProfileUI() {
+    if (!this.userData) return;
+    
+    console.log('Updating Profile UI with data:', this.userData);
+    
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    const userAvatar = document.getElementById('userAvatar');
+    const dropdownAvatar = document.getElementById('dropdownAvatar');
+    
+    // تأكد من وجود البيانات قبل التحديث
+    const userInfo = this.userData.userId || {};
+    
+    // تحديث اسم المستخدم
+    if (userName) {
+        const displayName = userInfo.username || 'User';
+        this.fadeElementContent(userName, displayName);
+    }
+    
+    // تحديث البريد الإلكتروني
+    if (userEmail) {
+        const email = userInfo.email || 'No email available';
+        this.fadeElementContent(userEmail, email);
+    }
+    
+    // تحديث الصورة الشخصية
+    if (userAvatar) {
+        const profilePicUrl = this.userData.profilePic?.[0] || '/images/defaults/default-avatar.png';
+        this.loadImageWithFade(userAvatar, profilePicUrl);
         
-        console.log('Updating UI with data:', this.userData);
-        
-        const userName = document.getElementById('userName');
-        const userEmail = document.getElementById('userEmail');
-        const userAvatar = document.getElementById('userAvatar');
-        const dropdownAvatar = document.getElementById('dropdownAvatar');
-        
-        // تأكد من وجود البيانات قبل التحديث
-        const userInfo = this.userData.userId || {};
-        
-        // تحديث اسم المستخدم
-        if (userName) {
-            const displayName = userInfo.username || 'User';
-            this.fadeElementContent(userName, displayName);
-        }
-        
-        // تحديث البريد الإلكتروني
-        if (userEmail) {
-            const email = userInfo.email || 'No email available';
-            this.fadeElementContent(userEmail, email);
-        }
-        
-        // تحديث الصورة الشخصية
-        if (userAvatar) {
-            const profilePicUrl = this.userData.profilePic?.[0] || '/images/defaults/default-avatar.png';
-            this.loadImageWithFade(userAvatar, profilePicUrl);
-            
-            // تحديث صورة القائمة المنسدلة أيضاً
-            if (dropdownAvatar) {
-                this.loadImageWithFade(dropdownAvatar, profilePicUrl);
-            }
-        }
-        
-        // تحديث حقول النموذج
-        this.updateProfileForm();
-        
-        // تحديث عدد القوائم في البادج
-        const listingsBadge = document.querySelector('.profile-item[data-section="listings"] .vr-badge');
-        if (listingsBadge) {
-            listingsBadge.textContent = this.listingsData.all?.length || '0';
+        // تحديث صورة القائمة المنسدلة أيضاً
+        if (dropdownAvatar) {
+            this.loadImageWithFade(dropdownAvatar, profilePicUrl);
         }
     }
+    
+    // تحديث حقول النموذج
+    this.updateProfileForm();
+    
+    // تحديث عدد القوائم في البادج
+    const listingsBadge = document.querySelector('.profile-item[data-section="listings"] .vr-badge');
+    if (listingsBadge) {
+        listingsBadge.textContent = this.listingsData.all?.length || '0';
+    }
+}
 
     /**
      * Fade element content for smooth transitions
@@ -494,44 +532,77 @@ class ProfilePage {
         }
     }
 
+    /**
+     * تجميع إعداد مستمعي الأحداث في مكان واحد
+     */
     setupEventListeners() {
-        // إضافة مستمعات للنقر على عناصر القائمة
+        // استخدام التفويض لمعالجة أحداث النقر (event delegation)
+        document.addEventListener('click', (event) => this.handleEvents(event));
+        
+        // مستمع لتغييرات الهاش في URL
+        window.addEventListener('hashchange', () => this.loadPageFromHash());
+        
+        // إعداد مستمع خاص لزر تحميل الصورة
+        this.setupAvatarUpload();
+        
+        // مستمع نموذج الملف الشخصي
+        const profileForm = document.getElementById('profileForm');
+        if (profileForm) {
+            profileForm.addEventListener('submit', (e) => this.handleProfileUpdate(e));
+        }
+        
+        // مستمعات التنقل بين الأقسام
         document.querySelectorAll('.profile-item').forEach(item => {
             item.addEventListener('click', () => {
-                const section = item.getAttribute('data-section');
-                this.loadSection(section);
+                const section = item.dataset.section;
+                if (section) this.loadSection(section);
             });
         });
-
-        // مستمع لتغييرات الهاش في URL
-        window.addEventListener('hashchange', () => {
-            this.loadPageFromHash();
-        });
-
-        // إضافة مستمع لزر تسجيل الخروج
-        const logoutBtn = document.getElementById('logoutBtn');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => this.handleLogout());
-        }
-
-        // Avatar upload
-        this.setupAvatarUpload();
-
-        // Profile form
-        document.getElementById('profileForm')?.addEventListener('submit', (e) => this.handleProfileUpdate(e));
-
-        // Listing tabs
+        
+        // مستمعات علامات التبويب للقوائم
         document.querySelectorAll('.vr-tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 const type = tab.dataset.type;
-                this.filterListings(type);
+                if (type) this.filterListings(type);
             });
         });
-
-        // معالج لزر إضافة حساب اجتماعي في الملف الشخصي
+        
+        // مستمع إضافة حساب اجتماعي
         const addProfileSocialBtn = document.getElementById('addProfileSocialBtn');
         if (addProfileSocialBtn) {
             addProfileSocialBtn.addEventListener('click', () => this.addSocialMediaField('profileSocialMediaContainer'));
+        }
+    }
+
+    /**
+     * استخدام معالج واحد للأحداث
+     */
+    handleEvents(event) {
+        const target = event.target;
+        const action = target.dataset.action;
+        const id = target.dataset.id;
+        
+        if (!action) return;
+        
+        switch (action) {
+            case 'edit-listing':
+                this.editListing(id);
+                break;
+            case 'delete-listing':
+                this.deleteListing(id);
+                break;
+            case 'activate-listing':
+                this.activateListing(id);
+                break;
+            case 'upgrade-listing':
+                this.upgradeListing(id);
+                break;
+            case 'load-section':
+                this.loadSection(target.dataset.section);
+                break;
+            case 'logout':
+                this.handleLogout();
+                break;
         }
     }
 
@@ -665,52 +736,41 @@ class ProfilePage {
         event.preventDefault();
         
         try {
+            // تغيير حالة الزر إلى وضع التحميل
             const submitButton = event.target.querySelector('button[type="submit"]');
             const originalButtonText = submitButton.innerHTML;
             submitButton.innerHTML = '<div class="vr-spinner vr-spinner--sm"></div> Saving...';
             submitButton.disabled = true;
             
+            // تجميع بيانات النموذج
             const formData = new FormData(event.target);
-            const formValues = Object.fromEntries(formData.entries());
+            const profileData = Object.fromEntries(formData.entries());
             
-            if (!formValues.phoneNumber || !formValues.title) {
+            // التحقق من الحقول المطلوبة
+            if (!profileData.phoneNumber || !profileData.title) {
                 toastService.error('Please fill in all required fields');
                 submitButton.innerHTML = originalButtonText;
                 submitButton.disabled = false;
                 return;
             }
             
+            // استخدام apiService لتحديث البروفايل
             const userId = authService.getUserId();
-            const profileData = {
-                title: formValues.title,
-                phoneNumber: formValues.phoneNumber,
-                address: formValues.address,
-                city: formValues.city,
-                state: formValues.state,
-                zipCode: formValues.zipCode,
-                about: formValues.about
-            };
-            
-            // إرسال البيانات للتحديث
             const response = await apiService.post(`/profile/${userId}`, profileData);
             
-            // تحديث البيانات المحلية
+            // تحديث البيانات المحلية وحفظها
             this.userData = response;
-            
-            // تحديث البيانات في authService
             authService.setUserProfile(response);
             
-            // إعادة تحميل البيانات من السيرفر للتأكد من التحديث
+            // تحديث الواجهة
+            toastService.success('Profile updated successfully');
             await this.loadUserProfile(userId);
             
-            toastService.success('Profile updated successfully');
-            
-            submitButton.innerHTML = originalButtonText;
-            submitButton.disabled = false;
         } catch (error) {
             console.error('Error updating profile:', error);
             toastService.error('Failed to update profile: ' + (error.message || 'Unknown error'));
-            
+        } finally {
+            // إعادة حالة الزر
             const submitButton = event.target.querySelector('button[type="submit"]');
             if (submitButton) {
                 submitButton.innerHTML = '<i class="fas fa-save"></i> Save Changes';
@@ -762,7 +822,7 @@ class ProfilePage {
     }
 
     /**
- * تحديث عدادات القوائم
+ * تحديث عدادات القوائم - نسخة محسنة تتعامل مع معرفات محددة
  */
 updateListingCounts() {
     const counts = {
@@ -772,40 +832,116 @@ updateListingCounts() {
         inactive: this.listingsData.inactive.length
     };
     
-    // تحديث جميع العناصر التي تعرض عدد القوائم
-    const updateElement = (id, value) => {
-        const element = document.getElementById(id);
-        if (element) {
-            // إضافة تأثير تحديث العداد
-            element.classList.add('vr-count-update');
-            setTimeout(() => {
-                element.textContent = value;
-                setTimeout(() => {
-                    element.classList.remove('vr-count-update');
-                }, 300);
-            }, 300);
-        }
+    console.log('Updating listing counts:', counts);
+    
+    // قائمة بجميع العناصر التي تحتاج إلى تحديث
+    const elementsToUpdate = {
+        // العدد الإجمالي للقوائم
+        'totalListings': counts.all,
+        
+        // أعداد علامات التبويب
+        'allCount': counts.all,
+        'activeCount': counts.active,
+        'featuredCount': counts.featured,
+        'inactiveCount': counts.inactive,
+        
+        // أعداد الإحصائيات السريعة
+        'activeQuickCount': counts.active,
+        'featuredQuickCount': counts.featured,
+        'inactiveQuickCount': counts.inactive
     };
     
-    // تحديث عدادات القوائم
-    updateElement('totalListings', counts.all);
-    updateElement('allCount', counts.all);
-    updateElement('activeCount', counts.active);
-    updateElement('featuredCount', counts.featured);
-    updateElement('inactiveCount', counts.inactive);
-    
-    // تحديث عدادات إضافية في علامات التبويب إذا كانت موجودة
-    updateElement('activeCountTab', counts.active);
-    updateElement('featuredCountTab', counts.featured);
-    updateElement('inactiveCountTab', counts.inactive);
+    // تحديث كافة العناصر مع تأثير بصري
+    for (const [id, value] of Object.entries(elementsToUpdate)) {
+        const element = document.getElementById(id);
+        
+        if (element) {
+            // التحقق إذا كان العنصر يحتوي على قيمة مختلفة
+            if (element.textContent !== String(value)) {
+                // إضافة تأثير التحديث
+                element.classList.add('vr-count-update');
+                
+                // تحديث القيمة بعد فترة قصيرة
+                setTimeout(() => {
+                    element.textContent = value;
+                    
+                    // إزالة تأثير التحديث بعد اكتمال التحديث
+                    setTimeout(() => {
+                        element.classList.remove('vr-count-update');
+                    }, 500);
+                }, 100);
+            } else {
+                // تحديث القيمة بدون تأثير إذا كانت نفس القيمة
+                element.textContent = value;
+            }
+        } else {
+            console.warn(`Element with ID '${id}' not found in the DOM`);
+        }
+    }
     
     // تحديث شارة القوائم في القائمة الجانبية
     const listingsBadge = document.querySelector('.profile-item[data-section="listings"] .vr-badge');
     if (listingsBadge) {
-        listingsBadge.textContent = counts.all;
+        if (listingsBadge.textContent !== String(counts.all)) {
+            listingsBadge.classList.add('vr-count-update');
+            setTimeout(() => {
+                listingsBadge.textContent = counts.all;
+                setTimeout(() => {
+                    listingsBadge.classList.remove('vr-count-update');
+                }, 500);
+            }, 100);
+        }
     }
-    
-    console.log('Updated listing counts:', counts);
+}
+
+    /**
+ * تحسين في تحميل القوائم للتأكد من تحديث العدادات بشكل صحيح
+ */
+async loadListings(status = 'all') {
+    try {
+        // عرض skeleton مباشرة
+        this.showListingsSkeleton();
+        
+        // تأخير صغير لضمان ظهور skeleton
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        
+        // جلب البيانات
+        const data = await listingService.getUserListings();
+        console.log('Listings data received:', data);
+        
+        // تأخير صغير قبل إخفاء skeleton
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // تصحيح: تحديث البيانات بشكل صحيح
+        this.listingsData = {
+            all: data.listings || [],
+            active: (data.listings || []).filter(item => item.isActive && !item.isPosted),
+            featured: (data.listings || []).filter(item => item.isPosted),
+            inactive: (data.listings || []).filter(item => !item.isActive)
+        };
+
+        // تحميل البانر الترويجي بشكل مستقل (قبل إخفاء skeleton)
+        await this.loadPromoComponent();
+        
+        // إخفاء skeleton وعرض البيانات
+        this.hideListingsSkeleton();
+        
+        // تحديث عدادات القوائم
+        this.updateListingCounts();
+        
+        // إعادة إعداد أحداث التصفية للفلاتر
+        this.setupFilterEvents();
+        
+        // تطبيق الفلتر المحدد
+        this.filterListings(status);
+        
+        console.log('Listings loaded successfully');
+        
+    } catch (error) {
+        console.error('Error loading listings:', error);
+        toastService.error('Failed to load listings');
+        this.hideListingsSkeleton();
+    }
 }
 
     filterListings(status = 'all') {
@@ -824,10 +960,25 @@ updateListingCounts() {
                 grid.style.display = 'none';
                 emptyState.style.display = 'block';
             } else {
-                grid.style.display = 'grid';
+                grid.style.display = 'block'; // تغيير من grid إلى block
                 emptyState.style.display = 'none';
                 
-                grid.innerHTML = listings.map(listing => this.createListingCard(listing)).join('');
+                // إضافة عناوين الأعمدة قبل القوائم - بدون أعمدة الموقع والتاريخ والفئة
+                let html = `
+                    <div class="vr-listing-table-header">
+                        <div class="vr-listing-table-header__image">Image</div>
+                        <div class="vr-listing-table-header__title">Title</div>
+                        <div class="vr-listing-table-header__actions">Actions</div>
+                    </div>
+                `;
+                
+                // إضافة كروت القوائم
+                html += listings.map(listing => this.createListingCard(listing)).join('');
+                
+                grid.innerHTML = html;
+                
+                // إضافة أحداث على الكروت
+                this.attachListingCardEvents();
             }
             
             // إظهار المحتوى الجديد
@@ -891,53 +1042,73 @@ updateListingCounts() {
         `;
     }
 
-    createListingCard(listing) {
-        const status = listing.isPosted ? 'featured' : (listing.isActive ? 'active' : 'inactive');
-        const statusText = {
-            featured: 'Featured',
-            active: 'Active',
-            inactive: 'Inactive'
-        }[status];
-        
-        // Determine which action buttons to show based on listing status
-        let statusActionButton = '';
-        
-        if (status === 'inactive') {
-            // For inactive listings: Show Activate button
-            statusActionButton = `
-                <button class="vr-btn vr-btn--success" onclick="profilePage.activateListing('${listing._id}')">
-                    <i class="fas fa-check-circle"></i> Activate
-                </button>`;
-        } else if (status === 'active') {
-            // For active but not featured listings: Show Upgrade button
-            statusActionButton = `
-                <button class="vr-btn vr-btn--upgrade" onclick="profilePage.upgradeListing('${listing._id}')">
-                    <i class="fas fa-star"></i> Upgrade
-                </button>`;
-        }
-        
-        return `
-            <div class="vr-listing-card vr-listing-card--${status}">
-                <div class="vr-listing-card__image">
-                    <img src="${listing.mainImage || listing.images?.[0] || '/images/defaults/default-listing.jpg'}" 
-                         alt="${listing.listingName}">
-                    <span class="vr-listing-card__status">${statusText}</span>
-                </div>
-                <div class="vr-listing-card__content">
-                    <h3 class="vr-listing-card__title">${listing.listingName}</h3>
-                </div>
-                <div class="vr-listing-card__actions">
-                    ${statusActionButton}
-                    <button class="vr-btn vr-btn--primary" onclick="profilePage.editListing('${listing._id}')">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button class="vr-btn vr-btn--danger" onclick="profilePage.deleteListing('${listing._id}')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </div>
-            </div>
-        `;
+    /**
+ * إنشاء كرت القائمة بتصميم محسن وإضافة بادج مجاني للزر التنشيط
+ */
+createListingCard(listing) {
+    const status = listing.isPosted ? 'featured' : (listing.isActive ? 'active' : 'inactive');
+    const statusText = {
+        featured: 'Featured',
+        active: 'Active',
+        inactive: 'Inactive'
+    }[status];
+    
+    // تحديد أزرار الإجراءات بناءً على حالة القائمة
+    let statusActionButton = '';
+    
+    if (status === 'inactive') {
+        // للقوائم غير النشطة: إظهار زر التفعيل المجاني مع بادج Free
+        statusActionButton = `
+            <button class="vr-btn vr-btn--success" onclick="profilePage.activateListing('${listing._id}')">
+                <i class="fas fa-check-circle"></i> Activate <span class="vr-btn__badge">Free</span>
+            </button>`;
+    } else if (status === 'active') {
+        // للقوائم النشطة وغير المميزة: إظهار زر الترقية
+        statusActionButton = `
+            <button class="vr-btn vr-btn--upgrade" onclick="profilePage.upgradeListing('${listing._id}')">
+                <i class="fas fa-star"></i> Upgrade
+            </button>`;
     }
+    
+    // إنشاء تاريخ منسق
+    const formattedDate = listing.createdAt 
+        ? new Date(listing.createdAt).toLocaleDateString('ar-SA', {
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric'
+        })
+        : '';
+    
+    // تنسيق النص بناءً على حالة القائمة
+    let statusClass = '';
+    if (status === 'featured') {
+        statusClass = 'data-featured="true"';
+    }
+    
+    return `
+        <div class="vr-listing-card vr-listing-card--${status}" data-listing-id="${listing._id}" ${statusClass}>
+            <div class="vr-listing-card__image">
+                <img src="${listing.mainImage || listing.images?.[0] || '/images/defaults/default-listing.jpg'}" 
+                     alt="${listing.listingName}">
+                <span class="vr-listing-card__status">${statusText}</span>
+            </div>
+            
+            <div class="vr-listing-card__title-col">
+                <h3 class="vr-listing-card__title">${listing.listingName}</h3>
+            </div>
+            
+            <div class="vr-listing-card__actions">
+                ${statusActionButton}
+                <button class="vr-btn vr-btn--primary" onclick="profilePage.editListing('${listing._id}')">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="vr-btn vr-btn--danger" onclick="profilePage.deleteListing('${listing._id}')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    `;
+}
 
     // Add methods to handle listing activation and upgrade
     activateListing(id) {
@@ -951,10 +1122,15 @@ updateListingCounts() {
     // Method to handle checkout redirection
     redirectToCheckout(listingId, action) {
         try {
-            // Show loading indicator
+            // إذا كان العمل هو "تنشيط" فعندها نستخدم التنشيط المجاني
+            if (action === 'activate') {
+                this.handleFreeActivation(listingId);
+                return;
+            }
+            
+            // للترقية، نستمر إلى صفحة الدفع
             const loadingModal = this.showLoadingModal('Preparing Checkout');
             
-            // Store listing data in session storage for the checkout page
             const listingData = this.listingsData.all.find(listing => listing._id === listingId);
             if (listingData) {
                 const checkoutData = {
@@ -962,14 +1138,14 @@ updateListingCounts() {
                     listingName: listingData.listingName,
                     action: action,
                     timestamp: new Date().getTime(),
-                    price: action === 'upgrade' ? 29.99 : 9.99, // Example prices
+                    price: 9.99, // سعر الترقية
                     returnUrl: window.location.href
                 };
                 
                 sessionStorage.setItem('checkout_data', JSON.stringify(checkoutData));
             }
             
-            // Close loading modal and redirect to checkout page
+            // إغلاق شاشة التحميل والانتقال إلى صفحة الدفع
             setTimeout(() => {
                 loadingModal.remove();
                 window.location.href = `/pages/checkout.html?action=${action}&listing=${listingId}`;
@@ -1059,42 +1235,82 @@ updateListingCounts() {
     }
 
     /**
-     * تحميل مكون البانر الترويجي مع التحقق من وجود قوائم
+     * تحميل مكون البانر الترويجي مع التحقق من وجود قوائم - تحسين لضمان الظهور
      */
     async loadPromoComponent() {
         try {
             const promoContainer = document.getElementById('profilePromoContainer');
-            if (!promoContainer) return;
-            
-            // التحقق من وجود قوائم قبل عرض البانر
-            if (!this.listingsData.all || this.listingsData.all.length === 0) {
-                // لا تعرض البانر عندما لا توجد قوائم
-                promoContainer.innerHTML = '';
+            if (!promoContainer) {
+                console.warn('Promo container not found');
                 return;
             }
             
             // تجنب إعادة التحميل إذا كان المكون محملاً بالفعل
-            if (promoContainer.children.length > 0) return;
-            
-            // تحميل CSS الخاص بالبانر إذا لم يكن محملاً بالفعل
-            if (!document.querySelector('link[href="/css/components/profile-promo.css"]')) {
-                const linkElem = document.createElement('link');
-                linkElem.rel = 'stylesheet';
-                linkElem.href = '/css/components/profile-promo.css';
-                document.head.appendChild(linkElem);
+            if (promoContainer.children.length > 0) {
+                // التأكد من أنه مرئي
+                const promoBanner = promoContainer.querySelector('.vr-profile-promo');
+                if (promoBanner) {
+                    promoBanner.classList.add('visible');
+                    promoBanner.style.opacity = '1';
+                    promoBanner.style.transform = 'translateY(0)';
+                }
+                return;
             }
+            
+            console.log('Loading promo component...');
+            
+            // تحميل CSS الخاص بالبانر
+            await this.loadCSS('/css/components/profile-promo.css');
             
             // تحميل قالب البانر
             const response = await fetch('/components/profile/promo-banner.html');
-            if (!response.ok) throw new Error('Failed to load promo banner');
+            if (!response.ok) {
+                throw new Error(`Failed to load promo banner: ${response.status}`);
+            }
             
             const html = await response.text();
+            if (!html.trim()) {
+                throw new Error('Promo banner template is empty');
+            }
+            
+            // إضافة المحتوى للحاوية
             promoContainer.innerHTML = html;
             
-            // تطبيق تأثير انتقالي لإظهار البانر
-            setTimeout(() => {
-                promoContainer.style.opacity = '1';
-            }, 100);
+            // تطبيق تأثير انتقالي لإظهار البانر بعد تحميله
+            const promoBanner = promoContainer.querySelector('.vr-profile-promo');
+            if (promoBanner) {
+                // تأكد من عرض البانر بشكل صحيح
+                promoBanner.style.display = 'block';
+                promoBanner.style.opacity = '0';
+                promoBanner.style.transform = 'translateY(-10px)';
+                
+                // إضافة تأخير بسيط لإظهار التأثير البصري
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        promoBanner.classList.add('visible');
+                        promoBanner.style.opacity = '1';
+                        promoBanner.style.transform = 'translateY(0)';
+                    }, 100);
+                });
+                
+                // إضافة تأثيرات مرور المؤشر على الخيارات
+                const options = promoBanner.querySelectorAll('.vr-profile-promo__option');
+                options.forEach(option => {
+                    option.addEventListener('mouseenter', () => {
+                        option.style.transform = 'translateY(-5px)';
+                        option.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
+                    });
+                    
+                    option.addEventListener('mouseleave', () => {
+                        option.style.transform = '';
+                        option.style.boxShadow = '';
+                    });
+                });
+                
+                console.log('Promo banner loaded and visible');
+            } else {
+                console.warn('Promo banner element not found in loaded HTML');
+            }
             
         } catch (error) {
             console.error('Error loading promo component:', error);
@@ -1102,70 +1318,249 @@ updateListingCounts() {
     }
 
     /**
- * إضافة CSS المطلوب عند تهيئة الصفحة
+ * إضافة دالة لمعالجة التنشيط المجاني
  */
-async loadTemplates() {
+async handleFreeActivation(listingId) {
     try {
-        // إضافة ملف CSS الجديد لتحسين شكل لوحة القوائم
-        this.loadCSS('/css/components/profile-listings.css');
+        // عرض شاشة تحميل
+        const loadingModal = this.showLoadingModal('Activating Your Listing');
         
-        // ...existing code for loading templates...
-        // إنشاء ملف للتحميل المتزامن
-        const loadComponentPromises = [
-            // تحميل قالب البروفايل
-            fetch('/components/profile/profile-info.html')
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to load profile template');
-                    return response.text();
-                })
-                .then(html => {
-                    const container = document.getElementById('profileContainer');
-                    if (container) container.innerHTML = html;
-                }),
-                
-            // تحميل قالب إضافة قائمة جديدة
-            fetch('/components/profile/addListing.html')
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to load add listing template');
-                    return response.text();
-                })
-                .then(html => {
-                    const container = document.getElementById('addListingContainer');
-                    if (container) container.innerHTML = html;
-                }),
-                
-            // تحميل قالب عرض القوائم
-            fetch('/components/profile/listings-grid.html')
-                .then(response => {
-                    if (!response.ok) throw new Error('Failed to load listings grid template');
-                    return response.text();
-                })
-                .then(html => {
-                    const container = document.getElementById('listingsContainer');
-                    if (container) container.innerHTML = html;
-                })
-        ];
+        // الحصول على بيانات القائمة
+        const listing = this.listingsData.all.find(item => item._id === listingId);
+        if (!listing) {
+            throw new Error('Listing not found');
+        }
         
-        // انتظار اكتمال جميع عمليات التحميل
-        await Promise.all(loadComponentPromises);
-        console.log('All templates loaded successfully');
-        return true;
+        // تحديث حالة القائمة في API
+        await listingService.updateListingStatus(listingId, { 
+            isActive: true,
+            freeTrialStart: new Date().toISOString(),
+            freeTrialEnd: this.calculateFreeTrialEndDate()
+        });
+        
+        // إغلاق شاشة التحميل
+        setTimeout(() => {
+            loadingModal.remove();
+            
+            // عرض رسالة نجاح
+            toastService.success('Your listing has been activated for free for 1 month!');
+            
+            // إعادة تحميل القوائم للتحديث
+            this.loadListings();
+        }, 1200);
+        
     } catch (error) {
-        console.error('Error loading templates:', error);
-        toastService.error('Failed to load page components. Please try again.');
-        throw error;
+        console.error('Error during free activation:', error);
+        toastService.error('Failed to activate your listing. Please try again.');
     }
 }
 
-/**
- * مساعد لتحميل ملفات CSS
+// دالة لحساب تاريخ انتهاء الفترة المجانية (شهر واحد من الآن)
+calculateFreeTrialEndDate() {
+    const today = new Date();
+    const endDate = new Date(today);
+    endDate.setMonth(today.getMonth() + 1); // إضافة شهر واحد للتاريخ الحالي
+    return endDate.toISOString();
+}
+
+    /**
+ * تحسين إنشاء كرت القائمة بتصميم محسن
  */
-loadCSS(href) {
-    if (!document.querySelector(`link[href="${href}"]`)) {
-        const link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        document.head.appendChild(link);
+createListingCard(listing) {
+    const status = listing.isPosted ? 'featured' : (listing.isActive ? 'active' : 'inactive');
+    const statusText = {
+        featured: 'Featured',
+        active: 'Active',
+        inactive: 'Inactive'
+    }[status];
+    
+    // تحديد أزرار الإجراءات بناءً على حالة القائمة
+    let statusActionButton = '';
+    
+    if (status === 'inactive') {
+        // للقوائم غير النشطة: إظهار زر التفعيل
+        statusActionButton = `
+            <button class="vr-btn vr-btn--success" 
+                    data-action="activate-listing" 
+                    data-id="${listing._id}">
+                <i class="fas fa-check-circle"></i> Activate
+                <span class="vr-btn__badge">Free</span>
+            </button>`;
+    } else if (status === 'active') {
+        // للقوائم النشطة وغير المميزة: إظهار زر الترقية
+        statusActionButton = `
+            <button class="vr-btn vr-btn--upgrade" 
+                    data-action="upgrade-listing" 
+                    data-id="${listing._id}">
+                <i class="fas fa-star"></i> Upgrade
+            </button>`;
+    }
+    
+    // إنشاء تاريخ منسق
+    const formattedDate = listing.createdAt 
+        ? new Date(listing.createdAt).toLocaleDateString('ar-SA', {
+            year: 'numeric', 
+            month: 'short', 
+            day: 'numeric'
+        })
+        : '';
+    
+    // تنسيق النص بناءً على حالة القائمة
+    let statusClass = '';
+    if (status === 'featured') {
+        statusClass = 'data-featured="true"';
+    }
+    
+    return `
+        <div class="vr-listing-card vr-listing-card--${status}" data-id="${listing._id}">
+            <div class="vr-listing-card__image">
+                <img src="${listing.mainImage || listing.images?.[0] || '/images/defaults/default-listing.jpg'}" 
+                     alt="${listing.listingName}">
+                <span class="vr-listing-card__status">${statusText}</span>
+            </div>
+            
+            <div class="vr-listing-card__title-col">
+                <h3 class="vr-listing-card__title">${listing.listingName}</h3>
+            </div>
+            
+            <div class="vr-listing-card__actions">
+                ${statusActionButton}
+                <button class="vr-btn vr-btn--primary" 
+                        data-action="edit-listing" 
+                        data-id="${listing._id}">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button class="vr-btn vr-btn--danger" 
+                        data-action="delete-listing" 
+                        data-id="${listing._id}">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * تحديث دالة filterListings لعرض عناوين الأعمدة المناسبة
+ */
+filterListings(status = 'all') {
+    const grid = document.querySelector('.vr-listings-grid');
+    const emptyState = document.querySelector('.vr-listings-empty');
+    
+    if (!grid || !emptyState) return;
+    
+    const listings = this.listingsData[status] || [];
+    
+    // تأثير التلاشي عند تغيير المحتوى
+    grid.style.opacity = '0';
+    
+    setTimeout(() => {
+        if (listings.length === 0) {
+            grid.style.display = 'none';
+            emptyState.style.display = 'block';
+        } else {
+            grid.style.display = 'block'; // تغيير من grid إلى block
+            emptyState.style.display = 'none';
+            
+            // إضافة عناوين الأعمدة المحسّنة قبل القوائم
+            let html = `
+                <div class="vr-listing-table-header">
+                    <div class="vr-listing-table-header__image">Image</div>
+                    <div class="vr-listing-table-header__title">Title</div>
+                    <div class="vr-listing-table-header__actions">Actions</div>
+                </div>
+            `;
+            
+            // إضافة كروت القوائم
+            html += listings.map(listing => this.createListingCard(listing)).join('');
+            
+            grid.innerHTML = html;
+            
+            // إضافة أحداث على الكروت مع التحسينات الجديدة
+            this.attachListingCardEvents();
+            
+            // تطبيق تأثيرات الظهور المتتابعة للكروت
+            const cards = grid.querySelectorAll('.vr-listing-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(10px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.3s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 50 * index); // تأخير تصاعدي لكل كرت
+            });
+        }
+        
+        // إظهار المحتوى الجديد
+        requestAnimationFrame(() => {
+            grid.style.opacity = '1';
+        });
+    }, 300);
+}
+
+/**
+ * تحميل البانر الترويجي المحسّن مع تأثيرات
+ */
+async loadPromoComponent() {
+    try {
+        const promoContainer = document.getElementById('profilePromoContainer');
+        if (!promoContainer) return;
+        
+        // التحقق من وجود قوائم قبل عرض البانر
+        if (!this.listingsData.all || this.listingsData.all.length === 0) {
+            // لا تعرض البانر عندما لا توجد قوائم
+            promoContainer.innerHTML = '';
+            return;
+        }
+        
+        // تجنب إعادة التحميل إذا كان المكون محملاً بالفعل
+        if (promoContainer.children.length > 0) return;
+        
+        // تحميل CSS الخاص بالبانر إذا لم يكن محملاً بالفعل
+        this.loadCSS('/css/components/profile-promo.css');
+        
+        // تحميل قالب البانر
+        const response = await fetch('/components/profile/promo-banner.html');
+        if (!response.ok) throw new Error('Failed to load promo banner');
+        
+        const html = await response.text();
+        promoContainer.innerHTML = html;
+        
+        // تطبيق تأثير انتقالي لإظهار البانر بعد تحميله
+        const promoBanner = promoContainer.querySelector('.vr-profile-promo');
+        if (promoBanner) {
+            // تحضير البانر للتأثير
+            promoBanner.style.opacity = '0';
+            promoBanner.style.transform = 'translateY(-10px)';
+            
+            // إضافة تأخير بسيط لإظهار التأثير البصري
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    promoBanner.classList.add('visible');
+                    promoBanner.style.opacity = '1';
+                    promoBanner.style.transform = 'translateY(0)';
+                }, 100);
+            });
+            
+            // إضافة تأثيرات مرور المؤشر على الخيارات
+            const options = promoBanner.querySelectorAll('.vr-profile-promo__option');
+            options.forEach(option => {
+                option.addEventListener('mouseenter', () => {
+                    option.style.transform = 'translateY(-5px)';
+                    option.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
+                });
+                
+                option.addEventListener('mouseleave', () => {
+                    option.style.transform = '';
+                    option.style.boxShadow = '';
+                });
+            });
+        }
+        
+        console.log('Promo banner loaded successfully with enhanced animations');
+    } catch (error) {
+        console.error('Error loading promo component:', error);
     }
 }
 
@@ -1186,158 +1581,160 @@ loadCSS(href) {
         }
     }
 
-    // دالة موحدة لعرض skeleton
-    showProfileSkeleton() {
-        // عرض skeleton للمعلومات الجانبية
-        const userInfo = document.querySelector('.vr-profile__user-info');
-        const avatar = document.querySelector('.vr-profile-avatar img');
-        
-        if (userInfo) {
-            userInfo.innerHTML = `
-                <div class="vr-skeleton">
-                    <div class="vr-skeleton--text" style="width: 70%; height: 24px; margin-bottom: 8px;"></div>
-                    <div class="vr-skeleton--text" style="width: 90%; height: 16px;"></div>
-                </div>
-            `;
-        }
-        
-        if (avatar) {
-            avatar.style.opacity = '0.5';
-            avatar.classList.add('vr-skeleton--avatar');
-        }
+    /**
+ * مساعد لتحميل ملفات CSS
+ */
+loadCSS(href) {
+    if (!document.querySelector(`link[href="${href}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+    }
+}
 
-        // عرض skeleton للقوائم
-        const listingsGrid = document.querySelector('.vr-listings-grid');
-        if (listingsGrid) {
-            listingsGrid.innerHTML = Array(4).fill().map(() => `
-                <div class="vr-skeleton vr-skeleton--card">
-                    <div class="vr-skeleton--image"></div>
-                    <div class="vr-skeleton--content">
-                        <div class="vr-skeleton--text" style="width: 80%;"></div>
-                        <div class="vr-skeleton--text" style="width: 60%;"></div>
+/**
+ * إضافة دالة showListingsSkeleton لعرض شاشة التحميل أثناء جلب القوائم
+ */
+showListingsSkeleton() {
+    // البحث عن حاوية القوائم وشاشة التحميل
+    const listingsContainer = document.querySelector('.vr-listings-grid');
+    const skeleton = document.querySelector('.vr-listings-skeleton');
+    
+    if (!skeleton) {
+        // إنشاء شاشة تحميل إذا لم تكن موجودة
+        const skeletonHTML = `
+            <div class="vr-listings-skeleton">
+                ${Array(4).fill().map(() => `
+                    <div class="vr-skeleton-card">
+                        <div class="vr-skeleton-card__image"></div>
+                        <div class="vr-skeleton-card__content">
+                            <div class="vr-skeleton-card__title"></div>
+                            <div class="vr-skeleton-card__info">
+                                <div class="vr-skeleton-card__info-item"></div>
+                                <div class="vr-skeleton-card__info-item"></div>
+                            </div>
+                            <div class="vr-skeleton-card__actions">
+                                <div class="vr-skeleton-card__button"></div>
+                                <div class="vr-skeleton-card__button"></div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            `).join('');
-        }
-    }
-
-    // دالة موحدة لإخفاء skeleton
-    hideProfileSkeleton() {
-        const userInfo = document.querySelector('.vr-profile__user-info');
-        const avatar = document.querySelector('.vr-profile-avatar img');
-        
-        if (avatar) {
-            avatar.style.opacity = '1';
-            avatar.classList.remove('vr-skeleton--avatar');
-        }
-        
-        // تحديث المعلومات مباشرة إذا كانت متوفرة
-        if (this.userData && userInfo) {
-            const userInfoData = this.userData.userId || {};
-            userInfo.innerHTML = `
-                <h3 id="userName">${userInfoData.username || 'User'}</h3>
-                <p id="userEmail">${userInfoData.email || 'No email available'}</p>
-            `;
-        }
-    }
-
-    // إضافة دالة منفصلة لإضافة حقل تواصل اجتماعي للملف الشخصي
-    addSocialMediaField(containerId = 'profileSocialMediaContainer') {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        
-        const fieldDiv = document.createElement('div');
-        fieldDiv.className = 'vr-social-account';
-        
-        fieldDiv.innerHTML = `
-            <select class="vr-input vr-social-platform" name="socialPlatform[]">
-                <option value="">Select Platform</option>
-                <option value="facebook">Facebook</option>
-                <option value="instagram">Instagram</option>
-                <option value="twitter">Twitter</option>
-                <option value="linkedin">LinkedIn</option>
-                <option value="youtube">YouTube</option>
-            </select>
-            <input type="url" class="vr-input" name="socialUrl[]" placeholder="Profile URL">
-            <button type="button" class="vr-btn vr-btn--icon vr-remove-social">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-
-        fieldDiv.querySelector('.vr-remove-social').addEventListener('click', () => {
-            fieldDiv.remove();
-        });
-
-        container.appendChild(fieldDiv);
-    }
-
-    /**
-     * إظهار حالة التحميل السكيلتون للقوائم
-     */
-    showListingsSkeleton() {
-        const listingsGrid = document.querySelector('.vr-listings-grid');
-        if (!listingsGrid) return;
-        
-        // حفظ المحتوى الأصلي
-        if (!listingsGrid._originalContent) {
-            listingsGrid._originalContent = listingsGrid.innerHTML;
-        }
-        
-        // إنشاء 4 بطاقات سكيلتون
-        const skeletonHTML = Array(4).fill().map(() => `
-            <div class="vr-skeleton vr-skeleton--card">
-                <div style="height: 180px; background: var(--vr-gray-200);"></div>
-                <div style="padding: 15px;">
-                    <div class="vr-skeleton vr-skeleton--text" style="width: 70%;"></div>
-                    <div class="vr-skeleton vr-skeleton--text" style="width: 90%;"></div>
-                    <div class="vr-skeleton vr-skeleton--text" style="width: 50%;"></div>
-                </div>
+                `).join('')}
             </div>
-        `).join('');
+        `;
         
-        listingsGrid.innerHTML = skeletonHTML;
-    }
-
-    /**
-     * استعادة المحتوى الأصلي بعد التحميل
-     */
-    hideListingsSkeleton() {
-        const listingsGrid = document.querySelector('.vr-listings-grid');
-        if (listingsGrid && listingsGrid._originalContent) {
-            listingsGrid.innerHTML = listingsGrid._originalContent;
-            delete listingsGrid._originalContent;
+        // إضافة شاشة التحميل بعد حاوية القوائم
+        if (listingsContainer) {
+            listingsContainer.insertAdjacentHTML('afterend', skeletonHTML);
+        } else {
+            // إذا لم توجد حاوية، نبحث عن العنصر الرئيسي للقسم ونضيف فيه
+            const parentContainer = document.getElementById('listingsContainer');
+            if (parentContainer) {
+                parentContainer.insertAdjacentHTML('beforeend', skeletonHTML);
+            }
         }
     }
-
-    // إعداد أحداث التصفية
-    setupFilterEvents() {
-        const tabs = document.querySelectorAll('.vr-tab');
-        if (!tabs || tabs.length === 0) return;
-        
-        // إزالة أحداث النقر السابقة لمنع التكرار
-        tabs.forEach(tab => {
-            // إزالة جميع مستمعي الأحداث السابقة
-            const oldTab = tab.cloneNode(true);
-            tab.parentNode.replaceChild(oldTab, tab);
-        });
-        
-        // إضافة مستمعات أحداث جديدة
-        document.querySelectorAll('.vr-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                // إزالة الفئة النشطة من جميع التبويبات
-                document.querySelectorAll('.vr-tab').forEach(t => t.classList.remove('active'));
-                
-                // إضافة الفئة النشطة للتبويب المحدد
-                tab.classList.add('active');
-                
-                // تطبيق الفلتر المحدد
-                const type = tab.getAttribute('data-type');
-                this.filterListings(type);
-            });
-        });
-        
-        console.log('Filter tabs event listeners re-initialized');
+    
+    // إخفاء حاوية القوائم وإظهار شاشة التحميل
+    if (listingsContainer) {
+        listingsContainer.style.display = 'none';
     }
+    
+    const updatedSkeleton = document.querySelector('.vr-listings-skeleton');
+    if (updatedSkeleton) {
+        updatedSkeleton.style.display = 'grid';
+        
+        // إضافة تأثيرات الظهور للهياكل العظمية
+        const skeletonItems = updatedSkeleton.querySelectorAll('.vr-skeleton-card');
+        skeletonItems.forEach((item, index) => {
+            item.style.animation = `fade-in 0.3s ease forwards ${index * 0.1}s`;
+        });
+    }
+    
+    console.log('Listings skeleton displayed');
+}
+
+/**
+ * إضافة دالة hideListingsSkeleton لإخفاء شاشة التحميل بعد اكتمال جلب القوائم
+ */
+hideListingsSkeleton() {
+    // البحث عن حاوية القوائم وشاشة التحميل
+    const listingsContainer = document.querySelector('.vr-listings-grid');
+    const skeleton = document.querySelector('.vr-listings-skeleton');
+    
+    // إظهار حاوية القوائم
+    if (listingsContainer) {
+        listingsContainer.style.display = 'grid';
+    }
+    
+    // إخفاء شاشة التحميل
+    if (skeleton) {
+        // إضافة تأثير تلاشي قبل الإخفاء
+        skeleton.style.opacity = '0';
+        skeleton.style.transform = 'translateY(10px)';
+        
+        // إخفاء العنصر بعد انتهاء التأثير
+        setTimeout(() => {
+            skeleton.style.display = 'none';
+        }, 300);
+    }
+    
+    console.log('Listings skeleton hidden');
+}
+
+/**
+ * إضافة دالة setupFilterEvents للتعامل مع أحداث تصفية القوائم
+ */
+setupFilterEvents() {
+    const tabs = document.querySelectorAll('.vr-tab');
+    if (!tabs.length) {
+        console.warn('No filter tabs found');
+        return;
+    }
+    
+    // إضافة مستمع للنقر على كل علامة تبويب
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            // إزالة الفئة النشطة من جميع علامات التبويب
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            // إضافة الفئة النشطة للعلامة المنقورة
+            tab.classList.add('active');
+            
+            // استخراج نوع التصفية واستدعاء دالة التصفية
+            const type = tab.getAttribute('data-type') || 'all';
+            this.filterListings(type);
+        });
+    });
+    
+    console.log('Filter events setup completed');
+}
+
+/**
+ * إضافة دالة attachListingCardEvents للتعامل مع أحداث بطاقات القوائم
+ */
+attachListingCardEvents() {
+    // البحث عن جميع بطاقات القوائم
+    const cards = document.querySelectorAll('.vr-listing-card');
+    
+    // إضافة مستمعات للأحداث لكل بطاقة
+    cards.forEach(card => {
+        // تأثيرات عند المرور بالمؤشر
+        card.addEventListener('mouseenter', () => {
+            card.style.transform = 'translateY(-3px)';
+            card.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+            card.style.boxShadow = '';
+        });
+    });
+    
+    console.log(`${cards.length} listing card events attached`);
+}
+
 }
 
 // Initialize

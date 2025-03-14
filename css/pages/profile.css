@@ -263,10 +263,10 @@
     }
 }
 
-.vr-profile:hover {
+/* .vr-profile:hover {
     transform: translateY(-5px);
     box-shadow: var(--vr-shadow-xl);
-}
+} */
 
 .vr-profile-card::before {
     content: '';

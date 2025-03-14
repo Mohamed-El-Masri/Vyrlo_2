@@ -1,0 +1,342 @@
+/* تصاميم كروت القوائم المحسنة - عرض أفقي مع بادجات أكثر وضوحاً وحدود أكثر تميزاً */
+
+/* كرت القائمة الأساسي */
+.vr-listing-card {
+    background-color: var(--vr-white);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    transition: all 0.25s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    border: 1px solid var(--vr-gray-100);
+    width: 100%;
+    height: 90px; /* تعديل الارتفاع للحصول على مظهر أفضل */
+}
+
+.vr-listing-card:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+/* صورة القائمة */
+.vr-listing-card__image {
+    width: 120px; /* زيادة العرض من 90px إلى 120px */
+    height: 90px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.vr-listing-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.vr-listing-card:hover .vr-listing-card__image img {
+    transform: scale(1.05);
+}
+
+/* تحسين شارة الحالة */
+.vr-listing-card__status {
+    position: absolute;
+    top: 8px;
+    right: 8px; /* تعديل الموقع من اليسار لليمين لمزيد من الوضوح */
+    padding: 0.2rem 0.7rem;
+    border-radius: 30px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    z-index: 1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.2;
+}
+
+/* عنوان القائمة */
+.vr-listing-card__title-col {
+    flex: 1;
+    padding: 0 1.5rem;
+    overflow: hidden;
+}
+
+.vr-listing-card__title {
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 600;
+    color: var(--vr-gray-900);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* أزرار القائمة */
+.vr-listing-card__actions {
+    padding: 0 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    justify-content: flex-end;
+    flex-shrink: 0;
+    min-width: 280px;
+    background-color: var(--vr-white);
+    height: 100%;
+    border-left: 1px solid var(--vr-gray-100);
+}
+
+.vr-listing-card__actions .vr-btn {
+    font-size: 0.8rem;
+    padding: 0.35rem 0.65rem;
+    white-space: nowrap;
+}
+
+/* حالات القوائم */
+.vr-listing-card--featured {
+    border-left: 6px solid #ff9800; /* تغيير اللون للتمييز أكثر */
+    background: linear-gradient(to right, rgba(255, 152, 0, 0.05) 0%, rgba(255, 152, 0, 0) 40%);
+    box-shadow: 0 4px 12px rgba(255, 152, 0, 0.08);
+}
+
+.vr-listing-card--featured .vr-listing-card__status {
+    background: linear-gradient(45deg, #ff9800, #f44336); /* تدرج لون جذاب للقوائم المميزة */
+    color: white;
+    box-shadow: 0 2px 10px rgba(255, 152, 0, 0.4);
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    padding: 0.25rem 0.8rem;
+}
+
+.vr-listing-card--active {
+    border-left: 6px solid #10b981; /* أخضر */
+    background: linear-gradient(to right, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0) 40%);
+}
+
+.vr-listing-card--active .vr-listing-card__status {
+    background: linear-gradient(45deg, #10b981, #059669); /* تدرج لون أخضر */
+    color: white;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+.vr-listing-card--inactive {
+    border-left: 6px solid var(--vr-gray-400);
+    background-color: var(--vr-gray-50);
+}
+
+.vr-listing-card--inactive .vr-listing-card__status {
+    background: linear-gradient(45deg, #6B7280, #4B5563); /* تدرج رمادي */
+    color: white;
+    box-shadow: 0 2px 6px rgba(107, 114, 128, 0.3);
+}
+
+/* إضافة أيقونة للبادج */
+.vr-listing-card__status::before {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: 0.7rem;
+}
+
+.vr-listing-card--featured .vr-listing-card__status::before {
+    content: '\f005'; /* نجمة */
+    color: #FFD700; /* لون ذهبي للأيقونة */
+    text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
+}
+
+.vr-listing-card--active .vr-listing-card__status::before {
+    content: '\f058'; /* دائرة مع علامة صح */
+    color: #E0FFF4; /* لون فاتح للأيقونة */
+}
+
+.vr-listing-card--inactive .vr-listing-card__status::before {
+    content: '\f05e'; /* دائرة مع خط مائل */
+}
+
+/* رؤوس أعمدة الجدول */
+.vr-listing-table-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid var(--vr-gray-200);
+    color: var(--vr-gray-700);
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.vr-listing-table-header__image {
+    width: 120px; /* مطابق لعرض الصورة */
+    padding-left: 0.5rem;
+}
+
+.vr-listing-table-header__title {
+    flex: 1;
+    padding: 0 1.5rem;
+}
+
+.vr-listing-table-header__actions {
+    min-width: 280px;
+    padding: 0 1.25rem;
+    text-align: center;
+}
+
+/* توافق مع الهواتف المحمولة */
+@media (max-width: 768px) {
+    .vr-listing-card {
+        height: auto;
+        flex-direction: column;
+        align-items: stretch;
+        padding-bottom: 0.75rem;
+    }
+    
+    .vr-listing-card__image {
+        width: 100%; /* عرض كامل في الأجهزة المحمولة */
+        height: 180px; /* ارتفاع أكبر للصورة في الشاشات الصغيرة */
+    }
+    
+    .vr-listing-card__title-col {
+        padding: 1rem 1rem 0.5rem;
+    }
+    
+    .vr-listing-card__title {
+        font-size: 1rem;
+    }
+    
+    .vr-listing-card__actions {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--vr-gray-100);
+        padding: 0.75rem 1rem 0;
+        min-width: auto;
+        justify-content: space-between;
+        margin-top: 0.5rem;
+        background-color: transparent;
+        flex-wrap: wrap;
+    }
+    
+    .vr-listing-card__actions .vr-btn {
+        flex: 1;
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .vr-listing-table-header {
+        display: none; /* إخفاء رأس الجدول في الشاشات الصغيرة */
+    }
+    
+    .vr-listing-card__status {
+        top: 10px;
+        right: 10px;
+        font-size: 0.7rem;
+    }
+    
+    /* تصغير الأزرار في الشاشات الصغيرة جدا */
+    @media (max-width: 480px) {
+        .vr-listing-card__actions {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .vr-listing-card__actions .vr-btn {
+            padding: 0.35rem 0.5rem;
+            font-size: 0.7rem;
+            flex-basis: calc(50% - 0.25rem);
+        }
+        
+        .vr-listing-card__image {
+            height: 160px;
+        }
+    }
+}
+
+/* دعم الوضع المظلم */
+@media (prefers-color-scheme: dark) {
+    .vr-listing-card {
+        background-color: var(--vr-gray-800);
+        border-color: var(--vr-gray-700);
+    }
+    
+    .vr-listing-card:hover {
+        background-color: var(--vr-gray-750);
+    }
+    
+    .vr-listing-card__title {
+        color: var(--vr-gray-100);
+    }
+    
+    .vr-listing-card__actions {
+        background-color: var(--vr-gray-800);
+        border-color: var(--vr-gray-700);
+    }
+    
+    .vr-listing-card--featured {
+        background: linear-gradient(to right, rgba(255, 152, 0, 0.1) 0%, rgba(255, 152, 0, 0) 40%);
+    }
+    
+    .vr-listing-card--active {
+        background: linear-gradient(to right, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0) 40%);
+    }
+    
+    .vr-listing-card--inactive {
+        background-color: var(--vr-gray-850);
+    }
+    
+    .vr-listing-table-header {
+        border-color: var(--vr-gray-700);
+        color: var(--vr-gray-400);
+    }
+}
+
+/* تصميم معزز لحالة فارغة */
+.vr-empty-state {
+    text-align: center;
+    padding: 3rem;
+    background-color: var(--vr-white);
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.vr-empty-state img {
+    width: 200px;
+    margin-bottom: var(--vr-spacing-lg);
+    opacity: 0.5;
+}
+
+.vr-empty-state i {
+    font-size: 3rem;
+    color: var(--vr-gray-400);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.vr-empty-state h3 {
+    font-size: 1.5rem;
+    color: var(--vr-gray-800);
+    margin-bottom: 0.75rem;
+}
+
+.vr-empty-state p {
+    color: var(--vr-gray-600);
+    margin-bottom: 1.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+    .vr-empty-state {
+        background-color: var(--vr-gray-800);
+    }
+    
+    .vr-empty-state h3 {
+        color: var(--vr-gray-100);
+    }
+    
+    .vr-empty-state p {
+        color: var(--vr-gray-400);
+    }
+}

@@ -1,14 +1,23 @@
-/* Profile Promotional Banner */
+/* تحسينات لبانر الترويج في البروفايل مع تحسينات للشاشات الصغيرة */
+
+/* البانر الترويجي الأساسي */
 .vr-profile-promo {
-    background: linear-gradient(135deg, #f0f4f8 0%, #edf2f7 100%);
-    border-radius: 10px;
+    background: linear-gradient(135deg, #f6f9fc 0%, #edf2f7 100%);
+    border-radius: 12px;
     margin-bottom: 2.5rem;
     overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
     position: relative;
-    transition: opacity 0.3s ease;
-    opacity: 0;
+    opacity: 0; 
+    transition: all 0.4s ease;
     z-index: 1;
+    border: 1px solid var(--vr-gray-100);
+}
+
+/* تعديل جديد: تأثير الظهور */
+.vr-profile-promo.visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .vr-profile-promo::before {
@@ -16,98 +25,111 @@
     position: absolute;
     top: 0;
     right: 0;
-    width: 30%;
+    width: 40%;
     height: 100%;
     background-image: url('/images/decorations/pattern.svg');
-    opacity: 0.07;
+    opacity: 0.05;
     z-index: 0;
+    pointer-events: none;
 }
 
 .vr-profile-promo__content {
     position: relative;
-    padding: 1.5rem;
+    padding: 1.5rem 2rem;
     z-index: 1;
 }
 
+/* ترويسة البانر */
 .vr-profile-promo__header {
-    margin-bottom: 1.5rem;
+    margin-bottom: 2rem;
+    position: relative;
+    max-width: 80%;
 }
 
 .vr-profile-promo__header h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+    margin: 0 0 0.5rem;
     color: var(--vr-primary-dark);
-    font-weight: 600;
+    font-weight: 700;
+    background: linear-gradient(45deg, var(--vr-primary-dark), var(--vr-primary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
 }
 
 .vr-profile-promo__header p {
-    font-size: 1rem;
+    font-size: 1.1rem;
     color: var(--vr-gray-600);
     margin: 0;
+    line-height: 1.5;
 }
 
+/* خيارات البانر */
 .vr-profile-promo__options {
     display: flex;
-    gap: 1.5rem;
+    gap: 2rem;
     margin-bottom: 1.5rem;
     flex-wrap: wrap;
 }
 
 .vr-profile-promo__option {
     background: white;
-    border-radius: 8px;
-    padding: 1.25rem;
+    border-radius: 10px;
+    padding: 1.5rem;
     flex: 1;
     min-width: 280px;
     display: flex;
-    gap: 1rem;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    gap: 1.25rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     border: 1px solid var(--vr-gray-100);
     position: relative;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .vr-profile-promo__option:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
 .vr-profile-promo__option--featured {
     border: 2px solid var(--vr-primary-light);
-    background-color: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(to bottom right, rgba(255, 255, 255, 1), rgba(var(--vr-primary-rgb), 0.03));
 }
 
 .vr-profile-promo__badge {
     position: absolute;
-    top: -10px;
-    right: 15px;
-    background: var(--vr-primary);
+    top: -12px;
+    right: 20px;
+    background: linear-gradient(45deg, var(--vr-primary-dark), var(--vr-primary));
     color: white;
-    padding: 0.2rem 0.75rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 0.25rem 0.85rem;
+    border-radius: 30px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    box-shadow: 0 3px 6px rgba(var(--vr-primary-rgb), 0.3);
+    letter-spacing: 0.5px;
 }
 
 .vr-profile-promo__icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.4rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
 }
 
 .vr-profile-promo__option:first-child .vr-profile-promo__icon {
-    background-color: #e6f3ff;
+    background: linear-gradient(135deg, #e6f3ff, #d1e8ff);
     color: #0077ff;
 }
 
 .vr-profile-promo__option--featured .vr-profile-promo__icon {
-    background-color: #fff3e6;
+    background: linear-gradient(135deg, #ffeeda, #ffd7b3);
     color: #ff8c00;
 }
 
@@ -116,29 +138,29 @@
 }
 
 .vr-profile-promo__details h3 {
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     margin: 0 0 0.5rem;
     color: var(--vr-gray-800);
 }
 
 .vr-profile-promo__details p {
-    margin: 0 0 0.75rem;
+    margin: 0 0 1rem;
     color: var(--vr-gray-600);
-    font-size: 0.9rem;
+    line-height: 1.5;
 }
 
 .vr-profile-promo__benefits {
     list-style: none;
     padding: 0;
-    margin: 0 0 1rem;
+    margin: 0 0 1.25rem;
 }
 
 .vr-profile-promo__benefits li {
-    margin-bottom: 0.4rem;
-    padding-left: 1.5rem;
+    margin-bottom: 0.5rem;
+    padding-left: 1.75rem;
     position: relative;
     color: var(--vr-gray-700);
-    font-size: 0.9rem;
+    line-height: 1.4;
 }
 
 .vr-profile-promo__benefits li::before {
@@ -149,7 +171,6 @@
     left: 0;
     top: 2px;
     color: var(--vr-primary);
-    font-size: 0.8rem;
 }
 
 .vr-profile-promo__option--featured .vr-profile-promo__benefits li::before {
@@ -157,72 +178,206 @@
 }
 
 .vr-profile-promo__price {
-    margin-top: 1rem;
+    margin-top: 1.25rem;
+    display: flex;
+    align-items: baseline;
 }
 
 .vr-profile-promo__amount {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
     font-weight: 700;
     color: var(--vr-primary-dark);
 }
 
 .vr-profile-promo__period {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--vr-gray-600);
     margin-left: 0.25rem;
 }
 
 .vr-profile-promo__discount {
     display: inline-block;
-    margin-left: 0.5rem;
-    padding: 0.1rem 0.5rem;
+    margin-left: 0.75rem;
+    padding: 0.2rem 0.65rem;
     background-color: #ffe8e8;
     color: #ff4545;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    vertical-align: middle;
+}
+
+/* إضافة نمط CSS لعلامة العرض المجاني */
+.vr-profile-promo__free-label {
+    display: inline-block;
+    margin-left: 0.75rem;
+    padding: 0.2rem 0.65rem;
+    background-color: #ebf8f3;
+    color: #10b981;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    animation: pulse-green 2s infinite;
+}
+
+@keyframes pulse-green {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
 }
 
 .vr-profile-promo__note {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.75rem;
-    background-color: rgba(255, 255, 255, 0.7);
-    padding: 0.75rem 1rem;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    color: var(--vr-gray-700);
+    background-color: rgba(var(--vr-primary-rgb), 0.05);
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    border-left: 3px solid var(--vr-primary-light);
 }
 
 .vr-profile-promo__note i {
     color: var(--vr-primary);
     font-size: 1.1rem;
+    margin-top: 0.2rem;
 }
 
-/* Responsive adjustments */
+.vr-profile-promo__note p {
+    margin: 0;
+    color: var(--vr-gray-700);
+    line-height: 1.5;
+    flex: 1;
+}
+
+/* تحسينات للشاشات المتوسطة والصغيرة */
+@media (max-width: 992px) {
+    .vr-profile-promo__header {
+        max-width: 100%;
+    }
+    
+    .vr-profile-promo__header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .vr-profile-promo__header p {
+        font-size: 1rem;
+    }
+    
+    .vr-profile-promo__options {
+        gap: 1.5rem;
+    }
+    
+    .vr-profile-promo__option {
+        padding: 1.25rem;
+    }
+}
+
 @media (max-width: 768px) {
+    .vr-profile-promo__content {
+        padding: 1.25rem;
+    }
+    
     .vr-profile-promo__options {
         flex-direction: column;
+        gap: 2rem;
     }
     
     .vr-profile-promo__option {
         width: 100%;
+        min-width: 0;
     }
     
-    .vr-profile-promo__header h2 {
-        font-size: 1.3rem;
+    .vr-profile-promo__badge {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .vr-profile-promo__icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+    }
+    
+    .vr-profile-promo__details h3 {
+        font-size: 1.1rem;
+    }
+    
+    .vr-profile-promo__details p {
+        font-size: 0.95rem;
+    }
+    
+    .vr-profile-promo__benefits li {
+        font-size: 0.95rem;
+    }
+    
+    .vr-profile-promo__amount {
+        font-size: 1.5rem;
     }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
+/* تحسينات إضافية للشاشات الصغيرة جدًا */
+@media (max-width: 480px) {
     .vr-profile-promo {
-        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        margin-bottom: 1.5rem;
+    }
+    
+    .vr-profile-promo__header {
+        margin-bottom: 1.5rem;
     }
     
     .vr-profile-promo__header h2 {
-        color: white;
+        font-size: 1.25rem;
+    }
+    
+    .vr-profile-promo__header p {
+        font-size: 0.9rem;
+    }
+    
+    .vr-profile-promo__option {
+        padding: 1.1rem;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .vr-profile-promo__icon {
+        margin: 0 auto;
+    }
+    
+    .vr-profile-promo__details h3 {
+        text-align: center;
+    }
+    
+    .vr-profile-promo__amount {
+        font-size: 1.35rem;
+    }
+    
+    .vr-profile-promo__price {
+        justify-content: center;
+    }
+    
+    .vr-profile-promo__note {
+        padding: 0.85rem;
+    }
+}
+
+/* تعديل النص في وضع الظلام */
+@media (prefers-color-scheme: dark) {
+    .vr-profile-promo {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        border-color: var(--vr-gray-700);
+    }
+    
+    .vr-profile-promo__header h2 {
+        background: linear-gradient(45deg, var(--vr-primary-light), #4dabf7);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
     
     .vr-profile-promo__header p {
@@ -230,25 +385,25 @@
     }
     
     .vr-profile-promo__option {
-        background-color: #2d3748;
+        background-color: var(--vr-gray-800);
         border-color: var(--vr-gray-700);
     }
     
     .vr-profile-promo__option--featured {
-        background-color: rgba(45, 55, 72, 0.95);
+        background: linear-gradient(to bottom right, var(--vr-gray-800), rgba(var(--vr-primary-rgb), 0.1));
         border-color: var(--vr-primary);
     }
     
     .vr-profile-promo__details h3 {
-        color: white;
+        color: var(--vr-gray-100);
     }
     
     .vr-profile-promo__details p {
-        color: #cbd5e0;
+        color: var(--vr-gray-400);
     }
     
     .vr-profile-promo__benefits li {
-        color: #cbd5e0;
+        color: var(--vr-gray-300);
     }
     
     .vr-profile-promo__amount {
@@ -256,12 +411,21 @@
     }
     
     .vr-profile-promo__period {
-        color: #cbd5e0;
+        color: var(--vr-gray-400);
+    }
+    
+    .vr-profile-promo__free-label {
+        background-color: rgba(16, 185, 129, 0.2);
+        color: #34d399;
     }
     
     .vr-profile-promo__note {
-        background-color: rgba(45, 55, 72, 0.7);
-        color: #cbd5e0;
+        background-color: rgba(var(--vr-primary-rgb), 0.1);
+        border-color: var(--vr-primary);
+    }
+    
+    .vr-profile-promo__note p {
+        color: var(--vr-gray-300);
     }
 }
 
@@ -273,5 +437,5 @@
 #profilePromoContainer {
     position: relative;
     z-index: 1;
+    margin-bottom: 1.5rem;
 }
-
