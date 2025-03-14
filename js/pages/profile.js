@@ -649,17 +649,7 @@ class ProfilePage {
                 </div>
                 <div class="vr-listing-card__content">
                     <h3 class="vr-listing-card__title">${listing.listingName}</h3>
-                    <p class="vr-listing-card__description">${listing.description || 'No description available'}</p>
-                    <div class="vr-listing-card__meta">
-                        <span>
-                            <i class="fas fa-map-marker-alt"></i>
-                            ${listing.location || 'No location'}
-                        </span>
-                        <span>
-                            <i class="fas fa-calendar"></i>
-                            ${new Date(listing.createdAt).toLocaleDateString()}
-                        </span>
-                    </div>
+                
                 </div>
                 <div class="vr-listing-card__actions">
                     <button class="vr-btn vr-btn--primary" onclick="profilePage.editListing('${listing._id}')">
