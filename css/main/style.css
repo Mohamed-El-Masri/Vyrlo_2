@@ -165,3 +165,42 @@ body {
     padding: 0 var(--vr-spacing-sm);
   }
 }
+
+/* أضف هذا الكود في نهاية ملف الأنماط الرئيسي */
+
+/* تحديث تأثير للأرقام */
+.vr-count-update {
+    animation: count-pulse 0.6s ease-in-out;
+}
+
+@keyframes count-pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+        color: var(--vr-primary);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Animation for badge updates */
+.vr-badge.vr-count-update {
+    animation: badge-update 0.6s ease-in-out;
+}
+
+@keyframes badge-update {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+        background-color: var(--vr-primary);
+        color: white;
+    }
+    100% {
+        transform: scale(1);
+    }
+}

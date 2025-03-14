@@ -193,22 +193,89 @@ class ListingService {
         }
     }
 
-    /**
-     * Delete listing
-     * @param {string} id - Listing ID
-     * @returns {Promise} - Response from API
-     */
-    async deleteListing(id) {
-        try {
-            const response = await window.ApiService.delete(`${this.baseUrl}/listing/${id}`);
-            window.toastService.success('Listing deleted successfully');
-            return response;
-        } catch (error) {
-            console.error('Error deleting listing:', error);
-            window.toastService.error('Failed to delete listing');
-            throw error;
+  /**
+ * Delete listing
+ * @param {string} id - Listing ID
+ * @returns {Promise} - Response from API
+ */
+async deleteListing(id) {
+    try {
+        // استخدام apiService المستورد بدلاً من window.ApiService
+        const token = authService.getToken();
+        const headers = { 'token': token };
+        
+        // عنوان URL الصحيح كما ذكرت
+        const url = `${this.baseUrl}/listing/${id}`;
+        
+        // إضافة تسجيل لتتبع العملية
+        console.log('Deleting listing:', id);
+        console.log('Using URL:', url);
+        console.log('With token:', token);
+        
+        const response = await fetch(url, {
+            method: 'DELETE',
+            headers: headers
+        });
+        
+        // التحقق من نجاح الطلب
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Delete request failed:', response.status, errorText);
+            throw new Error(`Failed to delete: ${response.status}`);
         }
+        
+        // إظهار رسالة نجاح
+        toastService.success('Listing deleted successfully');
+        
+        // حذف من الكاش إذا كان موجوداً
+        this.clearCache('active');
+        
+        return await response.json().catch(() => ({})); // بعض API تعيد JSON، وبعضها لا تعيد
+    } catch (error) {
+        console.error('Error deleting listing:', error);
+        toastService.error('Failed to delete listing');
+        throw error;
     }
+}
+
+/**
+ * Update listing status (activate or upgrade to featured)
+ * @param {string} id - Listing ID
+ * @param {Object} statusData - Status update data
+ * @returns {Promise} - Response from API
+ */
+async updateListingStatus(id, statusData) {
+    try {
+        console.log('Updating listing status:', id, statusData);
+        
+        const token = authService.getToken();
+        const url = `${this.baseUrl}/listing/${id}/status`;
+        
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': token
+            },
+            body: JSON.stringify(statusData)
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.text();
+            console.error('Status update failed:', errorData);
+            throw new Error('Failed to update listing status');
+        }
+        
+        // Clear cache to ensure fresh data on next fetch
+        this.clearCache();
+        
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating listing status:', error);
+        toastService.error('Failed to update listing status');
+        throw error;
+    }
+}
 
     /**
      * Check if listing is open based on opening times
@@ -300,17 +367,8 @@ class ListingService {
         }
     }
 
-    // Delete listing
-    async deleteListing(id) {
-        try {
-            await window.ApiService.delete(`/listings/${id}`);
-            window.toastService.success('Listing deleted successfully');
-        } catch (error) {
-            window.toastService.error('Failed to delete listing');
-            throw error;
-        }
-    }
+    
 }
 
 // Export a singleton instance
-export const listingService = new ListingService(); 
+export const listingService = new ListingService();

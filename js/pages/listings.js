@@ -67,6 +67,8 @@ class ListingsPage {
     async setupElements() {
         console.log('Setting up elements...');
         
+       
+        
         // Forms and inputs
         this.searchForm = document.getElementById('searchForm');
         this.searchInput = document.getElementById('searchInput');
@@ -96,6 +98,8 @@ class ListingsPage {
 
         console.log('Elements setup completed');
     }
+
+
 
     async loadCategories() {
         try {

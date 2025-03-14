@@ -73,3 +73,48 @@
   border-radius: 50%;
   animation: button-loading 0.6s linear infinite;
 }
+
+/* Upgrade button */
+.vr-btn--upgrade {
+    background: linear-gradient(135deg, #FFA500, #FF6347);
+    color: white;
+    border: none;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.vr-btn--upgrade::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 70%);
+    transform: scale(0);
+    transition: transform 0.5s ease-out;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.vr-btn--upgrade:hover {
+    box-shadow: 0 4px 12px rgba(255, 165, 0, 0.3);
+    transform: translateY(-2px);
+}
+
+.vr-btn--upgrade:hover::before {
+    transform: scale(1);
+}
+
+.vr-btn--upgrade:active {
+    transform: translateY(0);
+}
+
+.vr-btn--upgrade i {
+    margin-right: 6px;
+    position: relative;
+    z-index: 2;
+    color: #FFD700;
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.5);
+}

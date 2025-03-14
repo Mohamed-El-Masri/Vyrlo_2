@@ -1,0 +1,277 @@
+/* Profile Promotional Banner */
+.vr-profile-promo {
+    background: linear-gradient(135deg, #f0f4f8 0%, #edf2f7 100%);
+    border-radius: 10px;
+    margin-bottom: 2.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    position: relative;
+    transition: opacity 0.3s ease;
+    opacity: 0;
+    z-index: 1;
+}
+
+.vr-profile-promo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 30%;
+    height: 100%;
+    background-image: url('/images/decorations/pattern.svg');
+    opacity: 0.07;
+    z-index: 0;
+}
+
+.vr-profile-promo__content {
+    position: relative;
+    padding: 1.5rem;
+    z-index: 1;
+}
+
+.vr-profile-promo__header {
+    margin-bottom: 1.5rem;
+}
+
+.vr-profile-promo__header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--vr-primary-dark);
+    font-weight: 600;
+}
+
+.vr-profile-promo__header p {
+    font-size: 1rem;
+    color: var(--vr-gray-600);
+    margin: 0;
+}
+
+.vr-profile-promo__options {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.vr-profile-promo__option {
+    background: white;
+    border-radius: 8px;
+    padding: 1.25rem;
+    flex: 1;
+    min-width: 280px;
+    display: flex;
+    gap: 1rem;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--vr-gray-100);
+    position: relative;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.vr-profile-promo__option:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.vr-profile-promo__option--featured {
+    border: 2px solid var(--vr-primary-light);
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+.vr-profile-promo__badge {
+    position: absolute;
+    top: -10px;
+    right: 15px;
+    background: var(--vr-primary);
+    color: white;
+    padding: 0.2rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.vr-profile-promo__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.vr-profile-promo__option:first-child .vr-profile-promo__icon {
+    background-color: #e6f3ff;
+    color: #0077ff;
+}
+
+.vr-profile-promo__option--featured .vr-profile-promo__icon {
+    background-color: #fff3e6;
+    color: #ff8c00;
+}
+
+.vr-profile-promo__details {
+    flex: 1;
+}
+
+.vr-profile-promo__details h3 {
+    font-size: 1.1rem;
+    margin: 0 0 0.5rem;
+    color: var(--vr-gray-800);
+}
+
+.vr-profile-promo__details p {
+    margin: 0 0 0.75rem;
+    color: var(--vr-gray-600);
+    font-size: 0.9rem;
+}
+
+.vr-profile-promo__benefits {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+}
+
+.vr-profile-promo__benefits li {
+    margin-bottom: 0.4rem;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--vr-gray-700);
+    font-size: 0.9rem;
+}
+
+.vr-profile-promo__benefits li::before {
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    top: 2px;
+    color: var(--vr-primary);
+    font-size: 0.8rem;
+}
+
+.vr-profile-promo__option--featured .vr-profile-promo__benefits li::before {
+    color: #ff8c00;
+}
+
+.vr-profile-promo__price {
+    margin-top: 1rem;
+}
+
+.vr-profile-promo__amount {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--vr-primary-dark);
+}
+
+.vr-profile-promo__period {
+    font-size: 0.85rem;
+    color: var(--vr-gray-600);
+    margin-left: 0.25rem;
+}
+
+.vr-profile-promo__discount {
+    display: inline-block;
+    margin-left: 0.5rem;
+    padding: 0.1rem 0.5rem;
+    background-color: #ffe8e8;
+    color: #ff4545;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+.vr-profile-promo__note {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--vr-gray-700);
+}
+
+.vr-profile-promo__note i {
+    color: var(--vr-primary);
+    font-size: 1.1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .vr-profile-promo__options {
+        flex-direction: column;
+    }
+    
+    .vr-profile-promo__option {
+        width: 100%;
+    }
+    
+    .vr-profile-promo__header h2 {
+        font-size: 1.3rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .vr-profile-promo {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    }
+    
+    .vr-profile-promo__header h2 {
+        color: white;
+    }
+    
+    .vr-profile-promo__header p {
+        color: #cbd5e0;
+    }
+    
+    .vr-profile-promo__option {
+        background-color: #2d3748;
+        border-color: var(--vr-gray-700);
+    }
+    
+    .vr-profile-promo__option--featured {
+        background-color: rgba(45, 55, 72, 0.95);
+        border-color: var(--vr-primary);
+    }
+    
+    .vr-profile-promo__details h3 {
+        color: white;
+    }
+    
+    .vr-profile-promo__details p {
+        color: #cbd5e0;
+    }
+    
+    .vr-profile-promo__benefits li {
+        color: #cbd5e0;
+    }
+    
+    .vr-profile-promo__amount {
+        color: var(--vr-primary-light);
+    }
+    
+    .vr-profile-promo__period {
+        color: #cbd5e0;
+    }
+    
+    .vr-profile-promo__note {
+        background-color: rgba(45, 55, 72, 0.7);
+        color: #cbd5e0;
+    }
+}
+
+/* تأكيد أن البانر لا يتعارض مع تصفية العناصر */
+.vr-listings-container {
+    position: relative;
+}
+
+#profilePromoContainer {
+    position: relative;
+    z-index: 1;
+}
+

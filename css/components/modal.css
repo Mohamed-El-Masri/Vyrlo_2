@@ -5,32 +5,49 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
+    width: 100%;
+    height: 100%;
     display: flex;
-    align-items: center;
     justify-content: center;
-    z-index: var(--vr-z-modal);
+    align-items: center;
+    z-index: 9999;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
 }
 
-.vr-modal.active {
+.vr-modal--active {
     opacity: 1;
     visibility: visible;
 }
 
+.vr-modal__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    cursor: pointer;
+}
+
 .vr-modal__container {
-    background: var(--vr-light);
-    border-radius: var(--vr-radius-lg);
     position: relative;
-    width: 90%;
+    width: 95%;
+    max-width: 500px;
     max-height: 90vh;
-    overflow-y: auto;
-    transform: scale(0.9) translateY(20px);
-    opacity: 0;
-    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    padding: 0;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    transform: scale(0.95);
+    transition: transform 0.3s ease;
+    z-index: 10;
+}
+
+.vr-modal--active .vr-modal__container {
+    transform: scale(1);
 }
 
 /* Modal Sizes */
@@ -65,64 +82,55 @@
 
 /* Modal Header */
 .vr-modal__header {
-    padding: var(--vr-spacing-lg);
-    border-bottom: 1px solid var(--vr-gray-200);
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    position: sticky;
-    top: 0;
-    background: var(--vr-light);
-    z-index: 1;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eaeaea;
 }
 
 .vr-modal__title {
-    font-size: var(--vr-text-xl);
-    font-weight: var(--vr-font-semibold);
-    color: var(--vr-gray-900);
     margin: 0;
-    padding-right: var(--vr-spacing-xl);
+    color: #333;
+    font-size: 1.25rem;
+    font-weight: 600;
 }
 
 .vr-modal__close {
-    position: absolute;
-    top: var(--vr-spacing-md);
-    right: var(--vr-spacing-md);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
+    background: transparent;
     border: none;
-    background: var(--vr-gray-100);
-    color: var(--vr-gray-600);
-    font-size: 1.5rem;
-    line-height: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    font-size: 1.25rem;
     cursor: pointer;
-    transition: all var(--vr-transition-fast);
+    color: #888;
+    transition: color 0.2s ease;
 }
 
 .vr-modal__close:hover {
-    background: var(--vr-gray-200);
-    color: var(--vr-gray-900);
-    transform: rotate(90deg);
+    color: #333;
 }
 
 /* Modal Content */
-.vr-modal__content {
-    padding: var(--vr-spacing-lg);
-    color: var(--vr-gray-700);
+.vr-modal__body {
+    padding: 1.5rem;
+    overflow-y: auto;
+    max-height: 50vh;
+    color: #555;
+    line-height: 1.6;
 }
 
 /* Modal Footer */
 .vr-modal__footer {
-    padding: var(--vr-spacing-lg);
-    border-top: 1px solid var(--vr-gray-200);
     display: flex;
     justify-content: flex-end;
-    gap: var(--vr-spacing-sm);
-    background: var(--vr-gray-50);
+    padding: 1rem 1.5rem;
+    gap: 0.75rem;
+    border-top: 1px solid #eaeaea;
+}
+
+.vr-modal__footer .vr-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
 }
 
 /* Scrollbar Styling */
@@ -204,4 +212,53 @@
 .vr-modal__container:focus {
     outline: none;
     box-shadow: 0 0 0 3px var(--vr-color-primary-light);
-} 
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .vr-modal__container {
+        width: 95%;
+        max-width: none;
+    }
+    
+    .vr-modal__footer {
+        flex-direction: column;
+    }
+    
+    .vr-modal__footer .vr-btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .vr-modal__container {
+        background-color: #222;
+        border: 1px solid #333;
+    }
+    
+    .vr-modal__header {
+        border-bottom: 1px solid #333;
+    }
+    
+    .vr-modal__title {
+        color: #fff;
+    }
+    
+    .vr-modal__close {
+        color: #aaa;
+    }
+    
+    .vr-modal__close:hover {
+        color: #fff;
+    }
+    
+    .vr-modal__body {
+        color: #ccc;
+    }
+    
+    .vr-modal__footer {
+        border-top: 1px solid #333;
+    }
+}

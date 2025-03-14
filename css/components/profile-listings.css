@@ -1,0 +1,271 @@
+/* Enhanced Profile Listings Styling */
+
+/* Listings Container */
+.vr-listings-container {
+    position: relative;
+}
+
+/* Dashboard Section */
+.vr-listings-dashboard {
+    margin-bottom: 2rem;
+}
+
+/* Stats and Info Section */
+.vr-listings-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding: 1.25rem;
+    background-color: var(--vr-white);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.vr-listings-stats {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.vr-listings-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.vr-listings-stat__label {
+    font-size: 0.9rem;
+    color: var(--vr-gray-600);
+    margin-bottom: 0.25rem;
+}
+
+.vr-listings-stat__value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--vr-gray-800);
+}
+
+/* Quick Stats */
+.vr-listings-quick-stats {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.vr-listings-quick-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--vr-gray-700);
+    font-size: 0.95rem;
+}
+
+.vr-listings-quick-stat i {
+    font-size: 1rem;
+}
+
+/* Status Icon Colors */
+.vr-icon-active {
+    color: #10b981; /* Green */
+}
+
+.vr-icon-featured {
+    color: #f59e0b; /* Amber */
+}
+
+.vr-icon-inactive {
+    color: #6b7280; /* Gray */
+}
+
+/* Enhanced Tabs */
+.vr-tabs {
+    display: flex;
+    overflow-x: auto;
+    background-color: var(--vr-white);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 1.25rem;
+    position: relative;
+    z-index: 2;
+}
+
+.vr-tab {
+    padding: 1rem 1.5rem;
+    white-space: nowrap;
+    cursor: pointer;
+    position: relative;
+    font-weight: 500;
+    color: var(--vr-gray-600);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.vr-tab::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--vr-primary);
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s ease;
+}
+
+.vr-tab:hover {
+    color: var(--vr-gray-800);
+    background-color: var(--vr-gray-50);
+}
+
+.vr-tab.active {
+    color: var(--vr-primary);
+}
+
+.vr-tab.active::after {
+    transform: scaleX(1);
+}
+
+.vr-tab__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Badge Styling */
+.vr-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 0.5rem;
+    background-color: var(--vr-gray-100);
+    color: var(--vr-gray-700);
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.vr-tab.active .vr-badge {
+    background-color: var(--vr-primary-light);
+    color: var(--vr-primary-dark);
+}
+
+/* Listings Grid */
+.vr-listings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    transition: opacity 0.3s ease;
+}
+
+/* Empty State */
+.vr-listings-empty {
+    text-align: center;
+    padding: 3rem 2rem;
+    background-color: var(--vr-white);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.vr-listings-empty__img {
+    max-width: 200px;
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+}
+
+.vr-listings-empty h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--vr-gray-800);
+}
+
+.vr-listings-empty p {
+    color: var(--vr-gray-600);
+    margin-bottom: 1.5rem;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .vr-listings-info {
+        flex-direction: column;
+        gap: 1.5rem;
+        align-items: flex-start;
+    }
+    
+    .vr-listings-stats {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        width: 100%;
+    }
+    
+    .vr-listings-quick-stats {
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .vr-tab {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .vr-listings-info,
+    .vr-tabs,
+    .vr-listings-empty {
+        background-color: var(--vr-gray-800);
+        border: 1px solid var(--vr-gray-700);
+    }
+    
+    .vr-listings-stat__label {
+        color: var(--vr-gray-400);
+    }
+    
+    .vr-listings-stat__value {
+        color: var(--vr-gray-200);
+    }
+    
+    .vr-listings-quick-stat {
+        color: var(--vr-gray-400);
+    }
+    
+    .vr-tab {
+        color: var(--vr-gray-400);
+    }
+    
+    .vr-tab:hover {
+        color: var(--vr-gray-200);
+        background-color: var(--vr-gray-700);
+    }
+    
+    .vr-tab.active {
+        color: var(--vr-primary-light);
+    }
+    
+    .vr-badge {
+        background-color: var(--vr-gray-700);
+        color: var(--vr-gray-300);
+    }
+    
+    .vr-tab.active .vr-badge {
+        background-color: var(--vr-primary-dark);
+        color: var(--vr-primary-light);
+    }
+    
+    .vr-listings-empty h3 {
+        color: var(--vr-gray-200);
+    }
+    
+    .vr-listings-empty p {
+        color: var(--vr-gray-400);
+    }
+}

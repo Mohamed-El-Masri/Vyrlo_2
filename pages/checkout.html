@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Vyrlo</title>
+    <link rel="stylesheet" href="/css/main/style.css">
+    <link rel="stylesheet" href="/css/components/modal.css">
+    <link rel="stylesheet" href="/css/components/checkout.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <!-- PayPal SDK -->
+    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+</head>
+<body class="vr-page">
+    <!-- Header Container -->
+    <div id="headerContainer"></div>
+
+    <!-- Main Content -->
+    <main class="vr-main-content">
+        <div class="vr-container">
+            <div class="vr-checkout">
+                <div class="vr-checkout__header">
+                    <h1 class="vr-checkout__title">Complete Checkout</h1>
+                    <p class="vr-checkout__subtitle">Complete your payment to enhance your listing</p>
+                </div>
+
+                <div class="vr-checkout__content">
+                    <!-- Order Summary -->
+                    <div class="vr-checkout__summary">
+                        <h2><i class="fas fa-shopping-cart"></i> Order Summary</h2>
+                        <div class="vr-checkout__summary-item">
+                            <span id="checkoutItemName">Loading...</span>
+                            <span id="checkoutItemPrice">--</span>
+                        </div>
+                        <div class="vr-checkout__summary-total">
+                            <span>Total</span>
+                            <span id="checkoutTotal">--</span>
+                        </div>
+                        <div class="vr-checkout__summary-details">
+                            <div id="activateDetails" style="display: none;">
+                                <h3><i class="fas fa-check-circle"></i> Activation Benefits:</h3>
+                                <ul>
+                                    <li>Make your listing visible to all users</li>
+                                    <li>Appear in search results</li>
+                                    <li>Active for 30 days</li>
+                                    <li>Live status updates</li>
+                                </ul>
+                            </div>
+                            <div id="upgradeDetails" style="display: none;">
+                                <h3><i class="fas fa-star"></i> Upgrade Benefits:</h3>
+                                <ul>
+                                    <li>Featured placement at the top of search results</li>
+                                    <li>Highlighted with special badge</li>
+                                    <li>Premium status for 30 days</li>
+                                    <li>Priority in mobile app</li>
+                                    <li>Advanced listing analytics</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PayPal Payment Method -->
+                    <div class="vr-checkout__payment">
+                        <h2><i class="fab fa-paypal"></i> Pay with PayPal</h2>
+                        
+                        <div class="vr-paypal-container">
+                            <div class="vr-paypal-info">
+                                <p>Click the PayPal button below to complete your payment securely. You'll be redirected to PayPal to finalize your transaction.</p>
+                            </div>
+                            <div id="paypal-button-container" class="vr-paypal-button"></div>
+                            <div class="vr-secure-payment">
+                                <i class="fas fa-lock"></i> All your information is secure and encrypted
+                            </div>
+                            <div class="vr-form__actions">
+                                <button type="button" id="cancelBtn" class="vr-btn vr-btn--secondary">
+                                    Back to Listings
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Security Info -->
+                <div class="vr-checkout__security">
+                    <div class="vr-security-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Secure Payment</span>
+                    </div>
+                    <div class="vr-security-badge">
+                        <i class="fas fa-lock"></i>
+                        <span>Encrypted Data</span>
+                    </div>
+                    <div class="vr-security-badge">
+                        <i class="far fa-clock"></i>
+                        <span>24/7 Support</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Container -->
+    <div id="footerContainer"></div>
+    
+    <!-- Toast Container -->
+    <div class="vr-toast-container" id="toastContainer"></div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Core Services -->
+    <script src="/js/services/api.service.js" type="module"></script>
+    <script src="/js/services/toast.service.js" type="module"></script>
+    <script src="/js/core/utils.js" type="module"></script>
+    <script src="/js/core/componentLoader.js" type="module"></script>
+    <script src="/js/services/auth.service.js" type="module"></script>
+    <!-- Page Script -->
+    <script src="/js/pages/checkout.js" type="module"></script>
+</body>
+</html>

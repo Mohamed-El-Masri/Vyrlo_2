@@ -1,60 +1,76 @@
-<div class="vr-listings-section">
-    <!-- رأس القسم مع زر الإضافة -->
-    <div class="vr-section__header">
-        <div class="vr-section__title">
-            <h2><i class="fas fa-list"></i> My Listings</h2>
-            <span class="vr-badge vr-badge--primary" id="totalListings">0</span>
-        </div>
-        <a href="/pages/profile.html#addListing" class="vr-btn vr-btn--primary">
-            <i class="fas fa-plus"></i> Create New Listing
-        </a>
-    </div>
+<div class="vr-listings-container">
+    <!-- Promo Banner - Will be loaded conditionally -->
+    <div id="profilePromoContainer"></div>
 
-    <!-- شريط التصفية -->
-    <div class="vr-listings-filter">
-        <div class="vr-filter-tabs">
-            <button class="vr-filter-tab active" data-filter="all">
-                <i class="fas fa-th-large"></i>
-                <span>All</span>
+    <!-- Enhanced Listings Dashboard -->
+    <div class="vr-listings-dashboard">
+        <!-- Summary Info & Actions -->
+        <div class="vr-listings-info">
+            <div class="vr-listings-stats">
+                <div class="vr-listings-stat">
+                    <span class="vr-listings-stat__label">Total Listings</span>
+                    <span class="vr-listings-stat__value" id="totalListings">0</span>
+                </div>
+                
+                <!-- Quick Stats -->
+                <div class="vr-listings-quick-stats">
+                    <div class="vr-listings-quick-stat">
+                        <i class="fas fa-check-circle vr-icon-active"></i>
+                        <span id="activeCount">0</span> Active
+                    </div>
+                    <div class="vr-listings-quick-stat">
+                        <i class="fas fa-star vr-icon-featured"></i>
+                        <span id="featuredCount">0</span> Featured
+                    </div>
+                    <div class="vr-listings-quick-stat">
+                        <i class="fas fa-pause-circle vr-icon-inactive"></i>
+                        <span id="inactiveCount">0</span> Inactive
+                    </div>
+                </div>
+            </div>
+            
+            <button class="vr-btn vr-btn--primary" onclick="profilePage.loadSection('addListing')">
+                <i class="fas fa-plus"></i> Add New Listing
+            </button>
+        </div>
+
+        <!-- Enhanced Tab Navigation -->
+        <div class="vr-tabs">
+            <div class="vr-tab active" data-type="all">
+                <span class="vr-tab__icon"><i class="fas fa-list"></i></span>
+                All Listings
                 <span class="vr-badge" id="allCount">0</span>
-            </button>
-            <button class="vr-filter-tab" data-filter="active">
-                <i class="fas fa-check-circle"></i>
-                <span>Active</span>
-                <span class="vr-badge" id="activeCount">0</span>
-            </button>
-            <button class="vr-filter-tab" data-filter="featured">
-                <i class="fas fa-star"></i>
-                <span>Featured</span>
-                <span class="vr-badge" id="featuredCount">0</span>
-            </button>
-            <button class="vr-filter-tab" data-filter="inactive">
-                <i class="fas fa-pause-circle"></i>
-                <span>Inactive</span>
-                <span class="vr-badge" id="inactiveCount">0</span>
-            </button>
+            </div>
+            <div class="vr-tab" data-type="active">
+                <span class="vr-tab__icon vr-icon-active"><i class="fas fa-check-circle"></i></span>
+                Active
+                <span class="vr-badge" id="activeCountTab">0</span>
+            </div>
+            <div class="vr-tab" data-type="featured">
+                <span class="vr-tab__icon vr-icon-featured"><i class="fas fa-star"></i></span>
+                Featured
+                <span class="vr-badge" id="featuredCountTab">0</span>
+            </div>
+            <div class="vr-tab" data-type="inactive">
+                <span class="vr-tab__icon vr-icon-inactive"><i class="fas fa-pause-circle"></i></span>
+                Inactive
+                <span class="vr-badge" id="inactiveCountTab">0</span>
+            </div>
         </div>
     </div>
 
-    <!-- شبكة القوائم -->
-    <div class="vr-listings-grid">
-        <!-- سيتم إضافة البطاقات ديناميكياً -->
-    </div>
-
-    <!-- حالة عدم وجود قوائم -->
+    <!-- Listings Grid -->
+    <div class="vr-listings-grid"></div>
+    
+    <!-- Empty State -->
     <div class="vr-listings-empty" style="display: none;">
-        <img src="/images/illustrations/empty-listings.svg" alt="No listings">
-        <h3>No Listings Found</h3>
-        <p>You haven't created any listings yet. Get started by creating your first listing.</p>
-        <a href="/pages/profile.html#addListing" class="vr-btn vr-btn--primary">
-            <i class="fas fa-plus"></i> Create Listing
-        </a>
-    </div>
-
-    <!-- حالة التحميل -->
-    <div class="vr-loading-state" style="display: none;">
-        <div class="vr-spinner"></div>
-        <p>Loading your listings...</p>
+        <img src="/images/empty-listings.png" alt="No listings found" class="vr-listings-empty__img">
+        <h3>No Listings Yet</h3>
+        <p>Create your first listing to start growing your business</p>
+        <button class="vr-btn vr-btn--primary" onclick="profilePage.loadSection('addListing')">
+            <i class="fas fa-plus"></i>
+            Create Listing
+        </button>
     </div>
 </div>
 
@@ -69,4 +85,4 @@
     <button class="vr-pagination__next">
         <i class="fas fa-chevron-right"></i>
     </button>
-</div> 
+</div>

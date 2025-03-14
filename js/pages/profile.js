@@ -21,8 +21,217 @@ class ProfilePage {
             inactive: []
         };
         this.init();
+
+       
+    }
+    async deleteListing(id) {
+        try {
+            // Show professional confirmation modal instead of using alert
+            const confirmed = await this.showConfirmationModal(
+                'Confirm Deletion', 
+                'Are you sure you want to delete this listing? This action cannot be undone.'
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+                
+            // تغيير حالة الزر إلى وضع التحميل
+            const button = document.querySelector(`.vr-btn--danger[onclick="profilePage.deleteListing('${id}')"]`);
+            if (button) {
+                button.innerHTML = '<div class="vr-spinner vr-spinner--sm"></div> Deleting...';
+                button.disabled = true;
+            }
+            
+            // استدعاء خدمة حذف الإعلان
+            await listingService.deleteListing(id);
+            
+            // إزالة البطاقة من العرض بتأثير بصري
+            const card = button?.closest('.vr-listing-card');
+            if (card) {
+                card.style.transition = 'all 0.3s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.95)';
+                
+                setTimeout(() => {
+                    card.remove();
+                    
+                    // تحديث عدادات الإعلانات
+                    this.listingsData.all = this.listingsData.all.filter(item => item._id !== id);
+                    this.listingsData.active = this.listingsData.active.filter(item => item._id !== id);
+                    this.listingsData.featured = this.listingsData.featured.filter(item => item._id !== id);
+                    this.listingsData.inactive = this.listingsData.inactive.filter(item => item._id !== id);
+                    
+                    this.updateListingCounts();
+                    
+                    // إظهار رسالة فارغة إذا لم يعد هناك إعلانات
+                    const grid = document.querySelector('.vr-listings-grid');
+                    const emptyState = document.querySelector('.vr-listings-empty');
+                    const activeTab = document.querySelector('.vr-tab.active');
+                    const activeType = activeTab?.dataset.type || 'all';
+                    
+                    if (this.listingsData[activeType].length === 0 && grid && emptyState) {
+                        grid.style.display = 'none';
+                        emptyState.style.display = 'block';
+                    }
+                    
+                }, 300);
+            } else {
+                // إعادة تحميل القوائم إذا لم نتمكن من إيجاد البطاقة
+                await this.loadListings();
+            }
+            
+        } catch (error) {
+            console.error('Error deleting listing:', error);
+            toastService.error('Failed to delete listing');
+            
+            // إعادة زر الحذف إلى حالته الأصلية
+            const button = document.querySelector(`.vr-btn--danger[onclick="profilePage.deleteListing('${id}')"]`);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-trash"></i> Delete';
+                button.disabled = false;
+            }
+        }
     }
 
+    // Add new method for showing confirmation modal
+    showConfirmationModal(title, message) {
+        return new Promise((resolve) => {
+            // Create modal container if it doesn't exist
+            let modalContainer = document.getElementById('vr-confirmation-modal-container');
+            if (!modalContainer) {
+                modalContainer = document.createElement('div');
+                modalContainer.id = 'vr-confirmation-modal-container';
+                document.body.appendChild(modalContainer);
+            }
+            
+            // Create modal HTML
+            const modalId = 'confirmation-modal-' + Date.now();
+            const modalHTML = `
+                <div id="${modalId}" class="vr-modal">
+                    <div class="vr-modal__overlay"></div>
+                    <div class="vr-modal__container">
+                        <div class="vr-modal__header">
+                            <h3 class="vr-modal__title">${title}</h3>
+                            <button class="vr-modal__close" data-action="cancel">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="vr-modal__body">
+                            <p>${message}</p>
+                        </div>
+                        <div class="vr-modal__footer">
+                            <button class="vr-btn vr-btn--secondary" data-action="cancel">
+                                Cancel
+                            </button>
+                            <button class="vr-btn vr-btn--danger" data-action="confirm">
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal to container
+            modalContainer.innerHTML = modalHTML;
+            
+            // Get modal element
+            const modal = document.getElementById(modalId);
+            
+            // Show modal with animation
+            setTimeout(() => {
+                modal.classList.add('vr-modal--active');
+            }, 10);
+            
+            // Setup event listeners
+            modal.querySelectorAll('[data-action]').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const action = e.target.closest('[data-action]').getAttribute('data-action');
+                    
+                    // Hide modal with animation
+                    modal.classList.remove('vr-modal--active');
+                    
+                    // Remove modal after animation
+                    setTimeout(() => {
+                        modal.remove();
+                        resolve(action === 'confirm');
+                    }, 300);
+                });
+            });
+        });
+    }
+
+    async editListing(id) {
+        try {
+            // تغيير حالة الزر إلى وضع التحميل
+            const button = document.querySelector(`.vr-btn--primary[onclick="profilePage.editListing('${id}')"]`);
+            if (button) {
+                button.innerHTML = '<div class="vr-spinner vr-spinner--sm"></div> Loading...';
+                button.disabled = true;
+            }
+            
+            // الانتقال إلى قسم إضافة الإعلان
+            this.loadSection('addListing');
+            
+            // تأخير للتأكد من تحميل القسم
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            // استدعاء دالة تحميل بيانات الإعلان للتعديل
+            const addListingContainer = document.getElementById('addListingContainer');
+            if (!addListingContainer) {
+                throw new Error('Add listing container not found');
+            }
+            
+            try {
+                // تحميل القالب إذا لم يكن مُحملاً بعد
+                if (!addListingContainer.querySelector('form')) {
+                    await this.loadAddListingComponent();
+                }
+                
+                // تأخير للتأكد من تحميل المكونات
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                // البحث عن كلاس AddListingPage
+                if (window.addListingPage) {
+                    // إذا كان لديه دالة loadListingForEdit
+                    if (typeof window.addListingPage.loadListingForEdit === 'function') {
+                        await window.addListingPage.loadListingForEdit(id);
+                    } else {
+                        // استدعاء الدالة المعرفة في add-listing.js
+                        const { default: AddListingPage } = await import('/js/pages/profile/add-listing.js');
+                        window.addListingPage = new AddListingPage();
+                        await window.addListingPage.loadListingForEdit(id);
+                    }
+                } else {
+                    // إذا لم يتم تعريف addListingPage
+                    const { default: AddListingPage } = await import('/js/pages/profile/add-listing.js');
+                    window.addListingPage = new AddListingPage();
+                    
+                    // فحص إذا كانت الدالة متوفرة
+                    if (typeof window.addListingPage.loadListingForEdit === 'function') {
+                        await window.addListingPage.loadListingForEdit(id);
+                    } else {
+                        console.error('loadListingForEdit method not available');
+                        toastService.error('Editing functionality not available');
+                    }
+                }
+            } catch (importError) {
+                console.error('Error importing AddListingPage:', importError);
+                toastService.error('Failed to load listing editor');
+            }
+            
+        } catch (error) {
+            console.error('Error editing listing:', error);
+            toastService.error('Failed to edit listing');
+        } finally {
+            // إعادة زر التعديل إلى حالته الأصلية
+            const button = document.querySelector(`.vr-btn--primary[onclick="profilePage.editListing('${id}')"]`);
+            if (button) {
+                button.innerHTML = '<i class="fas fa-edit"></i> Edit';
+                button.disabled = false;
+            }
+        }
+    }
     checkAuth() {
             if (!authService.isAuthenticated()) {
             window.location.href = '/pages/login.html';
@@ -552,13 +761,52 @@ class ProfilePage {
         }
     }
 
-    updateListingCounts() {
-        document.getElementById('totalListings').textContent = this.listingsData.all.length;
-        document.getElementById('allCount').textContent = this.listingsData.all.length;
-        document.getElementById('activeCount').textContent = this.listingsData.active.length;
-        document.getElementById('featuredCount').textContent = this.listingsData.featured.length;
-        document.getElementById('inactiveCount').textContent = this.listingsData.inactive.length;
+    /**
+ * تحديث عدادات القوائم
+ */
+updateListingCounts() {
+    const counts = {
+        all: this.listingsData.all.length,
+        active: this.listingsData.active.length,
+        featured: this.listingsData.featured.length,
+        inactive: this.listingsData.inactive.length
+    };
+    
+    // تحديث جميع العناصر التي تعرض عدد القوائم
+    const updateElement = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) {
+            // إضافة تأثير تحديث العداد
+            element.classList.add('vr-count-update');
+            setTimeout(() => {
+                element.textContent = value;
+                setTimeout(() => {
+                    element.classList.remove('vr-count-update');
+                }, 300);
+            }, 300);
+        }
+    };
+    
+    // تحديث عدادات القوائم
+    updateElement('totalListings', counts.all);
+    updateElement('allCount', counts.all);
+    updateElement('activeCount', counts.active);
+    updateElement('featuredCount', counts.featured);
+    updateElement('inactiveCount', counts.inactive);
+    
+    // تحديث عدادات إضافية في علامات التبويب إذا كانت موجودة
+    updateElement('activeCountTab', counts.active);
+    updateElement('featuredCountTab', counts.featured);
+    updateElement('inactiveCountTab', counts.inactive);
+    
+    // تحديث شارة القوائم في القائمة الجانبية
+    const listingsBadge = document.querySelector('.profile-item[data-section="listings"] .vr-badge');
+    if (listingsBadge) {
+        listingsBadge.textContent = counts.all;
     }
+    
+    console.log('Updated listing counts:', counts);
+}
 
     filterListings(status = 'all') {
         const grid = document.querySelector('.vr-listings-grid');
@@ -594,11 +842,11 @@ class ProfilePage {
         window.location.href = '/pages/login.html';
     }
 
-    async loadAddListingComponent() {
+    async loadAddListingComponent(editMode = false, editId = null) {
         try {
             const container = document.getElementById('addListingContainer');
             if (!container) return;
-
+    
             // تحميل القالب
             const response = await fetch('/components/profile/addListing.html');
             if (!response.ok) {
@@ -607,11 +855,22 @@ class ProfilePage {
             
             const html = await response.text();
             container.innerHTML = html;
-
+    
             // تهيئة الصفحة
             const { default: AddListingPage } = await import('/js/pages/profile/add-listing.js');
-            new AddListingPage();
-
+            window.addListingPage = new AddListingPage();
+            
+            // إذا كنا في وضع التعديل وهناك معرف إعلان
+            if (editMode && editId) {
+                // التأكد من أن هناك دالة لتحميل بيانات الإعلان
+                if (typeof window.addListingPage.loadListingForEdit === 'function') {
+                    await window.addListingPage.loadListingForEdit(editId);
+                } else {
+                    toastService.error('Editing functionality not available');
+                    console.error('loadListingForEdit method not available');
+                }
+            }
+    
         } catch (error) {
             console.error('Error loading add listing component:', error);
             toastService.error('Failed to load listing form');
@@ -640,6 +899,23 @@ class ProfilePage {
             inactive: 'Inactive'
         }[status];
         
+        // Determine which action buttons to show based on listing status
+        let statusActionButton = '';
+        
+        if (status === 'inactive') {
+            // For inactive listings: Show Activate button
+            statusActionButton = `
+                <button class="vr-btn vr-btn--success" onclick="profilePage.activateListing('${listing._id}')">
+                    <i class="fas fa-check-circle"></i> Activate
+                </button>`;
+        } else if (status === 'active') {
+            // For active but not featured listings: Show Upgrade button
+            statusActionButton = `
+                <button class="vr-btn vr-btn--upgrade" onclick="profilePage.upgradeListing('${listing._id}')">
+                    <i class="fas fa-star"></i> Upgrade
+                </button>`;
+        }
+        
         return `
             <div class="vr-listing-card vr-listing-card--${status}">
                 <div class="vr-listing-card__image">
@@ -649,9 +925,9 @@ class ProfilePage {
                 </div>
                 <div class="vr-listing-card__content">
                     <h3 class="vr-listing-card__title">${listing.listingName}</h3>
-                
                 </div>
                 <div class="vr-listing-card__actions">
+                    ${statusActionButton}
                     <button class="vr-btn vr-btn--primary" onclick="profilePage.editListing('${listing._id}')">
                         <i class="fas fa-edit"></i> Edit
                     </button>
@@ -663,6 +939,69 @@ class ProfilePage {
         `;
     }
 
+    // Add methods to handle listing activation and upgrade
+    activateListing(id) {
+        this.redirectToCheckout(id, 'activate');
+    }
+
+    upgradeListing(id) {
+        this.redirectToCheckout(id, 'upgrade');
+    }
+
+    // Method to handle checkout redirection
+    redirectToCheckout(listingId, action) {
+        try {
+            // Show loading indicator
+            const loadingModal = this.showLoadingModal('Preparing Checkout');
+            
+            // Store listing data in session storage for the checkout page
+            const listingData = this.listingsData.all.find(listing => listing._id === listingId);
+            if (listingData) {
+                const checkoutData = {
+                    listingId: listingId,
+                    listingName: listingData.listingName,
+                    action: action,
+                    timestamp: new Date().getTime(),
+                    price: action === 'upgrade' ? 29.99 : 9.99, // Example prices
+                    returnUrl: window.location.href
+                };
+                
+                sessionStorage.setItem('checkout_data', JSON.stringify(checkoutData));
+            }
+            
+            // Close loading modal and redirect to checkout page
+            setTimeout(() => {
+                loadingModal.remove();
+                window.location.href = `/pages/checkout.html?action=${action}&listing=${listingId}`;
+            }, 800);
+        } catch (error) {
+            console.error('Error redirecting to checkout:', error);
+            toastService.error('Failed to process request');
+        }
+    }
+
+    // Method to show loading modal when redirecting
+    showLoadingModal(message) {
+        // Create modal container if it doesn't exist
+        let modalContainer = document.createElement('div');
+        modalContainer.id = 'vr-loading-modal-container';
+        modalContainer.className = 'vr-modal vr-modal--active';
+        
+        modalContainer.innerHTML = `
+            <div class="vr-modal__overlay"></div>
+            <div class="vr-modal__container vr-modal__container--sm">
+                <div class="vr-modal__body text-center">
+                    <div class="vr-spinner vr-spinner--lg mb-3"></div>
+                    <h4>${message}</h4>
+                    <p class="text-muted">You will be redirected to the payment page...</p>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modalContainer);
+        return modalContainer;
+    }
+
     // تحميل الصفحة من هاش URL
     loadPageFromHash() {
         let hash = window.location.hash.substring(1);
@@ -672,7 +1011,9 @@ class ProfilePage {
         this.loadSection(hash);
     }
 
-    // تحسين تحميل القوائم
+    /**
+     * تحسين تحميل القوائم وإصلاح مشكلة الفلاتر
+     */
     async loadListings(status = 'all') {
         try {
             // عرض skeleton مباشرة
@@ -697,6 +1038,17 @@ class ProfilePage {
             
             // إخفاء skeleton وعرض البيانات
             this.hideListingsSkeleton();
+            
+            // تحميل البانر الترويجي بعد التحقق من البيانات
+            await this.loadPromoComponent();
+            
+            // تحديث عدادات القوائم
+            this.updateListingCounts();
+            
+            // إعادة إعداد أحداث التصفية للفلاتر
+            this.setupFilterEvents();
+            
+            // تطبيق الفلتر المحدد
             this.filterListings(status);
             
         } catch (error) {
@@ -706,54 +1058,116 @@ class ProfilePage {
         }
     }
 
-    async loadTemplates() {
+    /**
+     * تحميل مكون البانر الترويجي مع التحقق من وجود قوائم
+     */
+    async loadPromoComponent() {
         try {
-            // إنشاء ملف للتحميل المتزامن
-            const loadComponentPromises = [
-                // تحميل قالب البروفايل
-                fetch('/components/profile/profile-info.html')
-                    .then(response => {
-                        if (!response.ok) throw new Error('Failed to load profile template');
-                        return response.text();
-                    })
-                    .then(html => {
-                        const container = document.getElementById('profileContainer');
-                        if (container) container.innerHTML = html;
-                    }),
-                    
-                // تحميل قالب إضافة قائمة جديدة
-                fetch('/components/profile/addListing.html')
-                    .then(response => {
-                        if (!response.ok) throw new Error('Failed to load add listing template');
-                        return response.text();
-                    })
-                    .then(html => {
-                        const container = document.getElementById('addListingContainer');
-                        if (container) container.innerHTML = html;
-                    }),
-                    
-                // تحميل قالب عرض القوائم
-                fetch('/components/profile/listings-grid.html')
-                    .then(response => {
-                        if (!response.ok) throw new Error('Failed to load listings grid template');
-                        return response.text();
-                    })
-                    .then(html => {
-                        const container = document.getElementById('listingsContainer');
-                        if (container) container.innerHTML = html;
-                    })
-            ];
+            const promoContainer = document.getElementById('profilePromoContainer');
+            if (!promoContainer) return;
             
-            // انتظار اكتمال جميع عمليات التحميل
-            await Promise.all(loadComponentPromises);
-            console.log('All templates loaded successfully');
-            return true;
+            // التحقق من وجود قوائم قبل عرض البانر
+            if (!this.listingsData.all || this.listingsData.all.length === 0) {
+                // لا تعرض البانر عندما لا توجد قوائم
+                promoContainer.innerHTML = '';
+                return;
+            }
+            
+            // تجنب إعادة التحميل إذا كان المكون محملاً بالفعل
+            if (promoContainer.children.length > 0) return;
+            
+            // تحميل CSS الخاص بالبانر إذا لم يكن محملاً بالفعل
+            if (!document.querySelector('link[href="/css/components/profile-promo.css"]')) {
+                const linkElem = document.createElement('link');
+                linkElem.rel = 'stylesheet';
+                linkElem.href = '/css/components/profile-promo.css';
+                document.head.appendChild(linkElem);
+            }
+            
+            // تحميل قالب البانر
+            const response = await fetch('/components/profile/promo-banner.html');
+            if (!response.ok) throw new Error('Failed to load promo banner');
+            
+            const html = await response.text();
+            promoContainer.innerHTML = html;
+            
+            // تطبيق تأثير انتقالي لإظهار البانر
+            setTimeout(() => {
+                promoContainer.style.opacity = '1';
+            }, 100);
+            
         } catch (error) {
-            console.error('Error loading templates:', error);
-            toastService.error('Failed to load page components. Please try again.');
-            throw error;
+            console.error('Error loading promo component:', error);
         }
     }
+
+    /**
+ * إضافة CSS المطلوب عند تهيئة الصفحة
+ */
+async loadTemplates() {
+    try {
+        // إضافة ملف CSS الجديد لتحسين شكل لوحة القوائم
+        this.loadCSS('/css/components/profile-listings.css');
+        
+        // ...existing code for loading templates...
+        // إنشاء ملف للتحميل المتزامن
+        const loadComponentPromises = [
+            // تحميل قالب البروفايل
+            fetch('/components/profile/profile-info.html')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load profile template');
+                    return response.text();
+                })
+                .then(html => {
+                    const container = document.getElementById('profileContainer');
+                    if (container) container.innerHTML = html;
+                }),
+                
+            // تحميل قالب إضافة قائمة جديدة
+            fetch('/components/profile/addListing.html')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load add listing template');
+                    return response.text();
+                })
+                .then(html => {
+                    const container = document.getElementById('addListingContainer');
+                    if (container) container.innerHTML = html;
+                }),
+                
+            // تحميل قالب عرض القوائم
+            fetch('/components/profile/listings-grid.html')
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load listings grid template');
+                    return response.text();
+                })
+                .then(html => {
+                    const container = document.getElementById('listingsContainer');
+                    if (container) container.innerHTML = html;
+                })
+        ];
+        
+        // انتظار اكتمال جميع عمليات التحميل
+        await Promise.all(loadComponentPromises);
+        console.log('All templates loaded successfully');
+        return true;
+    } catch (error) {
+        console.error('Error loading templates:', error);
+        toastService.error('Failed to load page components. Please try again.');
+        throw error;
+    }
+}
+
+/**
+ * مساعد لتحميل ملفات CSS
+ */
+loadCSS(href) {
+    if (!document.querySelector(`link[href="${href}"]`)) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+    }
+}
 
     async loadUserData() {
         try {
@@ -897,26 +1311,37 @@ class ProfilePage {
 
     // إعداد أحداث التصفية
     setupFilterEvents() {
-        const filterTabs = document.querySelectorAll('.vr-filter-tab');
+        const tabs = document.querySelectorAll('.vr-tab');
+        if (!tabs || tabs.length === 0) return;
         
-        filterTabs.forEach(tab => {
+        // إزالة أحداث النقر السابقة لمنع التكرار
+        tabs.forEach(tab => {
+            // إزالة جميع مستمعي الأحداث السابقة
+            const oldTab = tab.cloneNode(true);
+            tab.parentNode.replaceChild(oldTab, tab);
+        });
+        
+        // إضافة مستمعات أحداث جديدة
+        document.querySelectorAll('.vr-tab').forEach(tab => {
             tab.addEventListener('click', () => {
-                const filter = tab.dataset.filter;
+                // إزالة الفئة النشطة من جميع التبويبات
+                document.querySelectorAll('.vr-tab').forEach(t => t.classList.remove('active'));
                 
-                // تحديث الفلتر النشط
-                filterTabs.forEach(t => t.classList.remove('active'));
+                // إضافة الفئة النشطة للتبويب المحدد
                 tab.classList.add('active');
                 
-                // تمرير التاب إلى منتصف الشاشة
-                tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                
-                // تطبيق الفلتر مع تأثير انتقالي
-                this.filterListings(filter);
+                // تطبيق الفلتر المحدد
+                const type = tab.getAttribute('data-type');
+                this.filterListings(type);
             });
         });
+        
+        console.log('Filter tabs event listeners re-initialized');
     }
 }
 
 // Initialize
 const profilePage = new ProfilePage();
+window.profilePage = profilePage; // جعل المتغير متاحًا عالميًا
+
 export default profilePage;
