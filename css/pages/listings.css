@@ -468,31 +468,7 @@
     z-index: 1;
 }
 
-.vr-featured__status {
-    position: absolute;
-    bottom: var(--vr-spacing-md);
-    left: var(--vr-spacing-md);
-    padding: var(--vr-spacing-xs) var(--vr-spacing-md);
-    border-radius: var(--vr-radius-full);
-    font-size: var(--vr-text-xs);
-    font-weight: var(--vr-font-semibold);
-    display: flex;
-    align-items: center;
-    gap: var(--vr-spacing-xs);
-    backdrop-filter: blur(8px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    z-index: 1;
-}
 
-.vr-featured__status--open {
-    background: linear-gradient(135deg, #34D399 0%, #059669 100%);
-    color: var(--vr-light);
-}
-
-.vr-featured__status--closed {
-    background: linear-gradient(135deg, #F87171 0%, #DC2626 100%);
-    color: var(--vr-light);
-}
 
 .vr-featured__content {
     padding: var(--vr-spacing-lg);
@@ -940,4 +916,120 @@
 .vr-btn--text:hover {
     color: var(--vr-primary-dark);
     text-decoration: underline;
-} 
+}
+
+/* تحسينات لعرض الفئات في القائمة المنسدلة */
+.vr-category-select {
+    max-width: 100%;
+    width: 100%;
+}
+
+.vr-category-select .choices__inner {
+    padding: 0.6rem 0.8rem;
+    background-color: var(--vr-input-bg, #fff);
+    border: 1px solid var(--vr-input-border, #dee2e6);
+    border-radius: 0.5rem;
+    min-height: unset;
+}
+
+.vr-category-select .choices__list--dropdown {
+    border-radius: 0.5rem;
+    border: 1px solid var(--vr-border-light, #e9ecef);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.vr-category-select .choices__list--dropdown .choices__item {
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+}
+
+.vr-category-select .choices__list--dropdown .choices__item::before {
+    font-family: 'Font Awesome 6 Free';
+    content: "\f02b"; /* fa-tag */
+    font-weight: 900;
+    margin-right: 10px;
+    color: var(--vr-primary, #007bff);
+}
+
+/* تنسيق للفلاتر النشطة */
+.vr-active-filter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--vr-gray-100, #f8f9fa);
+    border: 1px solid var(--vr-gray-200, #e9ecef);
+    border-radius: 1rem;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.85rem;
+    margin: 0 0.5rem 0.5rem 0;
+    transition: all 0.2s ease;
+}
+
+.vr-active-filter__remove {
+    background: none;
+    border: none;
+    color: var(--vr-gray-500, #adb5bd);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.vr-active-filter__remove:hover {
+    color: var(--vr-danger, #dc3545);
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.vr-active-filter--clear {
+    background-color: transparent;
+    color: var(--vr-gray-600, #6c757d);
+    border-color: transparent;
+    font-weight: 500;
+}
+
+.vr-active-filter--clear:hover {
+    color: var(--vr-danger, #dc3545);
+    background-color: rgba(220, 53, 69, 0.05);
+}
+
+.vr-active-filters__content {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.vr-active-filters__empty {
+    color: var(--vr-gray-500, #adb5bd);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+}
+
+/* تحسين شكل القائمة المنسدلة البسيطة في حالة عدم وجود Choices.js */
+.vr-select--enhanced {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23495057' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem;
+    padding-right: 2.5rem !important;
+}
+
+/* تحسين بطاقات الاقتراحات */
+.vr-search-suggestion__category {
+    display: inline-block;
+    background-color: var(--vr-gray-100, #f8f9fa);
+    padding: 0.1rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+    color: var(--vr-gray-700, #495057);
+}

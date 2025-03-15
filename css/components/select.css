@@ -1,0 +1,176 @@
+/* تحسينات لعرض القائمة المنسدلة للفئات */
+
+.vr-category-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--vr-border-color, #dee2e6);
+    border-radius: var(--vr-border-radius, 0.375rem);
+    background-color: var(--vr-input-bg, #fff);
+    color: var(--vr-text-color, #212529);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    appearance: none;
+}
+
+.vr-category-select:focus {
+    border-color: var(--vr-primary-light, #80bdff);
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* تحسين مظهر القائمة المنسدلة */
+.vr-select-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+
+.vr-select--enhanced {
+    padding-right: 2.5rem; /* مساحة للسهم */
+    background: transparent;
+}
+
+/* تنسيقات للـ Choices.js إذا تم استخدامه */
+.vr-choices {
+    margin-bottom: 0;
+}
+
+.vr-choices .choices__inner {
+    min-height: unset;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--vr-border-color, #dee2e6);
+    background-color: var(--vr-input-bg, #fff);
+}
+.vr-choices .choices__list--dropdown {
+    border-color: var(--vr-border-color-hover, #ced4da);
+    border-radius: var(--vr-border-radius-sm, 0.25rem);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+.vr-choices .choices__list--dropdown .choices__item--selectable {
+    position: relative;
+    border-color: var(--vr-border-color-hover, #ced4da);
+    border-radius: var(--vr-border-radius-sm, 0.25rem);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.vr-choices .choices__list--dropdown .choices__item {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+}
+
+
+.vr-choices .choices__list--dropdown .choices__item--selectable {
+    position: relative;
+    padding-right: 1rem;
+}
+
+.vr-choices .choices__list--dropdown .choices__item--selectable::before {
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    content: "\f02b"; /* fa-tag */
+    color: var(--vr-primary, #007bff);
+}
+.vr-choices .choices__list--single .choices__item {
+    font-weight: 500;
+}
+
+/* تنسيق حقل البحث */
+.vr-choices .choices__input {
+    background-color: transparent;
+}
+
+/* تحسينات لعرض الفئات ذات الميزات */
+.vr-choices-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.vr-choices-option__amenities {
+    font-size: 0.75rem;
+    color: var(--vr-success, #28a745);
+    background-color: var(--vr-success-ultra-light, #e3fcef);
+    padding: 0.2rem 0.5rem;
+    border-radius: 1rem;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}
+
+/* تحسين علامة الميزات في بطاقة القائمة */
+.vr-featured__amenities-badge {
+    font-size: 0.7rem;
+    color: var(--vr-success, #28a745);
+}
+.vr-choices-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+    .vr-choices .choices__list--multiple .choices__item {
+    width: 100%; 
+    background-color: var(--vr-primary-light, #80bdff);
+}
+.vr-choices-option__amenities {
+    font-size: 0.75rem;
+    color: var(--vr-success, #28a745);
+    background-color: var(--vr-success-ultra-light, #e3fcef);
+    padding: 0.2rem 0.5rem;
+    border-radius: 1rem;
+    margin-left: 0.5rem;
+    white-space: nowrap;
+}
+
+/* تحسين علامة الميزات في بطاقة القائمة */
+.vr-featured__amenities-badge {
+    font-size: 0.7rem;
+    color: var(--vr-success, #28a745);
+    margin-left: 0.5rem;    white-space: nowrap;}/* تحسين علامة الميزات في بطاقة القائمة */.vr-featured__amenities-badge {    font-size: 0.7rem;    color: var(--vr-success, #28a745);
+    background-color: var(--vr-success-ultra-light, #e3fcef);
+    padding: 0.15rem 0.4rem;
+    border-radius: 1rem;
+    margin-left: 0.4rem;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+/* تحسين عرض الفئات والميزات في بطاقات القوائم */
+.vr-featured__category {
+    align-items: center;
+    display: inline-flex;
+    flex-wrap: wrap;
+}
+
+/* تحسين تحديد الخيار النشط في القائمة المنسدلة */
+.vr-choices .choices__list--dropdown .choices__item--selectable.is-highlighted .vr-choices-option__amenities {
+    color: var(--vr-primary, #007bff);
+    background-color: var(--vr-white, #fff);
+}
+
+/* تحسين الخيارات في حالة عدم وجود choices.js */
+select.vr-category-select option[data-has-amenities="true"] {
+    background-color: var(--vr-success-ultra-light, #e3fcef);
+}
+
+/* تصميم مخصص للخيار المحدد */
+.vr-choices .choices__list--single .choices__item {
+    font-weight: 500;
+}
+
+/* تنسيق حقل البحث */
+.vr-choices .choices__input {
+    background-color: transparent;
+}
+
+/* تنسيق لقائمة الخيارات المتعددة */
+.vr-choices .choices__list--multiple .choices__item {
+    background-color: var(--vr-primary-light, #80bdff);
+    border-color: var(--vr-primary, #007bff);
+}
+
+/* مؤشر تحميل */
+.vr-choices.is-loading::after {
+    border-top-color: var(--vr-primary, #007bff);
+    border-right-color: var(--vr-primary, #007bff);
+}

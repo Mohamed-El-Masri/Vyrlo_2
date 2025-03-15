@@ -3,21 +3,229 @@
 .vr-featured__grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 2rem;
+    gap: 2.5rem 2rem;
+    padding: 1rem 0.5rem;
     margin-top: 2rem;
 }
 
+/* تصميم بطاقات القوائم المميزة */
+
 .vr-featured__card {
-    position: relative;
-    overflow: hidden;
-    border-radius: 12px;
-    background-color: var(--vr-light);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-    transition: all 0.4s ease;
     display: flex;
     flex-direction: column;
+    background-color: var(--vr-bg-card, white);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
     height: 100%;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--vr-border-light, #eee);
+}
+
+.vr-featured__card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.vr-featured__image-wrapper {
+    position: relative;
+    height: 180px;
+    overflow: hidden;
+}
+
+.vr-featured__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
+
+.vr-featured__card:hover .vr-featured__image {
+    transform: scale(1.05);
+}
+
+.vr-featured__content {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.vr-featured__title {
+    margin: 0.5rem 0 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--vr-text-title, #333);
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.vr-featured__meta {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    gap: 0.75rem;
+}
+
+.vr-featured__location, .vr-featured__category {
+    font-size: 0.85rem;
+    color: var(--vr-text-muted, #666);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.vr-featured__description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--vr-text-body, #555);
+    margin-bottom: 1rem;
+    flex-grow: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.vr-featured__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--vr-border-light, #eee);
+}
+
+.vr-featured__contact {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.vr-featured__contact-item {
+    color: var(--vr-text-muted, #666);
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.vr-featured__contact-item:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: var(--vr-primary, #007bff);
+}
+
+.vr-featured__view-more {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--vr-primary, #007bff);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: gap 0.2s ease;
+}
+
+.vr-featured__view-more:hover {
+    gap: 8px;
+}
+
+.vr-featured__rating {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.vr-featured__stars {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    color: var(--vr-warning, #ffc107);
+}
+
+.vr-featured__rating-value {
+    font-weight: 600;
+    margin-left: 5px;
+    font-size: 0.9rem;
+}
+
+.vr-featured__reviews-count {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--vr-text-muted, #666);
+}
+
+
+
+.vr-featured__status--open {
+    background-color: rgba(40, 167, 69, 0.9);
+    color: white;
+}
+
+.vr-featured__status--closed {
+    background-color: rgba(220, 53, 69, 0.9);
+    color: white;
+}
+
+/* Loading state */
+.vr-featured__card--loading .loading-shimmer {
+    background: linear-gradient(
+        90deg,
+        var(--vr-shimmer-bg, #f6f7f8) 0%,
+        var(--vr-shimmer-highlight, #edeef1) 50%,
+        var(--vr-shimmer-bg, #f6f7f8) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+}
+
+.vr-featured__card--loading .vr-featured__title {
+    height: 24px;
+    width: 90%;
+    margin-bottom: 1rem;
+}
+
+.vr-featured__card--loading .vr-featured__location,
+.vr-featured__card--loading .vr-featured__category {
+    height: 16px;
+    width: 40%;
+    margin-bottom: 0.75rem;
+}
+
+.vr-featured__card--loading .vr-featured__stat {
+    height: 16px;
+    width: 60%;
+    margin-bottom: 0.5rem;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* فئة الغطاء المظلل */
+.vr-listings-loading {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.vr-spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(0, 123, 255, 0.2);
+    border-top-color: var(--vr-primary, #007bff);
+    border-radius: 50%;
+    animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .vr-featured__card:hover {
@@ -34,6 +242,23 @@
     height: 4px;
     background: linear-gradient(90deg, var(--vr-primary), var(--vr-primary-light));
     z-index: 1;
+}
+
+.vr-featured__card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0));
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    pointer-events: none;
+}
+
+.vr-featured__card:hover::after {
+    opacity: 1;
 }
 
 .vr-featured__image-wrapper {
@@ -100,15 +325,6 @@
     z-index: 2;
 }
 
-.vr-featured__status--open {
-    background-color: rgba(var(--vr-success-rgb), 0.9);
-    color: var(--vr-light);
-}
-
-.vr-featured__status--closed {
-    background-color: rgba(var(--vr-gray-800-rgb), 0.9);
-    color: var(--vr-light);
-}
 
 .vr-featured__content {
     display: flex;
@@ -282,6 +498,11 @@
     .vr-featured__card {
         max-width: 100%;
     }
+    
+    .vr-featured__ribbon {
+        padding: 5px 25px 5px 10px;
+        font-size: 0.75rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -355,30 +576,19 @@
         background: var(--vr-gray-800);
         border-color: var(--vr-gray-700);
     }
+    
+    .vr-featured__card--premium {
+        background: linear-gradient(to bottom, rgba(40,40,45,0.01) 0%, rgba(40,40,45,1) 15%);
+    }
+    
+    .vr-featured__card--premium .vr-featured__title {
+        background: linear-gradient(90deg, var(--vr-warning) -20%, var(--vr-gray-100) 50%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 }
 
 /* Special Effects for Featured Cards */
-.vr-featured__card {
-    backface-visibility: hidden;
-    transform-style: preserve-3d;
-}
-
-.vr-featured__card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0));
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    pointer-events: none;
-}
-
-.vr-featured__card:hover::after {
-    opacity: 1;
-}
 
 /* Animation for Cards */
 @keyframes fadeInUp {
@@ -392,6 +602,292 @@
     }
 }
 
-.vr-featured__card {
-    animation: fadeInUp 0.6s ease backwards;
+/* Premium Listings Enhancements */
+.vr-featured__card--premium {
+    border: none;
+    box-shadow: 0 15px 40px rgba(var(--vr-warning-rgb), 0.1), 0 10px 20px rgba(0, 0, 0, 0.1);
+    transform: scale(1.02);
+    z-index: 10;
+    position: relative;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.01) 0%, rgba(255,255,255,1) 15%);
+    overflow: visible;
+}
+
+.vr-featured__card--premium:before {
+    height: 6px;
+    background: linear-gradient(90deg, var(--vr-warning), var(--vr-warning-light));
+}
+
+.vr-featured__card--premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--vr-warning), var(--vr-warning-light));
+    z-index: 2;
+}
+
+.vr-featured__card--premium:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 50px rgba(var(--vr-warning-rgb), 0.15), 0 15px 25px rgba(0, 0, 0, 0.1);
+}
+
+.vr-featured__card--premium::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(to bottom right, var(--vr-warning-light), transparent 50%, transparent);
+    border-radius: 12px;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+/* Premium Glow Effect */
+.vr-featured__card--premium::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 2px;
+    background: linear-gradient(45deg, var(--vr-warning), transparent 30%, transparent 70%, var(--vr-warning));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.vr-featured__card--premium:hover::after {
+    opacity: 1;
+}
+
+/* Premium Badge Enhance */
+.vr-featured__card--premium .vr-featured__badge-premium {
+    box-shadow: 0 3px 10px rgba(var(--vr-warning-rgb), 0.4);
+    background: linear-gradient(135deg, #ffb347, #ffcc33);
+    font-weight: 700;
+}
+
+.vr-featured__card--premium .vr-featured__badge-premium i {
+    color: #fff8e1;
+    animation: pulse-star-premium 1.5s infinite;
+}
+
+@keyframes pulse-star-premium {
+    0% { transform: scale(1) rotate(0deg); text-shadow: 0 0 5px rgba(255, 255, 255, 0.7); }
+    50% { transform: scale(1.3) rotate(10deg); text-shadow: 0 0 15px rgba(255, 255, 255, 1); }
+    100% { transform: scale(1) rotate(0deg); text-shadow: 0 0 5px rgba(255, 255, 255, 0.7); }
+}
+
+/* Premium Title Styling */
+.vr-featured__card--premium .vr-featured__title {
+    color: var(--vr-warning-dark);
+    font-size: 1.3rem;
+    background: linear-gradient(90deg, var(--vr-warning-dark) -20%, var(--vr-gray-900) 50%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+/* Premium Separator */
+.vr-listings-separator {
+    margin: 2rem 0;
+    position: relative;
+    text-align: center;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--vr-gray-300), transparent);
+}
+
+.vr-listings-separator__text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--vr-light);
+    padding: 0 1rem;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--vr-gray-500);
+    font-weight: 600;
+}
+
+/* Dark mode support for separator */
+@media (prefers-color-scheme: dark) {
+    .vr-listings-separator {
+        background: linear-gradient(90deg, transparent, var(--vr-gray-700), transparent);
+    }
+    
+    .vr-listings-separator__text {
+        background-color: var(--vr-gray-900);
+        color: var(--vr-gray-400);
+    }
+    
+    .vr-featured__card--premium .vr-featured__title {
+        color: var(--vr-warning);
+    }
+    
+    .vr-featured__card--premium::after {
+        background: linear-gradient(45deg, var(--vr-warning), transparent 30%, transparent 70%, var(--vr-warning));
+    }
+}
+
+/* تحسينات إضافية للبطاقات المميزة */
+.vr-featured__card--premium {
+    transform: scale(1.02);
+    box-shadow: 0 15px 40px rgba(var(--vr-warning-rgb), 0.1), 0 10px 20px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border-width: 0;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.01) 0%, rgba(255,255,255,1) 15%);
+    overflow: visible;
+    z-index: 10;
+}
+
+.vr-featured__card--premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--vr-warning), var(--vr-warning-light));
+    z-index: 2;
+}
+
+.vr-featured__card--premium::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    background: linear-gradient(to bottom right, var(--vr-warning-light), transparent 50%, transparent);
+    border-radius: 12px;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+.vr-featured__card--premium:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 50px rgba(var(--vr-warning-rgb), 0.15), 0 15px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* إضافة شريط Featured جذاب */
+.vr-featured__ribbon {
+    position: absolute;
+    top: 20px;
+    right: -5px;
+    z-index: 10;
+    background: linear-gradient(135deg, var(--vr-warning-dark), var(--vr-warning));
+    color: white;
+    padding: 8px 35px 8px 15px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 10% 50%);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.vr-featured__ribbon span {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.vr-featured__ribbon span::before {
+    content: "\f005"; /* Font Awesome star icon */
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    display: inline-block;
+    animation: pulse-star 2s infinite;
+}
+
+/* تأثير توهج خلف البطاقة المميزة */
+.vr-featured__glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 80%;
+    height: 120%;
+    background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.15), transparent 70%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: -1;
+    filter: blur(20px);
+    opacity: 0.7;
+    transition: all 0.5s ease;
+}
+
+.vr-featured__card--premium:hover .vr-featured__glow {
+    opacity: 1;
+    width: 100%;
+    filter: blur(15px);
+}
+
+/* تحسينات تصميم العناوين للبطاقات المميزة */
+.vr-featured__card--premium .vr-featured__title {
+    background: linear-gradient(90deg, var(--vr-warning-dark) -20%, var(--vr-gray-900) 50%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+/* مؤشر بصري إضافي للبطاقات المميزة */
+.vr-featured__premium-marker {
+    height: 3px;
+    width: 40px;
+    background: linear-gradient(to right, var(--vr-warning), transparent);
+    margin-bottom: 10px;
+}
+
+/* تأثير حركي للنجوم في التقييمات */
+.vr-featured__card--premium .vr-featured__stars {
+    color: var(--vr-warning);
+    font-size: 1rem;
+}
+
+.vr-featured__card--premium .vr-featured__rating-value {
+    color: var(--vr-warning-dark);
+    font-weight: 700;
+}
+
+/* تأثير حركي للنجمة في الشارة */
+@keyframes pulse-star-premium {
+    0% { transform: scale(1) rotate(0deg); text-shadow: 0 0 5px rgba(255, 215, 0, 0.7); }
+    50% { transform: scale(1.3) rotate(20deg); text-shadow: 0 0 15px rgba(255, 215, 0, 1); }
+    100% { transform: scale(1) rotate(0deg); text-shadow: 0 0 5px rgba(255, 215, 0, 0.7); }
+}
+
+/* تنظيم عام للبطاقات في الشبكة لتصبح أكثر جاذبية */
+.vr-featured__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2.5rem 2rem;
+    padding: 1rem 0.5rem;
+}
+
+/* تعديلات للأجهزة المحمولة */
+@media (max-width: 768px) {
+    .vr-featured__ribbon {
+        padding: 5px 25px 5px 10px;
+        font-size: 0.75rem;
+    }
+}
+
+/* دعم الوضع المظلم */
+@media (prefers-color-scheme: dark) {
+    .vr-featured__card--premium {
+        background: linear-gradient(to bottom, rgba(40,40,45,0.01) 0%, rgba(40,40,45,1) 15%);
+    }
+    
+    .vr-featured__card--premium .vr-featured__title {
+        background: linear-gradient(90deg, var(--vr-warning) -20%, var(--vr-gray-100) 50%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 }

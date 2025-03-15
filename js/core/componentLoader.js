@@ -1,8 +1,14 @@
 import { authService } from '../services/auth.service.js';
 
-export class ComponentLoader {
+/**
+ * Component Loader
+ * مكتبة لتحميل وإدراج المكونات HTML في الصفحة
+ */
+
+class ComponentLoader {
     constructor() {
         this.cache = new Map();
+        this.loadingPromises = new Map();
         this.preloadQueue = new Set();
         this.initializeComponents();
     }
@@ -253,7 +259,129 @@ export class ComponentLoader {
             `;
         }
     }
+
+    /**
+     * تحميل مكون HTML وإدراجه في حاوية محددة
+     * 
+     * @param {string} url - مسار ملف HTML المكون
+     * @param {HTMLElement|string} container - العنصر أو معرّف العنصر الذي سيحتوي المكون
+     * @param {object} data - بيانات لتمرير للمكون (اختياري)
+     * @returns {Promise<HTMLElement>} وعد بالحاوية بعد إدراج المكون
+     */
+    async loadComponent(url, container, data = {}) {
+        try {
+            // تحويل المعرّف إلى عنصر DOM إذا كان نصيًا
+            if (typeof container === 'string') {
+                container = document.getElementById(container);
+                if (!container) {
+                    throw new Error(`Container element with ID '${container}' not found`);
+                }
+            }
+
+            // الحصول على محتوى المكون
+            const html = await this.fetchComponent(url);
+            
+            // تحضير المحتوى وإدراجه
+            container.innerHTML = this.processTemplate(html, data);
+            
+            // تنفيذ أي كود JavaScript في المكون
+            this.executeScripts(container);
+            
+            return container;
+        } catch (error) {
+            console.error(`Error loading component from ${url}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * جلب محتوى مكون HTML مع التخزين المؤقت
+     * 
+     * @param {string} url - مسار ملف HTML المكون
+     * @returns {Promise<string>} وعد بمحتوى HTML للمكون
+     */
+    async fetchComponent(url) {
+        // التحقق من وجود المكون في التخزين المؤقت
+        if (this.cache.has(url)) {
+            return this.cache.get(url);
+        }
+
+        // تجنب تكرار نفس الطلب للمكون
+        if (this.loadingPromises.has(url)) {
+            return this.loadingPromises.get(url);
+        }
+
+        // جلب المكون
+        const promise = fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch component: ${response.status} ${response.statusText}`);
+                }
+                return response.text();
+            })
+            .then(html => {
+                // تخزين المكون مؤقتًا
+                this.cache.set(url, html);
+                this.loadingPromises.delete(url);
+                return html;
+            })
+            .catch(error => {
+                this.loadingPromises.delete(url);
+                throw error;
+            });
+
+        this.loadingPromises.set(url, promise);
+        return promise;
+    }
+
+    /**
+     * معالجة قالب HTML واستبدال المتغيرات بالبيانات
+     * 
+     * @param {string} template - قالب HTML
+     * @param {object} data - بيانات لإدخالها في القالب
+     * @returns {string} HTML مع استبدال المتغيرات
+     */
+    processTemplate(template, data) {
+        if (!data || Object.keys(data).length === 0) {
+            return template;
+        }
+        
+        // استبدال المتغيرات في القالب بتنسيق {{variableName}}
+        return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (match, key) => {
+            return data.hasOwnProperty(key) ? data[key] : match;
+        });
+    }
+
+    /**
+     * تنفيذ أي عنصر script موجود في المكون
+     * 
+     * @param {HTMLElement} container - حاوية المكون
+     */
+    executeScripts(container) {
+        const scripts = container.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            
+            // نسخ كل خاصية من السكريبت القديم إلى الجديد
+            Array.from(oldScript.attributes).forEach(attr => {
+                newScript.setAttribute(attr.name, attr.value);
+            });
+            
+            // نسخ محتوى السكريبت
+            newScript.textContent = oldScript.textContent;
+            
+            // استبدال السكريبت القديم بالجديد لتنفيذه
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
+    }
+
+    /**
+     * مسح التخزين المؤقت للمكونات
+     */
+    clearCache() {
+        this.cache.clear();
+    }
 }
 
-// Create a singleton instance
+// تصدير نسخة واحدة من الفئة للاستخدام في جميع أنحاء التطبيق
 export const componentLoader = new ComponentLoader();

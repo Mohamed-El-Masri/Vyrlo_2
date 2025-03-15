@@ -253,11 +253,19 @@ class HomePage {
                 }
                 
                 if (newListings.length > 0) {
+                    // Sort by premium (isPosted) first
+                    const sortedListings = [...newListings].sort((a, b) => {
+                        // القوائم المميزة أولاً
+                        if (a.isPosted && !b.isPosted) return -1;
+                        if (!a.isPosted && b.isPosted) return 1;
+                        return 0;
+                    });
+                    
                     // Add new listing IDs to our Set
-                    newListings.forEach(listing => this.loadedListings.add(listing._id));
+                    sortedListings.forEach(listing => this.loadedListings.add(listing._id));
                     
                     // Render the new listings
-                    this.renderListings(newListings, this.listingPage > 1);
+                    this.renderListings(sortedListings, this.listingPage > 1);
                     this.listingPage++;
                     
                     // Update previous listings count with filtered listings count
@@ -327,7 +335,7 @@ class HomePage {
 
     renderListings(listings, append = false) {
         const html = listings.map((listing, index) => `
-            <article class="vr-featured__card" 
+            <article class="vr-featured__card ${listing.isPosted ? 'vr-featured__card--premium' : ''}" 
                      data-listing-id="${listing._id}"
                      data-scroll-reveal
                      style="animation-delay: ${index * 0.1}s">
@@ -337,9 +345,10 @@ class HomePage {
                          class="vr-featured__image"
                          loading="lazy"
                          onerror="this.src='/images/defaults/default-listing.jpg'">
+                    ${listing.isPosted ? `
                     <div class="vr-featured__badge-premium">
                         <i class="fas fa-star"></i> Featured
-                    </div>
+                    </div>` : ''}
                     ${this.renderOpenStatus(listing.openingTimes)}
                 </div>
                 <div class="vr-featured__content">

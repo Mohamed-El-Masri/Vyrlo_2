@@ -1,0 +1,73 @@
+/* إعدادات متغيرات الألوان والتصميمات للقوائم المميزة */
+
+:root {
+  /* ألوان القوائم المميزة */
+  --featured-primary: #ffc107;
+  --featured-primary-dark: #ff9800;
+  --featured-primary-light: #fff8e1;
+  --featured-text: #333;
+  --featured-text-light: #fff;
+  --featured-highlight: rgba(255, 193, 7, 0.2);
+  --featured-border: rgba(255, 193, 7, 0.5);
+  --featured-shadow: rgba(255, 193, 7, 0.25);
+  
+  /* تأثيرات القوائم المميزة */
+  --featured-card-scale: scale(1.02);
+  --featured-card-hover-scale: scale(1.02) translateY(-5px);
+  --featured-transition-duration: 0.3s;
+  --featured-box-shadow: 0 5px 20px var(--featured-shadow);
+  --featured-card-border-radius: 10px;
+}
+
+/* الوضع المظلم */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --featured-primary: #ffc107;
+    --featured-primary-dark: #ff9800;
+    --featured-primary-light: #333;
+    --featured-text: #eee;
+    --featured-text-light: #333;
+    --featured-highlight: rgba(255, 193, 7, 0.15);
+    --featured-border: rgba(255, 193, 7, 0.4);
+    --featured-shadow: rgba(255, 193, 7, 0.15);
+  }
+}
+
+.vr-featured__card--premium {
+  transform: var(--featured-card-scale);
+  box-shadow: var(--featured-box-shadow);
+  border: 1px solid var(--featured-border);
+  transition: transform var(--featured-transition-duration) ease,
+              box-shadow var(--featured-transition-duration) ease;
+}
+
+.vr-featured__card--premium:hover {
+  transform: var(--featured-card-hover-scale);
+  box-shadow: 0 10px 30px var(--featured-shadow);
+}
+
+.vr-featured__card--premium .vr-featured__title {
+  color: var(--featured-primary-dark);
+}
+
+.vr-featured__card--premium .vr-featured__premium-marker {
+  background: linear-gradient(to right, var(--featured-primary), transparent);
+}
+
+.vr-auto-filter__btn--featured {
+  border-color: var(--featured-primary);
+  color: var(--featured-primary-dark);
+}
+
+.vr-auto-filter__btn--featured.active {
+  background-color: var(--featured-primary);
+  color: var(--featured-text-light);
+}
+
+.vr-auto-filter__btn--featured i {
+  color: var(--featured-primary);
+}
+
+.vr-auto-filter__btn--featured.active i {
+  color: var(--featured-text-light);
+}

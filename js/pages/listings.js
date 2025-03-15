@@ -52,8 +52,22 @@ class ListingsPage {
     async init() {
         try {
             console.log('Initializing ListingsPage...');
+            // Load required themes
+            if (window.themeManager) {
+                try {
+                    await window.themeManager.themeLoader.loadThemes([
+                        'components/featured-ribbon.css',
+                        'themes/featured-themes.css'
+                    ]);
+                    console.log('Themes loaded successfully');
+                } catch (themeError) {
+                    console.warn('Failed to load themes:', themeError);
+                }
+            }
+            
             await this.setupElements();
             await this.loadCategories();
+            this.setupFilterButtons();
             this.attachEventListeners();
             this.checkUrlParams();
             await this.loadInitialListings();
@@ -108,12 +122,10 @@ class ListingsPage {
             if (!response.ok) throw new Error('Failed to fetch categories');
             
             const categories = await response.json();
-            const filteredCategories = categories.filter(cat => 
-                !cat.categoryName.toLowerCase().includes('test')
-            );
             
-            this.renderCategories(filteredCategories);
-            console.log('Categories loaded successfully');
+            // تمرير كل الفئات بدون فلترة
+            this.renderCategories(categories);
+            console.log(`Categories loaded successfully, total: ${categories.length}`);
         } catch (error) {
             console.error('Failed to load categories:', error);
             toastService.error('Failed to load categories');
@@ -121,17 +133,247 @@ class ListingsPage {
     }
 
     renderCategories(categories) {
-        if (!this.categorySelect) return;
+        if (!this.categorySelect) {
+            console.warn('Category select element not found');
+            return;
+        }
         
-        const options = categories.map(category => 
-            `<option value="${category._id}">${category.categoryName}</option>`
-        ).join('');
+        // تحقق من وجود الفئات
+        if (!Array.isArray(categories) || categories.length === 0) {
+            console.warn('No categories provided or invalid categories array');
+            this.categorySelect.innerHTML = '<option value="">No Categories Available</option>';
+            return;
+        }
         
-        this.categorySelect.innerHTML = '<option value="">All Categories</option>' + options;
+        // مسح المحتوى الحالي للـ select
+        this.categorySelect.innerHTML = '';
         
+        // إضافة خيار لجميع الفئات
+        const allOption = document.createElement('option');
+        allOption.value = '';
+        allOption.textContent = 'All Categories';
+        this.categorySelect.appendChild(allOption);
+        
+        // ترتيب الفئات أبجدياً بعد فلترة الفئات التجريبية
+        const validCategories = [...categories].filter(cat => 
+            cat && cat.categoryName && !cat.categoryName.toLowerCase().includes('test')
+        ).sort((a, b) => {
+            const nameA = a.categoryName || '';
+            const nameB = b.categoryName || '';
+            return nameA.localeCompare(nameB);
+        });
+        
+        // حفظ جميع الفئات لاستخدامها في الفلترة ومعالجة البيانات
+        this.categoriesData = new Map();
+        
+        // إضافة الفئات إلى القائمة المنسدلة
+        validCategories.forEach(category => {
+            // تخزين بيانات الفئة للرجوع إليها لاحقاً
+            this.categoriesData.set(category._id, category);
+            
+            // إنشاء عنصر option للفئة
+            const option = document.createElement('option');
+            option.value = category._id;
+            option.textContent = category.categoryName || 'Unnamed Category';
+            
+            // إضافة البيانات الإضافية كسمات
+            if (category.iconOne) option.dataset.iconOne = category.iconOne;
+            if (category.iconTwo) option.dataset.iconTwo = category.iconTwo;
+            if (category.amenities && category.amenities.length) {
+                option.dataset.hasAmenities = 'true';
+                option.dataset.amenitiesCount = category.amenities.length;
+            }
+            
+            // إضافة Option إلى قائمة الاختيارات
+            this.categorySelect.appendChild(option);
+        });
+        
+        // تحديد الخيار الحالي استنادًا إلى الفلتر إذا تم تحديده مسبقًا
         if (this.filters.categoryId) {
             this.categorySelect.value = this.filters.categoryId;
+            
+            // إذا لم نعثر على الفئة في القائمة، نحاول تحميلها
+            if (this.categorySelect.value !== this.filters.categoryId) {
+                this.tryLoadSingleCategory(this.filters.categoryId);
+            }
         }
+        
+        console.log(`Rendered ${validCategories.length} categories`);
+        
+        // تطبيق التنسيق المخصص على القائمة المنسدلة
+        this.enhanceCategoryDropdown();
+    }
+
+    async tryLoadSingleCategory(categoryId) {
+        if (!categoryId) return;
+        
+        try {
+            // التحقق مما إذا كانت الفئة موجودة بالفعل في الـ cache
+            if (this.categoriesData && this.categoriesData.has(categoryId)) {
+                const cachedCategory = this.categoriesData.get(categoryId);
+                this.addCategoryOption(cachedCategory);
+                return;
+            }
+            
+            // جلب الفئة من API
+            const response = await fetch(`${this.API_BASE_URL}/categories/${categoryId}`);
+            if (!response.ok) {
+                console.warn(`Category with ID ${categoryId} not found`);
+                return;
+            }
+            
+            const category = await response.json();
+            if (category && category._id) {
+                // تخزين الفئة في الـ cache
+                if (!this.categoriesData) this.categoriesData = new Map();
+                this.categoriesData.set(category._id, category);
+                
+                // إضافة الفئة كخيار في القائمة المنسدلة
+                this.addCategoryOption(category);
+                
+                console.log(`Added missing category: ${category.categoryName} (${category._id})`);
+            }
+        } catch (error) {
+            console.error(`Failed to load single category ${categoryId}:`, error);
+        }
+    }
+
+    addCategoryOption(category) {
+        // التأكد من وجود القائمة المنسدلة
+        if (!this.categorySelect || !category || !category._id) return;
+        
+        // التحقق ما إذا كان الخيار موجودًا بالفعل
+        const existingOption = this.categorySelect.querySelector(`option[value="${category._id}"]`);
+        if (existingOption) {
+            // تحديث الخيار الموجود إذا لزم الأمر
+            existingOption.textContent = category.categoryName || 'Unnamed Category';
+            if (category.iconOne) existingOption.dataset.iconOne = category.iconOne;
+            if (category.iconTwo) existingOption.dataset.iconTwo = category.iconTwo;
+            if (category.amenities && category.amenities.length) {
+                existingOption.dataset.hasAmenities = 'true';
+                existingOption.dataset.amenitiesCount = category.amenities.length;
+            }
+            return;
+        }
+        
+        // إنشاء خيار جديد
+        const option = document.createElement('option');
+        option.value = category._id;
+        option.textContent = category.categoryName || 'Unnamed Category';
+        
+        // إضافة البيانات الإضافية
+        if (category.iconOne) option.dataset.iconOne = category.iconOne;
+        if (category.iconTwo) option.dataset.iconTwo = category.iconTwo;
+        if (category.amenities && category.amenities.length) {
+            option.dataset.hasAmenities = 'true';
+            option.dataset.amenitiesCount = category.amenities.length;
+        }
+        
+        // إضافة الخيار إلى القائمة
+        this.categorySelect.appendChild(option);
+        
+        // تحديد الخيار إذا كان هذا هو الفلتر الحالي
+        if (this.filters.categoryId === category._id) {
+            this.categorySelect.value = category._id;
+        }
+    }
+
+    enhanceCategoryDropdown() {
+        if (!this.categorySelect) return;
+        
+        // تخصيص شكل القائمة المنسدلة
+        this.categorySelect.classList.add('vr-select', 'vr-category-select');
+        
+        // استخدام Choices.js إذا كان متاحًا لتحسين تجربة المستخدم
+        if (window.Choices) {
+            try {
+                // تدمير أي نسخة قديمة إذا وجدت
+                if (this.categorySelectInstance) {
+                    this.categorySelectInstance.destroy();
+                }
+                
+                // تخصيص قائمة الخيارات لتعرض المزيد من البيانات
+                const renderOption = (item) => {
+                    const option = this.categorySelect.querySelector(`option[value="${item.value}"]`);
+                    let html = `<div class="vr-choices-option">${item.label}</div>`;
+                    
+                    // إضافة عرض مميزات الفئة إذا كانت متوفرة
+                    if (option && option.dataset.hasAmenities === 'true') {
+                        const amenitiesCount = option.dataset.amenitiesCount || 0;
+                        html = `
+                            <div class="vr-choices-option">
+                                <span>${item.label}</span>
+                                <span class="vr-choices-option__amenities">
+                                    <i class="fas fa-check-circle"></i> ${amenitiesCount} features
+                                </span>
+                            </div>
+                        `;
+                    }
+                    
+                    return html;
+                };
+                
+                // إنشاء نسخة جديدة محسنة من القائمة المنسدلة
+                this.categorySelectInstance = new window.Choices(this.categorySelect, {
+                    searchEnabled: true,
+                    searchPlaceholderValue: 'Search categories...',
+                    placeholder: true,
+                    placeholderValue: 'Select Category',
+                    itemSelectText: '',
+                    callbackOnCreateTemplates: function(template) {
+                        return {
+                            item: (classNames, data) => {
+                                return template(`
+                                    <div class="${classNames.item} ${data.highlighted ? classNames.highlightedState : ''}" data-item data-id="${data.id}" data-value="${data.value}" ${data.active ? 'aria-selected="true"' : ''} ${data.disabled ? 'aria-disabled="true"' : ''}>
+                                        ${data.label}
+                                    </div>
+                                `);
+                            },
+                            choice: (classNames, data) => {
+                                return template(`
+                                    <div class="${classNames.item} ${classNames.itemChoice} ${data.disabled ? classNames.itemDisabled : classNames.itemSelectable}" data-select-text="${this.config.itemSelectText}" data-choice ${data.disabled ? 'data-choice-disabled aria-disabled="true"' : 'data-choice-selectable'} data-id="${data.id}" data-value="${data.value}" ${data.groupId > 0 ? 'role="treeitem"' : 'role="option"'}>
+                                        ${renderOption(data)}
+                                    </div>
+                                `);
+                            }
+                        };
+                    },
+                    classNames: {
+                        containerOuter: 'vr-choices vr-category-select',
+                    }
+                });
+            } catch (e) {
+                console.warn('Choices.js initialization failed:', e);
+                // استخدام النسخة العادية إذا فشل تهيئة المكتبة
+                this.setupBasicCategorySelect();
+            }
+        } else {
+            // استخدام النسخة العادية إذا كانت المكتبة غير متوفرة
+            this.setupBasicCategorySelect();
+        }
+    }
+
+    setupBasicCategorySelect() {
+        // تطبيق التنسيق الأساسي
+        this.categorySelect.classList.add('vr-select--enhanced');
+        
+        // إضافة سهم للقائمة المنسدلة
+        const selectWrapper = document.createElement('div');
+        selectWrapper.className = 'vr-select-wrapper';
+        const parent = this.categorySelect.parentNode;
+        
+        // وضع العنصر الأصلي داخل الغلاف
+        parent.insertBefore(selectWrapper, this.categorySelect);
+        selectWrapper.appendChild(this.categorySelect);
+        
+       
+        // تحسين خيارات الـ select لتعرض معلومات إضافية
+        Array.from(this.categorySelect.options).forEach(option => {
+            if (option.dataset.hasAmenities === 'true') {
+                // محاولة إضافة سمات مرئية للخيارات ذات الميزات
+                option.style.fontWeight = 'bold';
+            }
+        });
     }
 
     attachEventListeners() {
@@ -220,9 +462,20 @@ class ListingsPage {
         observer.observe(this.loadMoreBtn);
     }
 
-    checkUrlParams() {
+    async checkUrlParams() {
         const params = new URLSearchParams(window.location.search);
         
+        // فحص وجود معامل الفئة أولًا للتأكد من تحميل الفئات قبل البدء
+        if (params.has('categoryId')) {
+            this.filters.categoryId = params.get('categoryId');
+            
+            // تأكد من تحميل الفئات أولًا
+            if (this.categorySelect && this.categorySelect.options.length <= 1) {
+                await this.loadCategories();
+            }
+        }
+        
+        // تحديد بقية المعاملات
         if (params.has('name')) {
             this.searchInput.value = params.get('name');
             this.filters.name = params.get('name');
@@ -233,8 +486,19 @@ class ListingsPage {
             this.filters.location = params.get('location');
         }
         
-        if (params.has('categoryId')) {
-            this.filters.categoryId = params.get('categoryId');
+        // الآن بعد تحميل الفئات، تأكد من تحديد الخيار الصحيح
+        if (params.has('categoryId') && this.categorySelect) {
+            this.categorySelect.value = params.get('categoryId');
+            
+            // إذا كان المعرف غير موجود في القائمة، حاول تحميله من API
+            if (this.categorySelect.value !== params.get('categoryId')) {
+                await this.tryLoadSingleCategory(params.get('categoryId'));
+            }
+        }
+        
+        // تحديث الفلاتر النشطة
+        if (Object.values(this.filters).some(v => v)) {
+            this.updateActiveFilters();
         }
     }
 
@@ -319,6 +583,16 @@ class ListingsPage {
     async loadInitialListings() {
         this.page = 1;
         this.hasMore = true;
+        
+        // تحقق من وجود الفئات قبل التحميل
+        if (this.categorySelect && this.categorySelect.options.length <= 1) {
+            try {
+                await this.loadCategories();
+            } catch (error) {
+                console.error('Error loading categories before listings', error);
+            }
+        }
+        
         this.listingsGrid.innerHTML = '';
         await this.loadMoreListings();
     }
@@ -385,18 +659,75 @@ class ListingsPage {
     }
 
     filterListings(listings) {
-        return listings.filter(listing => {
+        // أدخل تحسينًا للتأكد من وجود القيم قبل المقارنة
+        const filteredBySearch = listings.filter(listing => {
+            // نتأكد من وجود قيمة listingName قبل استخدام includes
             const nameMatch = !this.filters.name || 
-                listing.listingName.toLowerCase().includes(this.filters.name.toLowerCase());
+                (listing.listingName && listing.listingName.toLowerCase().includes(this.filters.name.toLowerCase()));
             
+            // نتأكد من وجود قيمة location قبل استخدام includes
             const locationMatch = !this.filters.location || 
-                listing.location?.toLowerCase().includes(this.filters.location.toLowerCase());
+                (listing.location && listing.location.toLowerCase().includes(this.filters.location.toLowerCase()));
             
-            const categoryMatch = !this.filters.categoryId || 
-                listing.categoryId?._id === this.filters.categoryId;
+            // تحسين طريقة مطابقة الفئة
+            let categoryMatch = !this.filters.categoryId;
+            if (this.filters.categoryId) {
+                if (typeof listing.categoryId === 'object') {
+                    categoryMatch = listing.categoryId?._id === this.filters.categoryId;
+                } else {
+                    categoryMatch = listing.categoryId === this.filters.categoryId;
+                }
+            }
 
             return nameMatch && locationMatch && categoryMatch;
         });
+            
+        // فلترة إضافية بناء على نوع الفلتر السريع
+        let finalResults;
+        switch (this.currentQuickFilter) {
+            case 'featured':
+                // عرض المميزة فقط
+                finalResults = filteredBySearch.filter(listing => listing.isPosted === true);
+                break;
+            case 'newest':
+                // ترتيب حسب الأحدث (بافتراض أن هناك خاصية createdAt)
+                finalResults = [...filteredBySearch].sort((a, b) => 
+                    new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+                );
+                break;
+            case 'rating':
+                // ترتيب حسب التقييم
+                finalResults = [...filteredBySearch].sort((a, b) => 
+                    (b.rating || 0) - (a.rating || 0)
+                );
+                break;
+            default: // 'all' وغيرها
+                finalResults = [...filteredBySearch].sort((a, b) => {
+                    // المميزة دائماً في المقدمة
+                    if (a.isPosted && !b.isPosted) return -1;
+                    if (!a.isPosted && b.isPosted) return 1;
+                    
+                    // إذا كانت كلاهما مميزة أو كلاهما غير مميزة، رتب حسب التقييم
+                    return (b.rating || 0) - (a.rating || 0);
+                });
+        }
+        
+        // إذا كانت النتيجة فارغة والفلتر هو المميزة، يمكن العودة لجميع القوائم مع إظهار رسالة
+        if (finalResults.length === 0 && this.currentQuickFilter === 'featured' && filteredBySearch.length > 0) {
+            toastService.info('No featured listings found. Showing all listings instead.');
+            
+            // تحديث حالة النشاط للأزرار
+            if (this.autoFilterContainer) {
+                this.autoFilterContainer.querySelectorAll('.vr-auto-filter__btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.filter === 'all');
+                });
+            }
+            
+            this.currentQuickFilter = 'all';
+            return this.filterListings(listings); // تطبيق الفلتر من جديد
+        }
+        
+        return finalResults;
     }
 
     getLoadingCards(count) {
@@ -419,18 +750,88 @@ class ListingsPage {
     }
 
     renderListings(listings) {
-        const html = listings.map(listing => `
-            <article class="vr-featured__card" data-listing-id="${listing._id}">
+        // فصل القوائم المميزة والعادية ثم ترتيبها
+        const featuredListings = listings.filter(listing => listing.isPosted === true);
+        const regularListings = listings.filter(listing => listing.isPosted !== true);
+        
+        // إنشاء HTML لكل مجموعة
+        const featuredHTML = featuredListings.map(listing => this.createListingCard(listing, true)).join('');
+        const regularHTML = regularListings.map(listing => this.createListingCard(listing, false)).join('');
+        
+        // تجميع المحتوى النهائي - بدون فاصل
+        const html = featuredHTML + regularHTML;
+        
+        // عرض النتائج في الصفحة
+        if (this.page === 1) {
+            this.listingsGrid.innerHTML = html;
+        } else {
+            // في حالة تحميل المزيد، نضيف القوائم الجديدة إلى النهاية
+            this.listingsGrid.insertAdjacentHTML('beforeend', html);
+        }
+        
+        // تحديث عدد النتائج وإضافة الأحداث للبطاقات
+        this.updateResultsCount(this.filteredListings.length);
+        this.addCardEventListeners();
+    }
+
+    createListingCard(listing, isPremium = false) {
+        const premiumClass = isPremium ? 'vr-featured__card--premium' : '';
+        const premiumEffect = isPremium ? `<div class="vr-featured__glow"></div>` : '';
+        
+        // تحسين عرض حالة المكان (مفتوح/مغلق)
+        const openingStatus = this.renderOpenStatus(listing.openingTimes);
+        
+        // الحصول على اسم الفئة بطريقة أكثر أماناً
+        let categoryName = '';
+        let categoryIcon = '';
+        
+        if (listing.categoryId) {
+            // حالة إذا كانت البيانات كاملة في الاستجابة
+            if (typeof listing.categoryId === 'object' && listing.categoryId.categoryName) {
+                categoryName = listing.categoryId.categoryName;
+                categoryIcon = this.getCategoryIcon(listing.categoryId);
+            } 
+            // حالة إذا كان لدينا فقط معرف الفئة
+            else {
+                const categoryId = typeof listing.categoryId === 'object' ? listing.categoryId._id : listing.categoryId;
+                
+                // البحث عن الفئة في البيانات المخزنة
+                if (this.categoriesData && this.categoriesData.has(categoryId)) {
+                    const category = this.categoriesData.get(categoryId);
+                    categoryName = category.categoryName;
+                    categoryIcon = this.getCategoryIcon(category);
+                } else {
+                    // البحث في القائمة المنسدلة
+                    const option = this.categorySelect?.querySelector(`option[value="${categoryId}"]`);
+                    categoryName = option ? option.textContent : '';
+                    categoryIcon = this.getCategoryIcon(categoryId);
+                }
+            }
+        }
+        
+        // لا نعرض شارة الميزات في الكروت، نكتفي باسم الفئة فقط
+        
+        return `
+            <article class="vr-featured__card ${premiumClass}" data-listing-id="${listing._id}">
+                ${premiumEffect}
                 <div class="vr-featured__image-wrapper">
                     <img src="${listing.mainImage || '/images/defaults/default-listing.jpg'}" 
                          alt="${listing.listingName}"
                          class="vr-featured__image"
                          loading="lazy"
                          onerror="this.src='/images/defaults/default-listing.jpg'">
-                    ${listing.isPosted ? '<span class="vr-featured__badge">Featured</span>' : ''}
-                    ${this.renderOpenStatus(listing.openingTimes)}
+                    ${isPremium ? `
+                    <div class="vr-featured__badge-premium">
+                        <i class="fas fa-star"></i> Featured
+                    </div>` : ''}
+                    ${openingStatus}
                 </div>
                 <div class="vr-featured__content">
+                    ${isPremium ? '<div class="vr-featured__premium-marker"></div>' : ''}
+                    <div class="vr-featured__rating">
+                        ${this.generateRatingStars(listing.rating || 0)}
+                        <span class="vr-featured__reviews-count">${listing.reviewIds?.length || 0} reviews</span>
+                    </div>
                     <h3 class="vr-featured__title">${listing.listingName}</h3>
                     <div class="vr-featured__meta">
                         ${listing.location ? `
@@ -439,86 +840,78 @@ class ListingsPage {
                                 ${listing.location}
                             </span>
                         ` : ''}
-                        ${listing.categoryId?.categoryName ? `
+                        ${categoryName ? `
                             <span class="vr-featured__category">
                                 <i class="fas fa-tag"></i>
-                                ${listing.categoryId.categoryName}
+                                ${categoryName}
                             </span>
                         ` : ''}
                     </div>
-                    <div class="vr-featured__stats">
-                        ${listing.mobile ? `
-                            <span class="vr-featured__stat">
-                                <i class="fas fa-phone"></i>
-                                ${listing.mobile}
-                            </span>
-                        ` : ''}
-                        ${listing.email ? `
-                            <span class="vr-featured__stat vr-featured__stat--email">
-                                <i class="fas fa-envelope"></i>
-                                ${listing.email}
-                            </span>
-                        ` : ''}
+                    <p class="vr-featured__description">
+                        ${listing.description ? this.truncateText(listing.description, 100) : 'No description available'}
+                    </p>
+                    <div class="vr-featured__footer">
+                        <div class="vr-featured__contact">
+                            ${listing.mobile ? `
+                                <a href="tel:${listing.mobile}" class="vr-featured__contact-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span class="vr-sr-only">Call</span>
+                                </a>
+                            ` : ''}
+                            ${listing.email ? `
+                                <a href="mailto:${listing.email}" class="vr-featured__contact-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span class="vr-sr-only">Email</span>
+                                </a>
+                            ` : ''}
+                            ${listing.website ? `
+                                <a href="${listing.website}" class="vr-featured__contact-item" target="_blank" rel="noopener">
+                                    <i class="fas fa-globe"></i>
+                                    <span class="vr-sr-only">Website</span>
+                                </a>
+                            ` : ''}
+                        </div>
+                        <a href="/pages/listing-details.html?id=${listing._id}" class="vr-featured__view-more">
+                            View Details <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
             </article>
-        `).join('');
-        
-        if (this.page === 1) {
-            this.listingsGrid.innerHTML = html;
-        } else {
-            this.listingsGrid.insertAdjacentHTML('beforeend', html);
-        }
-        
-        this.addCardEventListeners();
-    }
-
-    renderOpenStatus(openingTimes) {
-        if (!openingTimes) return '';
-
-        const today = new Date().toLocaleString('en-us', {weekday: 'long'});
-        const status = openingTimes[today];
-
-        if (!status) return '';
-
-        const isOpen = status.status === 'open';
-        return `
-            <span class="vr-featured__status ${isOpen ? 'vr-featured__status--open' : 'vr-featured__status--closed'}">
-                <i class="fas fa-clock"></i>
-                ${isOpen ? `Open: ${status.from} - ${status.to}` : 'Closed'}
-            </span>
         `;
-    }
-
-    updateResultsCount(total) {
-        this.resultsCount.textContent = total;
     }
 
     showEmptyState() {
-        const instance = this; // Store reference to the class instance
-        this.listingsGrid.innerHTML = `
-            <div class="vr-listings-empty">
-                <i class="fas fa-search"></i>
-                <p>No listings found matching your criteria</p>
-                <div class="vr-listings-empty__actions">
-                    <button class="vr-btn vr-btn--outline" onclick="window.location.href='/pages/listings.html'">
-                        View All Listings
-                    </button>
-                    <button class="vr-btn vr-btn--text" id="clearFiltersBtn">
-                        Clear All Filters
-                    </button>
+        try {
+            // استخدام طريقة بديلة لعرض حالة "لا توجد نتائج"
+            // بدلاً من استخدام componentLoader.loadComponent
+            this.listingsGrid.innerHTML = `
+                <div class="vr-listings-empty">
+                    <i class="fas fa-search"></i>
+                    <p>No listings found matching your criteria</p>
+                    <div class="vr-listings-empty__actions">
+                        <button class="vr-btn vr-btn--outline" onclick="window.location.href='/pages/listings.html'">
+                            View All Listings
+                        </button>
+                        <button class="vr-btn vr-btn--text" id="clearFiltersBtn">
+                            Clear All Filters
+                        </button>
+                    </div>
                 </div>
-            </div>
-        `;
-        
-        // Add event listener to the clear filters button
-        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
-        if (clearFiltersBtn) {
-            clearFiltersBtn.addEventListener('click', () => this.clearFilters());
+            `;
+            
+            // إضافة معالج النقر لزر مسح الفلاتر
+            const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+            if (clearFiltersBtn) {
+                clearFiltersBtn.addEventListener('click', () => this.clearFilters());
+            }
+            
+            this.loadMoreBtn.style.display = 'none';
+            this.toastService.info('No listings found matching your search criteria');
+        } catch (error) {
+            console.error('Error displaying empty state:', error);
+            // حالة بديلة مبسطة في حال حدوث خطأ
+            this.listingsGrid.innerHTML = '<div class="vr-listings-empty"><p>No listings found</p></div>';
         }
-        
-        this.loadMoreBtn.style.display = 'none';
-        toastService.info('No listings found matching your search criteria');
     }
 
     setLoadingState(loading) {
@@ -545,23 +938,43 @@ class ListingsPage {
         this.loadInitialListings();
     }
 
-    // تحديث عرض الفلاتر النشطة
     updateActiveFilters() {
         if (!this.activeFiltersContainer) return;
-
+ 
         const activeFilters = Object.entries(this.filters)
             .filter(([_, value]) => value)
             .map(([type, value]) => {
                 let label = value;
-                if (type === 'categoryId') {
-                    const option = this.categorySelect.querySelector(`option[value="${value}"]`);
-                    label = option ? option.textContent : value;
+                let displayType = type;
+                
+                // تجميل نوع الفلتر للعرض
+                switch(type) {
+                    case 'name':
+                        displayType = 'Name';
+                        break;
+                    case 'location':
+                        displayType = 'Location';
+                        break;
+                    case 'categoryId':
+                        displayType = 'Category';
+                        // الحصول على اسم الفئة من الخيار المحدد
+                        if (this.categorySelect) {
+                            const option = this.categorySelect.querySelector(`option[value="${value}"]`);
+                            label = option ? option.textContent : 'Unknown Category';
+                        }
+                        break;
                 }
-                return { type, value, label };
+                
+                return { 
+                    type, 
+                    displayType, 
+                    value, 
+                    label 
+                };
             });
-
+            
         console.log('Active filters:', activeFilters);
-
+        
         if (!activeFilters.length) {
             this.activeFiltersContainer.innerHTML = `
                 <div class="vr-active-filters__empty">
@@ -571,18 +984,19 @@ class ListingsPage {
             `;
             return;
         }
-
+        
         this.activeFiltersContainer.innerHTML = `
             <div class="vr-active-filters__content">
                 ${activeFilters.map(filter => `
                     <span class="vr-active-filter">
-                        ${filter.type}: ${filter.label}
+                        ${filter.displayType}: ${filter.label}
                         <button class="vr-active-filter__remove" data-type="${filter.type}">
                             <i class="fas fa-times"></i>
                         </button>
                     </span>
                 `).join('')}
                 <button class="vr-active-filter vr-active-filter--clear">
+                    <i class="fas fa-filter-circle-xmark"></i>
                     Clear All Filters
                 </button>
             </div>
@@ -599,7 +1013,7 @@ class ListingsPage {
                 this.removeFilter(type);
             });
         });
-
+        
         // مستمع حدث لزر مسح جميع الفلاتر
         const clearAllBtn = this.activeFiltersContainer.querySelector('.vr-active-filter--clear');
         if (clearAllBtn) {
@@ -607,7 +1021,6 @@ class ListingsPage {
         }
     }
 
-    // إزالة فلتر معين
     removeFilter(type) {
         this.filters[type] = '';
         if (type === 'categoryId') {
@@ -632,26 +1045,23 @@ class ListingsPage {
     }
 
     async handleSearchInput() {
-        const query = this.searchInput.value.trim();
+        const query = this.searchInput.value.trim().toLowerCase();
         
         if (query.length < this.minSearchLength) {
             this.hideSearchSuggestions();
             return;
         }
-
-        // إظهار حالة التحميل
+        
         this.showLoadingSuggestions();
-
+        
         clearTimeout(this.searchTimeout);
         this.searchTimeout = setTimeout(async () => {
             try {
-                // جلب الاقتراحات للاسم والموقع في نفس الوقت
                 const [nameResults, locationResults] = await Promise.all([
                     fetch(`${this.API_BASE_URL}/listing/active/?name=${query}`).then(res => res.json()),
                     fetch(`${this.API_BASE_URL}/listing/active/?location=${query}`).then(res => res.json())
                 ]);
                 
-                // تجميع النتائج
                 const suggestions = {
                     listings: nameResults.listings || [],
                     locations: [...new Set(locationResults.listings?.map(l => l.location))] || []
@@ -673,7 +1083,7 @@ class ListingsPage {
         this.searchSuggestions.innerHTML = `
             <div class="vr-search-suggestion vr-search-suggestion--loading">
                 <div class="vr-spinner"></div>
-                <span>Searching...</span>
+                <span>Loading...</span>
             </div>
         `;
         this.searchSuggestions.classList.add('active');
@@ -686,6 +1096,7 @@ class ListingsPage {
                 <span>No matches found for "${query}"</span>
             </div>
         `;
+        this.searchSuggestions.classList.add('active');
     }
 
     showErrorSuggestions() {
@@ -695,14 +1106,15 @@ class ListingsPage {
                 <span>Error loading suggestions</span>
             </div>
         `;
+        this.searchSuggestions.classList.add('active');
     }
 
     showSuggestions(suggestions, query) {
         const { listings, locations } = suggestions;
         
         let html = '';
-
-        // إضافة اقتراحات القوائم
+        
+        // اقتراحات القوائم
         if (listings.length > 0) {
             html += `
                 <div class="vr-search-suggestion__group">
@@ -712,7 +1124,7 @@ class ListingsPage {
             `;
         }
 
-        // إضافة اقتراحات المواقع
+        // اقتراحات المواقع
         if (locations.length > 0) {
             html += `
                 <div class="vr-search-suggestion__group">
@@ -723,9 +1135,7 @@ class ListingsPage {
                                 <i class="fas fa-map-marker-alt"></i>
                             </div>
                             <div class="vr-search-suggestion__content">
-                                <div class="vr-search-suggestion__title">
-                                    ${this.highlightMatch(location, query)}
-                                </div>
+                                <div class="vr-search-suggestion__title">${this.highlightMatch(location, query)}</div>
                                 <div class="vr-search-suggestion__subtitle">Location</div>
                             </div>
                         </div>
@@ -736,8 +1146,6 @@ class ListingsPage {
 
         this.searchSuggestions.innerHTML = html;
         this.searchSuggestions.classList.add('active');
-        
-        // تحديث مستمعي الأحداث
         this.addSuggestionEventListeners(listings, locations);
     }
 
@@ -780,16 +1188,36 @@ class ListingsPage {
         const highlightedName = this.highlightMatch(listing.listingName, query);
         const highlightedLocation = this.highlightMatch(listing.location || '', query);
         
+        // الحصول على اسم الفئة بنفس طريقة دالة createListingCard
+        let categoryName = '';
+        
+        if (listing.categoryId) {
+            if (typeof listing.categoryId === 'object' && listing.categoryId.categoryName) {
+                categoryName = listing.categoryId.categoryName;
+            } else {
+                const categoryId = typeof listing.categoryId === 'object' ? listing.categoryId._id : listing.categoryId;
+                
+                if (this.categoriesData && this.categoriesData.has(categoryId)) {
+                    categoryName = this.categoriesData.get(categoryId).categoryName;
+                } else {
+                    const option = this.categorySelect?.querySelector(`option[value="${categoryId}"]`);
+                    categoryName = option ? option.textContent : '';
+                }
+            }
+        }
+        
+        const categoryIcon = this.getCategoryIcon(listing.categoryId);
+        
         return `
             <div class="vr-search-suggestion" data-id="${listing._id}">
                 <div class="vr-search-suggestion__icon">
-                    <i class="fas ${this.getCategoryIcon(listing.categoryId?.categoryName)}"></i>
+                    <i class="fas ${categoryIcon}"></i>
                 </div>
                 <div class="vr-search-suggestion__content">
                     <div class="vr-search-suggestion__title">${highlightedName}</div>
                     <div class="vr-search-suggestion__subtitle">
                         ${highlightedLocation}
-                        ${listing.categoryId ? `<span class="vr-search-suggestion__category">${listing.categoryId.categoryName}</span>` : ''}
+                        ${categoryName ? `<span class="vr-search-suggestion__category">${categoryName}</span>` : ''}
                     </div>
                 </div>
             </div>
@@ -805,20 +1233,50 @@ class ListingsPage {
     }
 
     getCategoryIcon(category) {
+        // خريطة الأيقونات الافتراضية للفئات
         const icons = {
             'Restaurant': 'fa-utensils',
             'Hotel': 'fa-hotel',
             'Shopping': 'fa-shopping-bag',
             'Health': 'fa-hospital',
             'Beauty': 'fa-spa',
-            // Add more category icons as needed
+            'Cafe': 'fa-coffee',
+            'Education': 'fa-graduation-cap',
+            'Entertainment': 'fa-film',
+            'Automotive': 'fa-car',
+            'Professional': 'fa-briefcase',
+            'Sports': 'fa-futbol',
             'default': 'fa-store'
         };
 
-        return icons[category] || icons.default;
+        // محاولة العثور على أيقونة مخصصة للفئة
+        if (category) {
+            // إذا كان لدينا الفئة كاملة وليس فقط الاسم
+            if (typeof category === 'object' && category.iconOne) {
+                return category.iconOne; // استخدام الأيقونة من البيانات
+            }
+            
+            // البحث في القائمة المنسدلة للعثور على أيقونة
+            if (this.categorySelect && typeof category === 'string') {
+                const option = this.categorySelect.querySelector(`option[value="${category}"]`) || 
+                             Array.from(this.categorySelect.options).find(opt => opt.textContent === category);
+                
+                if (option && option.dataset.iconOne) {
+                    return option.dataset.iconOne;
+                }
+            }
+            
+            // استخدام الأيقونة الافتراضية بناءً على اسم الفئة
+            if (typeof category === 'string' && icons[category]) {
+                return icons[category];
+            } else if (typeof category === 'object' && category.categoryName && icons[category.categoryName]) {
+                return icons[category.categoryName];
+            }
+        }
+
+        return icons.default;
     }
 
-    // دوال مساعدة جديدة للتحكم في حالات التحميل
     showSkeletonLoading() {
         this.listingsGrid.innerHTML = this.getLoadingCards(6);
     }
@@ -844,9 +1302,9 @@ class ListingsPage {
             this.hideLocationSuggestions();
             return;
         }
-
+        
         this.showLoadingLocationSuggestions();
-
+        
         clearTimeout(this.locationTimeout);
         this.locationTimeout = setTimeout(async () => {
             try {
@@ -854,8 +1312,6 @@ class ListingsPage {
                 if (!response.ok) throw new Error('Failed to fetch locations');
                 
                 const data = await response.json();
-                
-                // استخراج المواقع الفريدة وتطبيق البحث الذكي
                 const uniqueLocations = [...new Set(data.listings?.map(l => l.location))]
                     .filter(Boolean)
                     .filter(location => {
@@ -873,7 +1329,6 @@ class ListingsPage {
                         const distB = this.levenshteinDistance(b.toLowerCase(), query);
                         return distA - distB;
                     });
-                    
                     this.showLocationSuggestionsList(uniqueLocations, query);
                 }
             } catch (error) {
@@ -900,6 +1355,7 @@ class ListingsPage {
                 <span>No locations found for "${query}"</span>
             </div>
         `;
+        this.locationSuggestions.classList.add('active');
     }
 
     showErrorLocationSuggestions() {
@@ -909,9 +1365,9 @@ class ListingsPage {
                 <span>Error loading suggestions</span>
             </div>
         `;
+        this.locationSuggestions.classList.add('active');
     }
 
-    // إضافة دالة لحساب المسافة بين الكلمات
     levenshteinDistance(str1, str2) {
         const track = Array(str2.length + 1).fill(null).map(() =>
             Array(str1.length + 1).fill(null));
@@ -946,9 +1402,7 @@ class ListingsPage {
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
                         <div class="vr-search-suggestion__content">
-                            <div class="vr-search-suggestion__title">
-                                ${this.highlightMatch(location, query)}
-                            </div>
+                            <div class="vr-search-suggestion__title">${this.highlightMatch(location, query)}</div>
                             <div class="vr-search-suggestion__subtitle">Location</div>
                         </div>
                     </div>
@@ -974,13 +1428,6 @@ class ListingsPage {
                 }
             });
         });
-
-        // إضافة مستمع لإخفاء الاقتراحات عند النقر خارجها
-        document.addEventListener('click', (e) => {
-            if (!this.locationInput.contains(e.target) && !this.locationSuggestions.contains(e.target)) {
-                this.hideLocationSuggestions();
-            }
-        });
     }
 
     showLocationSuggestions() {
@@ -994,9 +1441,189 @@ class ListingsPage {
             this.locationSuggestions.classList.remove('active');
         }
     }
+
+    generateRatingStars(rating = 0) {
+        const fullStars = Math.floor(rating);
+        const halfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+        
+        return `
+            <div class="vr-featured__stars">
+                ${Array(fullStars).fill('<i class="fas fa-star"></i>').join('')}
+                ${halfStar ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                ${Array(emptyStars).fill('<i class="far fa-star"></i>').join('')}
+                <span class="vr-featured__rating-value">${rating.toFixed(1)}</span>
+            </div>
+        `;
+    }
+
+    truncateText(text, maxLength) {
+        if (!text || text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
+    }
+
+    setupFilterButtons() {
+        // إنشاء حاوية للفلاتر السريعة
+        this.autoFilterContainer = document.createElement('div');
+        this.autoFilterContainer.className = 'vr-auto-filter';
+        
+        // إنشاء أزرار الفلترة
+        this.autoFilterContainer.innerHTML = `
+            <button class="vr-auto-filter__btn vr-auto-filter__btn--featured active" data-filter="featured">
+                <i class="fas fa-star"></i> Featured Listings
+            </button>
+            <button class="vr-auto-filter__btn" data-filter="all">
+                <i class="fas fa-list"></i> All Listings
+            </button>
+            <button class="vr-auto-filter__btn" data-filter="newest">
+                <i class="fas fa-clock"></i> Newest First
+            </button>
+            <button class="vr-auto-filter__btn" data-filter="rating">
+                <i class="fas fa-star-half-alt"></i> Highest Rated
+            </button>
+        `;
+        
+        // إضافة الحاوية قبل شبكة القوائم
+        const parent = this.listingsGrid.parentNode;
+        parent.insertBefore(this.autoFilterContainer, this.listingsGrid);
+        
+        // إضافة مستمعي الأحداث
+        this.autoFilterContainer.querySelectorAll('.vr-auto-filter__btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // تحديث حالة النشاط للأزرار
+                this.autoFilterContainer.querySelectorAll('.vr-auto-filter__btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                btn.classList.add('active');
+                
+                // تطبيق الفلتر المناسب
+                const filterType = btn.dataset.filter;
+                this.applyQuickFilter(filterType);
+            });
+        });
+        
+        // الفلتر الافتراضي هو Featured
+        this.currentQuickFilter = 'featured';
+    }
+
+    applyQuickFilter(filterType) {
+        this.currentQuickFilter = filterType;
+        this.page = 1;
+        this.loadedListings.clear();
+        this.loadInitialListings();
+    }
+
+    renderOpenStatus(openingTimes) {
+        // إذا لم تكن هناك بيانات لأوقات العمل، لا يتم عرض أي شيء
+        if (!openingTimes) return '';
+        
+        // الحصول على اليوم الحالي بالإنجليزية (مثل "Monday")
+        const today = new Date().toLocaleString('en-us', {weekday: 'long'});
+        
+        // الحصول على حالة العمل لهذا اليوم
+        const status = openingTimes[today];
+        
+        // إذا لم تكن هناك معلومات عن الحالة لهذا اليوم، لا يتم عرض أي شيء
+        if (!status) return '';
+        
+        // تحديد ما إذا كان المكان مفتوحًا أم مغلقًا
+        const isOpen = status.status === 'open';
+        
+        // تحديد نص حالة العمل، مع أوقات العمل إذا كان المكان مفتوحًا
+        const statusText = isOpen 
+            ? `Open: ${status.from} - ${status.to}` 
+            : 'Closed';
+        
+        // إنشاء علامة HTML لعرض الحالة
+        return `
+            <span class="vr-featured__status ${isOpen ? 'vr-featured__status--open' : 'vr-featured__status--closed'}">
+                <i class="fas fa-clock"></i>
+                ${statusText}
+            </span>
+        `;
+    }
+
+    updateResultsCount(total) {
+        if (this.resultsCount) {
+            this.resultsCount.textContent = total;
+        }
+        
+        const resultsHeading = document.querySelector('.vr-listings-content__info h2');
+        if (resultsHeading) {
+            const suffix = total === 1 ? 'Result' : 'Results';
+            resultsHeading.textContent = `${total} ${suffix} Found`;
+        }
+        
+        const noResultsMessage = document.querySelector('.vr-no-results');
+        if (noResultsMessage) {
+            noResultsMessage.style.display = total > 0 ? 'none' : 'block';
+        }
+        
+        if (this.currentQuickFilter) {
+            const tabs = document.querySelectorAll('.vr-auto-filter__btn');
+            tabs.forEach(tab => {
+                const filter = tab.dataset.filter;
+                if (filter === this.currentQuickFilter) {
+                    const countSpan = tab.querySelector('.vr-count');
+                    if (countSpan) {
+                        countSpan.textContent = total;
+                    } else {
+                        const newSpan = document.createElement('span');
+                        newSpan.className = 'vr-count';
+                        newSpan.textContent = total;
+                        tab.appendChild(newSpan);
+                    }
+                }
+            });
+        }
+    }
+
+    checkAndUpdateFeaturedStatus() {
+        // حساب عدد القوائم المميزة والعادية
+        const featuredListings = this.filteredListings.filter(listing => listing.isPosted === true);
+        const regularListings = this.filteredListings.filter(listing => listing.isPosted !== true);
+        
+        // تحديث أعداد القوائم في أزرار الفلترة
+        const featuredBtn = this.autoFilterContainer?.querySelector('.vr-auto-filter__btn--featured');
+        if (featuredBtn) {
+            let countSpan = featuredBtn.querySelector('.vr-count');
+            if (!countSpan) {
+                countSpan = document.createElement('span');
+                countSpan.className = 'vr-count';
+                featuredBtn.appendChild(countSpan);
+            }
+            countSpan.textContent = featuredListings.length;
+        }
+        
+        // التحقق مما إذا كانت هناك قوائم مميزة وإظهار رسالة مناسبة
+        if (featuredListings.length === 0 && this.currentQuickFilter === 'featured') {
+            if (regularListings.length > 0) {
+                toastService.info('No featured listings available. Showing all listings instead.');
+                this.currentQuickFilter = 'all';
+            }
+        }
+    }
+
+    async loadEmptyStateComponent() {
+        return new Promise((resolve, reject) => {
+            fetch('/components/listings/no-results.html')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load no-results component');
+                    }
+                    return response.text();
+                })
+                .then(html => {
+                    resolve(html);
+                })
+                .catch(error => {
+                    console.error('Error loading empty state component:', error);
+                    reject(error);
+                });
+        });
+    }
 }
 
-// Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     window.listingsPage = new ListingsPage();
 });

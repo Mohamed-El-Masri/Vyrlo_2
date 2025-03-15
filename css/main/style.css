@@ -18,7 +18,7 @@
 
 /* UI Components */
 @import url('../components/cards.css');
-@import url('../components/alerts.css');
+
 @import url('../components/toast.css');
 @import url('../components/loaders.css');
 

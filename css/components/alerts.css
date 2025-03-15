@@ -1,0 +1,75 @@
+.vr-alert {
+  position: relative;
+  padding: var(--vr-spacing-md) var(--vr-spacing-lg);
+  border-radius: var(--vr-radius-md);
+  margin-bottom: var(--vr-spacing-md);
+  display: flex;
+  gap: var(--vr-spacing-md);
+  align-items: flex-start;
+}
+
+.vr-alert__icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.vr-alert__content {
+  flex: 1;
+}
+
+.vr-alert__title {
+  font-weight: var(--vr-font-semibold);
+  margin-bottom: 2px;
+}
+
+.vr-alert__message {
+  font-size: var(--vr-text-sm);
+}
+
+.vr-alert__close {
+  position: absolute;
+  top: var(--vr-spacing-md);
+  right: var(--vr-spacing-md);
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity var(--vr-transition-fast);
+}
+
+.vr-alert__close:hover {
+  opacity: 1;
+}
+
+/* Alert Variants */
+.vr-alert--success {
+  background: var(--vr-success-light);
+  border: 1px solid var(--vr-success);
+  color: var(--vr-success-dark);
+}
+
+.vr-alert--error {
+  background: var(--vr-error-light);
+  border: 1px solid var(--vr-error);
+  color: var(--vr-error-dark);
+}
+
+.vr-alert--warning {
+  background: var(--vr-warning-light);
+  border: 1px solid var(--vr-warning);
+  color: var(--vr-warning-dark);
+}
+
+.vr-alert--info {
+  background: var(--vr-primary-light);
+  border: 1px solid var(--vr-primary);
+  color: var(--vr-primary-dark);
+}
+
+/* Alert Sizes */
+.vr-alert--sm {
+  padding: var(--vr-spacing-sm) var(--vr-spacing-md);
+  font-size: var(--vr-text-sm);
+}
+
+.vr-alert--lg {
+  padding: var(--vr-spacing-lg) var(--vr-spacing-xl);
+}

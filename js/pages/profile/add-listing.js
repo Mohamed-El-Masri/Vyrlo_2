@@ -33,7 +33,7 @@ class AddListingPage {
   async loadCategories() {
     try {
       // جلب البيانات من الـ API
-      const response = await fetch("https://virlo.vercel.app/categories", {
+      const response = await fetch("https://www.vyrlo.com:8080/categories", {
         method: "GET",
         redirect: "follow",
       });
@@ -309,7 +309,7 @@ class AddListingPage {
 
       // إرسال الطلب إلى الـ API
       const response = await fetch(
-        "https://virlo.vercel.app/listing",
+        "https://www.vyrlo.com:8080/listing",
         requestOptions
       );
 
