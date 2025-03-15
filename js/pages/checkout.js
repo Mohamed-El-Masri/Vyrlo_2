@@ -69,14 +69,15 @@ class CheckoutPage {
         const listingId = params.get('listing');
         
         if (action && listingId) {
-            // Set default prices based on action
-            const price = action === 'upgrade' ? 29.99 : 9.99;
+            // تعديل: تحديد سعر الترقية إلى 14.99 دولار سنوياً
+            const price = action === 'upgrade' ? 14.99 : 9.99;
             
             return {
                 listingId,
                 action,
                 price,
-                timestamp: new Date().getTime()
+                timestamp: new Date().getTime(),
+                billingInterval: action === 'upgrade' ? 'yearly' : 'monthly' // إضافة فترة الدفع
             };
         }
         
@@ -99,11 +100,13 @@ class CheckoutPage {
         const actionMap = {
             'upgrade': {
                 text: 'Upgrade to Featured',
-                detailsId: 'upgradeDetails'
+                detailsId: 'upgradeDetails',
+                period: 'year' // تم تغييرها إلى سنة
             },
             'activate': {
                 text: 'Activate Listing',
-                detailsId: 'activateDetails'
+                detailsId: 'activateDetails',
+                period: 'month'
             }
         };
         
@@ -114,23 +117,29 @@ class CheckoutPage {
         document.getElementById('checkoutItemPrice').textContent = `$${this.checkoutData.price.toFixed(2)}`;
         document.getElementById('checkoutTotal').textContent = `$${this.checkoutData.price.toFixed(2)}`;
         
+        // إضافة فترة الدفع إلى الوصف (شهرياً/سنوياً)
+        const pricePeriod = document.getElementById('checkoutPricePeriod');
+        if (pricePeriod) {
+            pricePeriod.textContent = `per ${actionInfo.period}`;
+        }
+        
         // Show relevant details section
         document.getElementById(actionInfo.detailsId).style.display = 'block';
     }
     
     async processUpgrade() {
         try {
-            // Call API to update listing status
+            // تعديل: تحديث تاريخ انتهاء الترقية إلى سنة كاملة بدلاً من 30 يوم
             await listingService.updateListingStatus(this.checkoutData.listingId, {
                 isPosted: true,
-                featuredUntil: this.getFutureDate(30) // 30 days from now
+                featuredUntil: this.getFutureDate(365) // سنة كاملة (365 يوم)
             });
             
             // Clear checkout data
             sessionStorage.removeItem('checkout_data');
             
-            // Show success message
-            toastService.success('Your listing has been upgraded to Featured status!');
+            // إظهار رسالة نجاح مع توضيح أن الترقية سنوية
+            toastService.success('Your listing has been upgraded to Featured status for one year!');
             
             // Redirect back to profile page
             setTimeout(() => {

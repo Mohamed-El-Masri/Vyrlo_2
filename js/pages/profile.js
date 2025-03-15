@@ -1057,16 +1057,22 @@ createListingCard(listing) {
     let statusActionButton = '';
     
     if (status === 'inactive') {
-        // للقوائم غير النشطة: إظهار زر التفعيل المجاني مع بادج Free
+        // للقوائم غير النشطة: إظهار زر التفعيل
         statusActionButton = `
-            <button class="vr-btn vr-btn--success" onclick="profilePage.activateListing('${listing._id}')">
-                <i class="fas fa-check-circle"></i> Activate <span class="vr-btn__badge">Free</span>
+            <button class="vr-btn vr-btn--success" 
+                    data-action="activate-listing" 
+                    data-id="${listing._id}">
+                <i class="fas fa-check-circle"></i> Activate
+                <span class="vr-btn__badge">Free</span>
             </button>`;
     } else if (status === 'active') {
-        // للقوائم النشطة وغير المميزة: إظهار زر الترقية
+        // للقوائم النشطة وغير المميزة: إظهار زر الترقية مع السعر السنوي الجديد
         statusActionButton = `
-            <button class="vr-btn vr-btn--upgrade" onclick="profilePage.upgradeListing('${listing._id}')">
+            <button class="vr-btn vr-btn--upgrade" 
+                    data-action="upgrade-listing" 
+                    data-id="${listing._id}">
                 <i class="fas fa-star"></i> Upgrade
+                <span class="vr-btn__badge">$14.99/yr</span>
             </button>`;
     }
     
@@ -1086,7 +1092,7 @@ createListingCard(listing) {
     }
     
     return `
-        <div class="vr-listing-card vr-listing-card--${status}" data-listing-id="${listing._id}" ${statusClass}>
+        <div class="vr-listing-card vr-listing-card--${status}" data-id="${listing._id}">
             <div class="vr-listing-card__image">
                 <img src="${listing.mainImage || listing.images?.[0] || '/images/defaults/default-listing.jpg'}" 
                      alt="${listing.listingName}">
@@ -1099,10 +1105,14 @@ createListingCard(listing) {
             
             <div class="vr-listing-card__actions">
                 ${statusActionButton}
-                <button class="vr-btn vr-btn--primary" onclick="profilePage.editListing('${listing._id}')">
+                <button class="vr-btn vr-btn--primary" 
+                        data-action="edit-listing" 
+                        data-id="${listing._id}">
                     <i class="fas fa-edit"></i> Edit
                 </button>
-                <button class="vr-btn vr-btn--danger" onclick="profilePage.deleteListing('${listing._id}')">
+                <button class="vr-btn vr-btn--danger" 
+                        data-action="delete-listing" 
+                        data-id="${listing._id}">
                     <i class="fas fa-trash"></i> Delete
                 </button>
             </div>
@@ -1138,7 +1148,8 @@ createListingCard(listing) {
                     listingName: listingData.listingName,
                     action: action,
                     timestamp: new Date().getTime(),
-                    price: 9.99, // سعر الترقية
+                    price: 14.99, // تم تعديل سعر الترقية إلى 14.99 دولار
+                    billingInterval: 'yearly', // تم إضافة فترة الدفع (سنوياً)
                     returnUrl: window.location.href
                 };
                 
@@ -1387,12 +1398,13 @@ createListingCard(listing) {
                 <span class="vr-btn__badge">Free</span>
             </button>`;
     } else if (status === 'active') {
-        // للقوائم النشطة وغير المميزة: إظهار زر الترقية
+        // للقوائم النشطة وغير المميزة: إظهار زر الترقية مع السعر السنوي الجديد
         statusActionButton = `
             <button class="vr-btn vr-btn--upgrade" 
                     data-action="upgrade-listing" 
                     data-id="${listing._id}">
                 <i class="fas fa-star"></i> Upgrade
+                <span class="vr-btn__badge">$14.99/yr</span>
             </button>`;
     }
     
