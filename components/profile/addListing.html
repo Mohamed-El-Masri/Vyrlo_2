@@ -4,7 +4,7 @@
         <p>Create your business listing to reach more customers</p>
     </div>
 
-    <form id="listingForm" class="vr-listing-form__content">
+    <form id="listingForm" class="vr-listing-form__content" enctype="multipart/form-data">
         <!-- Basic Information -->
         <div class="vr-section">
             <div class="vr-section__header">
@@ -29,6 +29,13 @@
                 <label for="description">Business Description*</label>
                 <textarea id="description" name="description" class="vr-input" rows="4" required></textarea>
                 <div class="vr-char-counter">0/500</div>
+            </div>
+
+            <!-- إضافة حقل رفع الصورة -->
+            <div class="vr-form-group">
+                <label for="mainImage">Business Image*</label>
+                <input type="file" id="mainImage" name="mainImage" class="vr-input" accept="image/*" required>
+                <small class="vr-hint">Allowed formats: JPG, PNG, GIF. Max size: 5MB.</small>
             </div>
         </div>
 
@@ -153,4 +160,4 @@
             </button>
         </div>
     </form>
-</div> 
+</div>
