@@ -224,14 +224,15 @@
     }
 }
 
+
 @media (max-width: 768px) {
     .vr-profile {
         grid-template-columns: 1fr;
     }
 
     .vr-profile__nav {
-        position: sticky;
-        top: var(--vr-header-height);
+        position: relative;
+        top: 0px;
         z-index: 10;
         margin-bottom: var(--vr-spacing-lg);
     }

@@ -29,7 +29,61 @@ class AddListingPage {
       toastService.error("Failed to initialize page");
     }
   }
+  validateForm() {
+    const formData = new FormData(this.form);
+    const data = Object.fromEntries(formData.entries());
 
+    const requiredFields = [
+      "listingName",
+      "location",
+      "latitude",
+      "longitude",
+      "mainImage",
+      "description",
+      "email",
+      "mobile",
+      "taxNumber",
+    ];
+
+    for (const field of requiredFields) {
+      if (!data[field] || data[field].trim() === "") {
+        toastService.error(`Field ${field} is required`);
+        return false;
+      }
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(data.email)) {
+      toastService.error("Invalid email address");
+      return false;
+    }
+
+    const mobileRegex = /^\d{10,}$/;
+    if (!mobileRegex.test(data.mobile)) {
+      toastService.error("Invalid mobile number");
+      return false;
+    }
+
+    const latitude = parseFloat(data.latitude);
+    const longitude = parseFloat(data.longitude);
+    if (isNaN(latitude) || isNaN(longitude)) {
+      toastService.error("Invalid latitude or longitude");
+      return false;
+    }
+
+    if (!data.mainImage || data.mainImage.trim() === "") {
+      toastService.error("Main image is required");
+      return false;
+    }
+
+    if (!data.description || data.description.trim() === "") {
+      toastService.error("Description is required");
+      return false;
+    }
+
+    // إذا وصلنا إلى هنا، الفورم صحيح
+    return true;
+  }
   async loadCategories() {
     try {
       // جلب البيانات من الـ API
@@ -295,7 +349,7 @@ class AddListingPage {
       const myHeaders = new Headers();
       myHeaders.append("token", this.token);
       myHeaders.append("Content-Type", "application/json");
-      formData.listingName = `My Listing ${Math.floor(Math.random() * 1000)}`;
+      //   formData.listingName = `My Listing ${Math.floor(Math.random() * 1000)}`;
       // تحويل formData إلى JSON
       const raw = JSON.stringify(formData);
 
@@ -336,105 +390,91 @@ class AddListingPage {
   }
 
   getFormData() {
-    const formData = new FormData(this.form);
-    const data = Object.fromEntries(formData.entries());
-
-    // إضافة الحقول المطلوبة يدويًا
-    data.listingName = data.listingName || "Default Listing Name";
-    data.location = data.location || "Default Location";
-    data.longitude = parseFloat(data.longitude) || -74.006;
-    data.latitude = parseFloat(data.latitude) || 40.7128;
-    data.mainImage = data.mainImage || "listing.jpg";
-    data.description = data.description || "A great place to stay!";
-    data.email = data.email || "owner@example.com";
-    data.mobile = data.mobile || "123456789";
-    data.taxNumber = data.taxNumber || "12345";
-
-    // إضافة items (يمكن تعديلها بناءً على الفورم)
-    data.items = [
-      {
-        name: "Item 1",
-        price: 50,
-      },
-      {
-        name: "Item 2",
-        price: 100,
-      },
-    ];
-
-    // إضافة openingTimes (يمكن تعديلها بناءً على الفورم)
-    data.openingTimes = {
-      Monday: {
-        status: "open",
-        from: "10:00",
-        to: "12:00",
-      },
-      Tuesday: {
-        status: "close",
-        closingReason: "Holiday",
-      },
-      Wednesday: {
-        status: "open",
-        from: "08:00",
-        to: "16:00",
-      },
-      Thursday: {
-        status: "open",
-        from: "10:00",
-        to: "12:00",
-      },
-      Friday: {
-        status: "close",
-        closingReason: "Holiday",
-      },
-      Saturday: {
-        status: "open",
-        from: "08:00",
-        to: "16:00",
-      },
-      Sunday: {
-        status: "open",
-        from: "08:00",
-        to: "16:00",
-      },
-    };
-
-    return data;
-  }
-  getBusinessHours() {
-    const hours = {};
-    const is24Hours = document.getElementById("is24Hours").checked;
-
+    const form = document.getElementById("listingForm");
+  
+    // جمع البيانات الأساسية
+    const businessName = form.querySelector("#businessName").value;
+    const category = form.querySelector("#category").value;
+    const description = form.querySelector("#description").value;
+  
+    // جمع بيانات الاتصال
+    const email = form.querySelector("#email").value;
+    const mobile = form.querySelector("#mobile").value;
+    const website = form.querySelector("#website").value;
+  
+    // جمع بيانات الموقع
+    const address = form.querySelector("#address").value;
+    const latitude = form.querySelector("#latitude").value;
+    const longitude = form.querySelector("#longitude").value;
+  
+    // جمع بيانات الميزات
+    const features = [];
+    form.querySelectorAll("#featuresContainer input[type='checkbox']:checked").forEach((checkbox) => {
+      features.push(checkbox.value);
+    });
+  
+    // جمع الميزات المخصصة
+    const customFeatures = [];
+    form.querySelectorAll("#customFeaturesGrid .vr-custom-feature span").forEach((feature) => {
+      customFeatures.push(feature.textContent);
+    });
+  
+    // جمع بيانات ساعات العمل
+    const businessHours = {};
+    const is24Hours = form.querySelector("#is24Hours").checked;
+  
     if (is24Hours) {
-      [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ].forEach((day) => {
-        hours[day] = {
-          status: "open",
-          from: "00:00",
-          to: "23:59",
-        };
-      });
+      // إذا كانت ساعات العمل 24/7
+      businessHours.is24Hours = true;
     } else {
-      document.querySelectorAll(".vr-hours-row").forEach((row) => {
+      // إذا كانت ساعات العمل محددة
+      form.querySelectorAll(".vr-hours-row").forEach((row) => {
         const day = row.dataset.day;
-        hours[day] = {
-          status: row.querySelector(".vr-hours-status").value,
-          from: row.querySelector(".vr-hours-from").value,
-          to: row.querySelector(".vr-hours-to").value,
+        const status = row.querySelector(".vr-hours-status").value;
+        const from = row.querySelector(".vr-hours-from").value;
+        const to = row.querySelector(".vr-hours-to").value;
+  
+        businessHours[day] = {
+          status,
+          from,
+          to,
         };
       });
     }
-
-    return hours;
+  
+    // جمع بيانات وسائل التواصل الاجتماعي
+    const socialMedia = [];
+    form.querySelectorAll(".vr-social-account").forEach((account) => {
+      const platform = account.querySelector(".vr-social-platform").value;
+      const url = account.querySelector('input[type="url"]').value;
+  
+      if (platform && url) {
+        socialMedia.push({ platform, url });
+      }
+    });
+  
+    // إرجاع البيانات ككائن
+    return {
+      listingName: businessName, // Ensure listingName is included
+      businessName, // Keep this if needed elsewhere
+      category,
+      description,
+      contact: {
+        email,
+        mobile,
+        website,
+      },
+      location: address, // Ensure location is a string
+      latitude, // Include latitude and longitude separately if needed
+      longitude,
+      features: {
+        standard: features,
+        custom: customFeatures,
+      },
+      businessHours,
+      socialMedia,
+    };
   }
-
   addSocialMediaField() {
     const container = document.getElementById("listingSocialMediaContainer");
     const fieldDiv = document.createElement("div");
