@@ -236,16 +236,17 @@ class HomePage {
             loader.remove();
             
             if (listings && listings.length > 0) {
-                // Filter active OR posted listings (changed from active only)
-                const filteredListings = listings.filter(listing => 
-                    listing.isActive === true || listing.isPosted === true
+                // تعديل: تصفية القوائم لعرض isPosted === true فقط (الأعمال المميزة)
+                const featuredListings = listings.filter(listing => 
+                    listing.isPosted === true
                 );
-                const newListings = filteredListings.filter(listing => 
+                
+                const newListings = featuredListings.filter(listing => 
                     !this.loadedListings.has(listing._id)
                 );
                 
-                // Check if we're getting the same number of listings multiple times
-                if (filteredListings.length === this.previousListingsCount && filteredListings.length > 0) {
+                // تغيير منطق التحقق من استنفاد القوائم ليعتمد على القوائم المميزة فقط
+                if (featuredListings.length === this.previousListingsCount && featuredListings.length > 0) {
                     this.noMoreListings = true;
                     this.loadMoreListingsBtn.style.display = 'none';
                     return;
@@ -260,14 +261,14 @@ class HomePage {
                     this.listingPage++;
                     
                     // Update previous listings count with filtered listings count
-                    this.previousListingsCount = filteredListings.length;
+                    this.previousListingsCount = featuredListings.length;
                     
                     // Show the load more button
                     this.loadMoreListingsBtn.style.display = 'block';
                 } else {
-                    // If no new active listings after filtering
+                    // إذا لم يتم العثور على قوائم مميزة جديدة
                     if (this.listingPage === 1) {
-                        this.showEmptyState(this.featuredGrid, 'No active or posted listings available');
+                        this.showEmptyState(this.featuredGrid, 'No featured listings available');
                     }
                     this.noMoreListings = true;
                     this.loadMoreListingsBtn.style.display = 'none';
@@ -277,12 +278,12 @@ class HomePage {
                 this.noMoreListings = true;
                 this.loadMoreListingsBtn.style.display = 'none';
                 if (this.listingPage === 1) {
-                    this.showEmptyState(this.featuredGrid, 'No listings available');
+                    this.showEmptyState(this.featuredGrid, 'No featured listings available');
                 }
             }
         } catch (error) {
             console.error('Error loading listings:', error);
-            this.showEmptyState(this.featuredGrid, 'Failed to load listings');
+            this.showEmptyState(this.featuredGrid, 'Failed to load featured listings');
         } finally {
             this.isLoadingListings = false;
             this.setLoadingState(this.loadMoreListingsBtn, false);
@@ -336,10 +337,16 @@ class HomePage {
                          class="vr-featured__image"
                          loading="lazy"
                          onerror="this.src='/images/defaults/default-listing.jpg'">
-                    ${listing.isPosted ? '<span class="vr-featured__badge">Featured</span>' : ''}
+                    <div class="vr-featured__badge-premium">
+                        <i class="fas fa-star"></i> Featured
+                    </div>
                     ${this.renderOpenStatus(listing.openingTimes)}
                 </div>
                 <div class="vr-featured__content">
+                    <div class="vr-featured__rating">
+                        ${this.generateRatingStars(listing.rating || 5)}
+                        <span class="vr-featured__reviews-count">${listing.reviewIds?.length || 0} reviews</span>
+                    </div>
                     <h3 class="vr-featured__title">${listing.listingName}</h3>
                     <div class="vr-featured__meta">
                         ${listing.location ? `
@@ -355,19 +362,33 @@ class HomePage {
                             </span>
                         ` : ''}
                     </div>
-                    <div class="vr-featured__stats">
-                        ${listing.mobile ? `
-                            <span class="vr-featured__stat">
-                                <i class="fas fa-phone"></i>
-                                ${listing.mobile}
-                            </span>
-                        ` : ''}
-                        ${listing.email ? `
-                            <span class="vr-featured__stat">
-                                <i class="fas fa-envelope"></i>
-                                ${listing.email}
-                            </span>
-                        ` : ''}
+                    <p class="vr-featured__description">
+                        ${listing.description ? this.truncateText(listing.description, 100) : 'No description available'}
+                    </p>
+                    <div class="vr-featured__footer">
+                        <div class="vr-featured__contact">
+                            ${listing.mobile ? `
+                                <a href="tel:${listing.mobile}" class="vr-featured__contact-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span class="vr-sr-only">Call</span>
+                                </a>
+                            ` : ''}
+                            ${listing.email ? `
+                                <a href="mailto:${listing.email}" class="vr-featured__contact-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span class="vr-sr-only">Email</span>
+                                </a>
+                            ` : ''}
+                            ${listing.website ? `
+                                <a href="${listing.website}" class="vr-featured__contact-item" target="_blank" rel="noopener">
+                                    <i class="fas fa-globe"></i>
+                                    <span class="vr-sr-only">Website</span>
+                                </a>
+                            ` : ''}
+                        </div>
+                        <a href="/pages/listing-details.html?id=${listing._id}" class="vr-featured__view-more">
+                            View Details <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
             </article>
@@ -1385,6 +1406,28 @@ class HomePage {
                 }, 2000);
             }
         }
+    }
+
+    // إضافة طريقة لتوليد نجوم التقييم
+    generateRatingStars(rating = 0) {
+        const fullStars = Math.floor(rating);
+        const halfStar = rating % 1 >= 0.5;
+        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+        
+        return `
+            <div class="vr-featured__stars">
+                ${Array(fullStars).fill('<i class="fas fa-star"></i>').join('')}
+                ${halfStar ? '<i class="fas fa-star-half-alt"></i>' : ''}
+                ${Array(emptyStars).fill('<i class="far fa-star"></i>').join('')}
+                <span class="vr-featured__rating-value">${rating.toFixed(1)}</span>
+            </div>
+        `;
+    }
+
+    // طريقة لتقصير النص الطويل
+    truncateText(text, maxLength) {
+        if (!text || text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
     }
 }
 
